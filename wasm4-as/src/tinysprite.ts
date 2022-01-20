@@ -11,6 +11,12 @@
  * >> class Font             [100%]
  * >> class Canvas           [100%]
  *  | let canvas
+ * >> class GamepadButton    [100%]
+ * >> class Gamepad          [100%]
+ *  | let p1
+ *  | let p2
+ *  | let p3
+ *  | let p4
  * >> class Frame            [100%]
  * >> class Spritesheet      [ 50%]
  * >> class Hitbox           [100%]
@@ -19,7 +25,7 @@
  * ================================
  * Import lines:
  * ================================
- * >> import {SCREEN_WIDTH, SCREEN_HEIGHT, Vec2, Viewport, Font, Canvas, canvas, Frame, Spritesheet, Hitbox, Sprite, Core} from "./tinysprite";
+ * >> import {Vec2, Viewport, Font, Canvas, canvas, GamepadButton, Gamepad, p1, p2, p3, p4, Frame, Spritesheet, Hitbox, Sprite, Core} from "./tinysprite";
  * >> import * as tiny from "./tinysprite";
  * ================================
  */
@@ -549,10 +555,11 @@ export class Canvas {
    * @param {string} text Texto a ser escrito.
    * @param {i32} x Posição X.
    * @param {i32} y Posição Y.
+   * @param {u16} colors Ordem de cores da paleta.
    *
    * @return {boolean}
    */
-  text(text: string, x: i32, y: i32): boolean {
+  text(text: string, x: i32, y: i32, colors: u16): boolean {
     // Alterar ordem de cores da paleta:
     store<u16>(w4.DRAW_COLORS, colors);
 
@@ -566,6 +573,218 @@ export class Canvas {
 /** Canvas principal. */
 export let canvas: Canvas = new Canvas();
 
+// ==========================================================================
+// gamepad_button.ts
+// ==========================================================================
+/** Identificador do jogador 1. */
+const GAMEPAD_P1: u8 = 0;
+
+/** Identificador do jogador 2. */
+const GAMEPAD_P2: u8 = 1;
+
+/** Identificador do jogador 3. */
+const GAMEPAD_P3: u8 = 2;
+
+/** Indicador do jogador 4. */
+const GAMEPAD_P4: u8 = 3;
+
+/** Estado de controle inerte. */
+const GAMEPAD_STATE_IDLE: u8 = 0;
+
+/** Estado de controle recém-pressionado. */
+const GAMEPAD_STATE_PRESSED: u8 = 1;
+
+/** Estado de controle mantido. */
+const GAMEPAD_STATE_HELD: u8 = 2;
+
+/** Estado de controle recém-solto. */
+const GAMEPAD_STATE_RELEASED: u8 = 3;
+
+/**
+ * @class GamepadButton
+ *
+ * @description
+ * Representa um dos botões de controle. Útil para obter eventos rápidos, como
+ * checar se foi pressionado ou não.
+ */
+export class GamepadButton {
+  /** Estado de botão. */
+  state: u8;
+
+  /**
+   * @constructor
+   */
+  constructor() {
+    this.state = 0;
+  }
+
+  /**
+   * Avança para o próximo estado de botão, a partir de uma situação atual.
+   *
+   * @param {boolean} pressed Indica se o botão de entrada está pressionado.
+   *
+   * @return {u8}
+   */
+  nextState(pressed: boolean): u8 {
+    // Ciclo de estados quando o botão estiver pressionado.
+    let whenPressed: u8[] = [
+      GAMEPAD_STATE_PRESSED, // Quando inerte.
+      GAMEPAD_STATE_HELD,    // Quando recém-pressionado.
+      GAMEPAD_STATE_HELD,    // Quando mantido.
+      GAMEPAD_STATE_PRESSED  // Quando recém-solto.
+    ];
+
+    // Ciclo de estados quando o botão estiver solto.
+    let whenReleased: u8[] = [
+      GAMEPAD_STATE_IDLE,     // Quando inerte.
+      GAMEPAD_STATE_RELEASED, // Quando recém-pressionado.
+      GAMEPAD_STATE_RELEASED, // Quando mantido.
+      GAMEPAD_STATE_IDLE      // Quando recém-solto.
+    ];
+
+    if(pressed) {
+      this.state = whenPressed[this.state];
+    }
+    else {
+      this.state = whenReleased[this.state];
+    }
+
+    return this.state;
+  }
+
+  /**
+   * Indica se este botão está inerte.
+   *
+   * @return {boolean}
+   */
+  idle(): boolean {
+    return this.state === GAMEPAD_STATE_IDLE;
+  }
+
+  /**
+   * Indica se este botão está recém-pressionado.
+   *
+   * @return {boolean}
+   */
+  pressed(): boolean {
+    return this.state === GAMEPAD_STATE_PRESSED;
+  }
+
+  /**
+   * Indica se este botão está mantido.
+   *
+   * @return {boolean}
+   */
+  held(): boolean {
+    return this.state === GAMEPAD_STATE_HELD;
+  }
+
+  /**
+   * Indica se este botão está solto.
+   *
+   * @return {boolean}
+   */
+  released(): boolean {
+    return this.sate === GAMEPAD_STATE_RELEASED;
+  }
+}
+
+// ==========================================================================
+// gamepad.ts
+// ==========================================================================
+/**
+ * @class Gamepad
+ *
+ * @description
+ * Representa um controle de jogador.
+ */
+export class Gamepad {
+  /** Número do jogador. */
+  player: u8;
+
+  /** Botão para cima. */
+  up: GamepadButton;
+
+  /** Botão para baixo. */
+  down: GamepadButton;
+
+  /** Botáo para esquerda. */
+  left: GamepadButton;
+
+  /** Botáo para direita. */
+  right: GamepadButton;
+
+  /** Botáo 1 (tecla Z). */
+  b1: GamepadButton;
+
+  /** Botáo 2 (tecla X). */
+  b2: GamepadButton;
+
+  /**
+   * @constructor
+   *
+   * @param {usize} input Porta de referência.
+   */
+  constructor(player: u8) {
+    this.player = player;
+    this.up    = new GamepadButton();
+    this.down  = new GamepadButton();
+    this.left  = new GamepadButton();
+    this.right = new GamepadButton();
+    this.b1    = new GamepadButton();
+    this.b2    = new GamepadButton();
+  }
+
+  /**
+   * Retorna a entrada de referência do jogador deste controle.
+   *
+   * @return {usize}
+   */
+  gamepad(): usize {
+    // Porta do jogador 1...
+    if(this.player === GAMEPAD_P1) {
+      return load<u8>(w4.GAMEPAD1);
+    }
+    // Porta do jogador 2...
+    else if(this.player === GAMEPAD_P2) {
+      return load<u8>(w4.GAMEPAD2);
+    }
+    // Porta do jogador 3...
+    else if(this.player === GAMEPAD_P3) {
+      return load<u8>(w4.GAMEPAD3);
+    }
+    // Porta do jogador 4...
+    else {
+      return load<u8>(w4.GAMEPAD4);
+    }
+  }
+
+  /**
+   * Atualiza todos os estados de tecla.
+   */
+  update(): void {
+    let gamepad: usize = this.gamepad();
+
+    this.up.nextState(gamepad & w4.BUTTON_UP? true: false);
+    this.down.nextState(gamepad & w4.BUTTON_DOWN? true: false);
+    this.left.nextState(gamepad & w4.BUTTON_LEFT? true: false);
+    this.right.nextState(gamepad & w4.BUTTON_RIGHT? true: false);
+    this.b1.nextState(gamepad & w4.BUTTON_1? true: false);
+    this.b2.nextState(gamepad & w4.BUTTON_2? true: false);
+  }
+}
+
+/** Controles do jogador 1. */
+export let p1: Gamepad = new Gamepad(GAMEPAD_P1);
+
+/** Controles do jogador 2. */
+export let p2: Gamepad = new Gamepad(GAMEPAD_P2);
+
+/** Controles do jogador 3. */
+export let p3: Gamepad = new Gamepad(GAMEPAD_P3);
+
+/** Controles do jogador 4. */
+export let p4: Gamepad = new Gamepad(GAMEPAD_P4);
 // ==========================================================================
 // frame.ts
 // ==========================================================================
@@ -1010,6 +1229,12 @@ export class Core {
    * Game loop.
    */
   loop(): void {
+    // Atualizar controles...
+    p1.update();
+    p2.update();
+    p3.update();
+    p4.update();
+
     // Filtro de sprites ativos.
     let filter: Sprite[] = [];
 
