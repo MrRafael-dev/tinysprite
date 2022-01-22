@@ -232,17 +232,27 @@ export class Font {
   /** Índice do quadro de animação do primeiro caractere. */
   start: i32;
 
+  /** Espaçamento horizontal entre cada caractere. */
+  paddingX: i32;
+
+  /** Espaçamento vertical entre cada caractere. */
+  paddingY: i32;
+
   /**
    * @constructor
    *
    * @param {Spritesheet} Folha de sprites.
    * @param {string} charset Charset com todos os caracteres a serem usados.
    * @param {i32} start Índice do quadro de animação do primeiro caractere.
+   * @param {i32} paddingX Espaçamento horizontal entre cada caractere.
+   * @param {i32} paddingY Espaçamento vertical entre cada caractere.
    */
-  constructor(spritesheet: Spritesheet, charset: string, start: i32) {
+  constructor(spritesheet: Spritesheet, charset: string, start: i32, paddingX: i32, paddingY: i32) {
     this.spritesheet = spritesheet;
     this.charset     = charset;
     this.start       = start;
+    this.paddingX    = paddingX;
+    this.paddingY    = paddingY;
   }
 
   /**
@@ -254,7 +264,7 @@ export class Font {
    * @param {u16} colors Ordem de cores da paleta.
    */
   write(x: i32, y: i32, text: string, colors: u16): boolean {
-    return this.spritesheet.write(x, y, text, this.charset, this.start, colors);
+    return this.spritesheet.write(x, y, text, this.charset, this.start, this.paddingX, this.paddingY, colors);
   }
 }
 
@@ -937,10 +947,12 @@ export class Spritesheet {
    * @param {i32} y Posição Y.
    * @param {string} text Texto a ser escrito.
    * @param {string} charset Charset com todos os caracteres a serem usados.
+   * @param {i32} paddingX Espaçamento horizontal entre cada caractere.
+   * @param {i32} paddingY Espaçamento vertical entre cada caractere.
    * @param {i32} start Índice do quadro de animação do primeiro caractere.
    * @param {u16} colors Ordem de cores da paleta.
    */
-  write(x: i32, y: i32, text: string, charset: string, start: i32, colors: u16): boolean {
+  write(x: i32, y: i32, text: string, charset: string, start: i32, paddingX: i32, paddingY: i32, colors: u16): boolean {
     // Contadores de linhas e colunas.
     let line  : i32 = 0;
     let column: i32 = 0;
@@ -986,8 +998,8 @@ export class Spritesheet {
 
       // Desenhar caractere...
       this.draw(
-        x + (column * frame.width),
-        y + (line * frame.height),
+        x + (column * (frame.width  + paddingX)),
+        y + (line   * (frame.height + paddingY)),
         index,
         colors
       );
@@ -1089,6 +1101,9 @@ export class Hitbox {
  * Classe de sprite genérica.
  */
 export class Sprite {
+  /** Identificador coletivo. */
+  tag: string;
+
   /** Posição X. */
   x: i32;
 
@@ -1117,6 +1132,9 @@ export class Sprite {
    * @param {i32} height Altura do sprite.
    */
   constructor(width: i32, height: i32) {
+    this.tag = "Sprite";
+    this.x = 0;
+    this.y = 0;
     this.width  = width;
     this.height = height;
     this.hitbox = new Hitbox(0, 0, width, height);
@@ -1157,6 +1175,63 @@ export class Sprite {
 
       // Checagem de colisão.
       let collision: boolean = this.intersect(sprite);
+
+      // Mover sprite para os resultados, caso exista colisão:
+      if(collision) {
+        results.push(sprite);
+      }
+    }
+
+    return results;
+  }
+
+  /**
+   * Checa a intersecção entre dois sprites, em uma posição arbitrária.
+   *
+   * @param {Sprite} sprite Sprite a ser checado.
+   * @param {i32} x X Posição X.
+   * @param {i32} y Y Posição Y.
+   *
+   * @return {boolean}
+   */
+  intersectAt(sprite: Sprite, x: i32, y: i32): boolean {
+    // Salvar posição atual deste sprite temporariamente...
+    let xprev: i32 = this.x;
+    let yprev: i32 = this.y;
+
+    // Mover este sprite para uma posição arbitrária...
+    this.x = x;
+    this.y = y;
+
+    // Checar colisão com o outro sprite:
+    let result: boolean = this.intersect(sprite);
+
+    // Mover sprite de volta à sua posição original...
+    this.x = xprev;
+    this.y = yprev;
+
+    return result;
+  }
+
+  /**
+   * Checa a intersecção entre múltiplos sprites, em uma posição arbitrária.
+   *
+   * @param {Sprite[]} sprites Sprites a serem checados.
+   * @param {i32} x X Posição X.
+   * @param {i32} y Y Posição Y.
+   *
+   * @return {Sprite[]} Sprites colididos (vazio quando não há colisões).
+   */
+  intersectAtArray(sprites: Sprite[], x: i32, y: i32): Sprite[] {
+    // Resultados.
+    let results: Sprite[] = [];
+
+    // Percorrer lista de spriets...
+    for(let index: i32 = 0; index < sprites.length; index += 1) {
+      let sprite: Sprite = sprites[i];
+
+      // Checagem de colisão.
+      let collision: boolean = this.intersectAt(sprite, x, y);
 
       // Mover sprite para os resultados, caso exista colisão:
       if(collision) {
@@ -1218,11 +1293,30 @@ export class Core {
   /** Lista de sprites do jogo. */
   sprites: Sprite[];
 
+  /** Tags. */
+  tags: Map<string, Sprite[]>;
+
   /**
    * @constructor
    */
   constructor() {
     this.sprites = [];
+    this.tags = new Map<string, Sprite[]>();
+  }
+
+  /**
+   * Obtém todos os sprites classificados por uma tag específica.
+   *
+   * @param {string} tag Tag.
+   *
+   * @return {Sprite[]}
+   */
+  tag(tag: string): Sprite[] {
+    if(this.tags.has(tag)) {
+      return this.tags.get(tag);
+    }
+
+    return [];
   }
 
   /**
@@ -1267,8 +1361,23 @@ export class Core {
       }
     }
 
-    // Filtrar sprites...
+    // Filtrar sprites e limpar tags...
     this.sprites = filter;
+    this.tags.clear();
+
+    // Clasificar sprites...
+    for(let index: i32 = 0; index < this.sprites.length; index += 1) {
+      let sprite: Sprite = this.sprites[index];
+      let tag   : string = sprite.tag;
+
+      // Criar identificador, caso não exista...
+      if(!this.tags.has(tag)) {
+        this.tags.set(tag, []);
+      }
+
+      // Classificar este sprite:
+      this.tags.get(tag).push(sprite);
+    }
 
     // Atualizar paleta de cores...
     canvas.updatePalette();
