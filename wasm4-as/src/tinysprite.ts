@@ -284,6 +284,12 @@ export class Canvas {
   /** Paleta de cores. */
   palette: i32[];
 
+  /** Quando "true", mantém a tela "suja". */
+  preserveFrameBuffer: boolean;
+
+  /** Quando "true", esconde os botões da versão mobile. */
+  hideGamepadOverlay: boolean;
+
   /**
    * @constructor
    *
@@ -298,6 +304,8 @@ export class Canvas {
       0x306850,
       0x071821
     ];
+    this.preserveFrameBuffer = false;
+    this.hideGamepadOverlay  = false;
   }
 
   /**
@@ -317,6 +325,21 @@ export class Canvas {
     store<u32>(w4.PALETTE, this.palette[2] as u32, 2 * sizeof<u32>());
     store<u32>(w4.PALETTE, this.palette[3] as u32, 3 * sizeof<u32>());
 
+    return true;
+  }
+
+  /**
+   * Atualiza as flags.
+   *
+   * @return {boolean}
+   */
+  updateSystemFlags(): boolean {
+    // Valores das flags.
+    let bitA: i32 = this.hideGamepadOverlay?  2: 0;
+    let bitB: i32 = this.preserveFrameBuffer? 1: 0;
+
+    // Atualizar flags...
+    store<u8>(w4.SYSTEM_FLAGS, bitA + bitB);
     return true;
   }
 
@@ -1419,8 +1442,9 @@ export class Core {
       this.tags.get(tag).push(sprite);
     }
 
-    // Atualizar paleta de cores...
+    // Atualizar paleta de cores + flags...
     canvas.updatePalette();
+    canvas.updateSystemFlags();
   }
 
   /**
