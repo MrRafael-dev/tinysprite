@@ -1143,6 +1143,46 @@ export class Sprite {
   }
 
   /**
+   * Movimenta este sprite em um ângulo específico.
+   *
+   * @param {i32} speed Velocidade de movimentação.
+   * @param {i32} angle Ângulo (de 0º a 359º).
+   *
+   * @return {Sprite} Tail call.
+   */
+  moveToAngle(angle: f64, speed: f64): Sprite {
+    // Ângulo radiano.
+    let degree: f64 = Math.PI / 180.0;
+
+    // Movimentar sprite...
+    this.x += (speed * Math.cos(angle * degree)) as i32;
+    this.y += (speed * Math.sin(angle * degree)) as i32;
+
+    return this;
+  }
+
+  /**
+   * Movimenta este sprite até uma posição específica.
+   *
+   * @param {i32} x Posição X.
+   * @param {i32} y Posição Y.
+   * @param {i32} speed Velocidade de movimentação.
+   *
+   * @return {Sprite} Tail call.
+   */
+  moveTo(x: i32, y: i32, speed: f64): Sprite {
+    // Ângulo radiano + rotação:
+    let degree  : f64 = Math.PI / 180.0;
+    let rotateTo: f64 = Math.atan2(y - this.y, x - this.x) * degree;
+
+    // Movimentar sprite...
+    this.x += speed * (Math.cos(rotateTo / degree)) as i32;
+    this.y += speed * (Math.sin(rotateTo / degree)) as i32;
+
+    return this;
+  }
+
+  /**
    * Checa a intersecção entre dois sprites.
    *
    * @param {Sprite} sprite Sprite a ser checado.
