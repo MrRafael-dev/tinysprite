@@ -21,12 +21,12 @@
  * >> class Spritesheet      [ 50%]
  * >> class Hitbox           [100%]
  * >> class Sprite           [ 50%]
- * >> class Core             [ 50%]
+ * >> class Scene            [ 50%]
  * ================================
  * Import lines:
  * ================================
- * >> import {Vec2, Viewport, Font, Canvas, canvas, GamepadButton, Gamepad, p1, p2, p3, p4, Frame, Spritesheet, Hitbox, Sprite, Core} from "./tinysprite";
- * >> import * as tiny from "./tinysprite";
+ * >> import {Vec2, Viewport, Font, Canvas, canvas, GamepadButton, Gamepad, p1, p2, p3, p4, Frame, Spritesheet, Hitbox, Sprite, Scene} from "./tinysprite";
+ * >> import * as Tiny from "./tinysprite";
  * ================================
  */
 
@@ -1344,15 +1344,15 @@ export class Sprite {
 }
 
 // ==========================================================================
-// core.ts
+// scene.ts
 // ==========================================================================
 /**
- * @class Core
+ * @class Scene
  *
  * @description
- * Representa uma instância de jogo.
+ * Representa uma cena de jogo.
  */
-export class Core {
+export class Scene {
   /** Lista de sprites do jogo. */
   sprites: Sprite[];
 
