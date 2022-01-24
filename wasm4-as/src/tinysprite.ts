@@ -1124,7 +1124,7 @@ export class Hitbox {
  * Classe de sprite genérica.
  */
 export class Sprite {
-  /** Identificador coletivo. */
+  /** Tag. */
   tag: string;
 
   /** Posição X. */
@@ -1311,6 +1311,7 @@ export class Sprite {
    * @return {boolean}
    */
   destroy(): boolean {
+    this._destroyed = true;
     return this._destroyed;
   }
 
@@ -1368,14 +1369,23 @@ export class Scene {
   }
 
   /**
-   * Obtém todos os sprites classificados por uma tag específica.
+   * Retorna se uma tag existe e possui ao menos um sprite rotulado.
+   *
+   * @return {boolean}
+   */
+  hasTag(tag: string): boolean {
+    return this.tags.has(tag) && this.tags.get(tag).length > 0;
+  }
+
+  /**
+   * Obtém todos os sprites rotulados por uma tag específica.
    *
    * @param {string} tag Tag.
    *
    * @return {Sprite[]}
    */
-  tag(tag: string): Sprite[] {
-    if(this.tags.has(tag)) {
+  getTag(tag: string): Sprite[] {
+    if(this.hasTag(tag)) {
       return this.tags.get(tag);
     }
 
@@ -1394,6 +1404,20 @@ export class Scene {
 
     // Filtro de sprites ativos.
     let filter: Sprite[] = [];
+
+    // Clasificar sprites...
+    for(let index: i32 = 0; index < this.sprites.length; index += 1) {
+      let sprite: Sprite = this.sprites[index];
+      let tag   : string = sprite.tag;
+
+      // Criar identificador, caso não exista...
+      if(!this.tags.has(tag)) {
+        this.tags.set(tag, []);
+      }
+
+      // Classificar este sprite:
+      this.tags.get(tag).push(sprite);
+    }
 
     // Percorrer sprites...
     for(let index: i32 = 0; index < this.sprites.length; index += 1) {
@@ -1427,20 +1451,6 @@ export class Scene {
     // Filtrar sprites e limpar tags...
     this.sprites = filter;
     this.tags.clear();
-
-    // Clasificar sprites...
-    for(let index: i32 = 0; index < this.sprites.length; index += 1) {
-      let sprite: Sprite = this.sprites[index];
-      let tag   : string = sprite.tag;
-
-      // Criar identificador, caso não exista...
-      if(!this.tags.has(tag)) {
-        this.tags.set(tag, []);
-      }
-
-      // Classificar este sprite:
-      this.tags.get(tag).push(sprite);
-    }
 
     // Atualizar paleta de cores + flags...
     canvas.updatePalette();
