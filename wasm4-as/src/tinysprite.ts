@@ -355,8 +355,8 @@ export class Canvas {
    */
   isVisible(x: i32, y: i32, width: i32, height: i32): boolean {
     return (
-      this.viewX(x)          < SCREEN_WIDTH &&
-      this.viewX(x + width)  > 0   &&
+      this.viewX(x)          < SCREEN_WIDTH  &&
+      this.viewX(x + width)  > 0             &&
       this.viewY(y)          < SCREEN_HEIGHT &&
       this.viewY(y + height) > 0
     );
@@ -932,13 +932,69 @@ export class Spritesheet {
    * @param {i32} x Posição X.
    * @param {i32} y Posição Y.
    * @param {i32} index Índice do quadro de animação.
+   * @param {boolean} flipX Inverte este quadro horizontalmente.
+   * @param {boolean} flipY Inverte este quadro verticalmente.
+   * @param {i32} rotation Ângulo de rotação (de 0º a 360º).
    * @param {u16} colors Ordem de cores da paleta.
    */
-  draw(x: i32, y: i32, index: i32, colors: u16): boolean {
+  draw(x: i32, y: i32, index: i32, flipX: boolean, flipY: boolean, rotation: i32, colors: u16): boolean {
     // Não desenhar a imagem, caso o índice não exista:
     if(index < 0 || index >= this.frames.length) {
       return false;
     }
+
+    // Índice de rotação, alinhado em 90º.
+    let rotationIndex: i32 = (Math.floor(Math.abs(rotation) / 90) as i32) % 4;
+
+    // Ajustar rotação para ângulos negativos...
+    if(rotation < 0) {
+      rotationIndex = (4 - rotationIndex) % 4;
+    }
+
+    // Look-Up Table de rotações (original).
+    // Ângulos: 0º, 90º, 180º e 270º, respectivamente.
+    let rotations: u32[] = [
+      this.flags,
+      this.flags | w4.BLIT_FLIP_X | w4.BLIT_FLIP_Y | w4.BLIT_ROTATE,
+      this.flags | w4.BLIT_FLIP_X | w4.BLIT_FLIP_Y,
+      this.flags | w4.BLIT_ROTATE
+    ];
+
+    // Look-Up Table de rotações (X invertido).
+    // Ângulos: 0º, 90º, 180º e 270º, respectivamente.
+    let rotationsFX: u32[] = [
+      this.flags | w4.BLIT_FLIP_X,
+      this.flags | w4.BLIT_FLIP_X | w4.BLIT_ROTATE,
+      this.flags | w4.BLIT_FLIP_Y,
+      this.flags | w4.BLIT_FLIP_Y | w4.BLIT_ROTATE
+    ];
+
+    // Look-Up Table de rotações (Y invertido).
+    // Ângulos: 0º, 90º, 180º e 270º, respectivamente.
+    let rotationsFY: u32[] = [
+      this.flags | w4.BLIT_FLIP_Y,
+      this.flags | w4.BLIT_FLIP_Y | w4.BLIT_ROTATE,
+      this.flags | w4.BLIT_FLIP_X,
+      this.flags | w4.BLIT_FLIP_X | w4.BLIT_ROTATE
+    ];
+
+    // Look-Up Table de rotações (X e Y invertidos).
+    // Ângulos: 0º, 90º, 180º e 270º, respectivamente.
+    let rotationsFXY: u32[] = [
+      this.flags | w4.BLIT_FLIP_X | w4.BLIT_FLIP_Y,
+      this.flags | w4.BLIT_ROTATE,
+      this.flags,
+      this.flags | w4.BLIT_FLIP_X | w4.BLIT_FLIP_Y | w4.BLIT_ROTATE
+    ];
+
+    // Flags de desenho.
+    let flags: u32 = 0;
+
+    // Escolher flags especiais de rotação...
+         if(flipX && flipY) { flags = rotationsFXY[rotationIndex]; }
+    else if(flipX)          { flags = rotationsFX[rotationIndex];  }
+    else if(flipY)          { flags = rotationsFY[rotationIndex];  }
+    else                    { flags = rotations[rotationIndex];    }
 
     // Quadro de animação.
     let frame: Frame = this.frames[index];
@@ -957,7 +1013,7 @@ export class Spritesheet {
       frame.y as u32,
       this.imageWidth,
       colors,
-      this.flags
+      flags
     );
 
     return true;
