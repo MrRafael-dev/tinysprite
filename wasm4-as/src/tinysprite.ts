@@ -1103,9 +1103,33 @@ export class Spritesheet {
     for(let row: i32 = 0; row < tilemap.length; row += 1) {
       let line: u16[] = tilemap[row];
 
+      // Calcular posição vertical de desenho na viewport.
+      let viewY: i32 = canvas.viewY(y + (row * this.height));
+
+      // Quando menor que zero, saltar para a próxima linha...
+      if(viewY < -this.height) {
+        continue;
+      }
+      // Quando maior que a altura da tela, encerrar iteração...
+      if(viewY >= 160) {
+        break;
+      }
+
       // Percorrer colunas do tilemap...
       for(let column: i32 = 0; column < line.length; column += 1) {
         let index: i32 = line[column] as i32;
+
+        // Calcular posição horizontal de desenho na viewport.
+        let viewX: i32 = canvas.viewX(x + (column * this.width));
+
+        // Quando menor que zero, saltar para a próxima coluna...
+        if(viewX < -this.width) {
+          continue;
+        }
+        // Quando maior que a largura da tela, encerrar iteração...
+        if(viewX >= 160) {
+          break;
+        }
 
         // Se o índice do tile ultrapassar o total de quadros de animação
         // existentes nesta folha de sprites, ele será ignorado...
