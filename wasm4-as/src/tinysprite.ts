@@ -9,6 +9,7 @@
  * >> class Vec2             [100%]
  * >> class Viewport         [100%]
  * >> class Font             [100%]
+ * >> class Tilemap          [100%]
  * >> class Canvas           [100%]
  *  | let canvas
  * >> class GamepadButton    [100%]
@@ -18,20 +19,23 @@
  *  | let p3
  *  | let p4
  * >> class Frame            [100%]
- * >> class Spritesheet      [ 50%]
+ * >> class Spritesheet      [ 75%]
  * >> class Hitbox           [100%]
- * >> class Sprite           [ 50%]
+ * >> class Sprite           [ 75%]
  * >> class Scene            [ 50%]
  * ================================
  * Import lines:
  * ================================
- * >> import {SCREEN_WIDTH, SCREEN_HEIGHT, Vec2, Viewport, Font, Canvas, canvas, GAMEPAD_P1, GAMEPAD_P2, GAMEPAD_P3, GAMEPAD_P4, GAMEPAD_STATE_IDLE, GAMEPAD_STATE_PRESSED, GAMEPAD_STATE_HELD, GAMEPAD_STATE_RELEASED, GamepadButton, Gamepad, p1, p2, p3, p4, Frame, Spritesheet, Hitbox, Sprite, Scene} from "./tinysprite";
+ * >> import {TINYSPRITE_VERSION, SCREEN_WIDTH, SCREEN_HEIGHT, Vec2, Viewport, Font, Tilemap, Canvas, canvas, GAMEPAD_P1, GAMEPAD_P2, GAMEPAD_P3, GAMEPAD_P4, GAMEPAD_STATE_IDLE, GAMEPAD_STATE_PRESSED, GAMEPAD_STATE_HELD, GAMEPAD_STATE_RELEASED, GamepadButton, Gamepad, p1, p2, p3, p4, Frame, Spritesheet, Hitbox, Sprite, Scene} from "./tinysprite";
  * >> import * as Tiny from "./tinysprite";
  * ================================
  */
 
 // WASM-4.
 import * as w4 from "./wasm4";
+
+/** Versão da TinySprite. */
+export const TINYSPRITE_VERSION: string = "0.0.1";
 
 /** Largura da tela do WASM-4. */
 export const SCREEN_WIDTH: i32 = 160;
@@ -265,6 +269,101 @@ export class Font {
    */
   write(x: i32, y: i32, text: string, colors: u16): boolean {
     return this.spritesheet.write(x, y, text, this.charset, this.start, this.paddingX, this.paddingY, colors);
+  }
+}
+
+// ==========================================================================
+// tilemap.ts
+// ==========================================================================
+/**
+ * @class Tilemap
+ *
+ * @description
+ * Representa um mapa 2D. Pode ser usado para representar fases e cenários.
+ */
+export class Tilemap {
+  /** Folha de sprites. */
+  spritesheet: Spritesheet;
+
+  /** Tilemap (Array 2D). */
+  map: i16[][];
+
+  /**
+   * @constructor
+   *
+   * @param {Spritesheet} Folha de sprites.
+   * @param {i16[][]} map Tilemap (Array 2D).
+   */
+  constructor(spritesheet: Spritesheet, map: i16[][]) {
+    this.spritesheet = spritesheet;
+    this.map = map;
+  }
+
+  /**
+   * Define um tile na posição especificada (em grade).
+   *
+   * @param {i32} x Posição X.
+   * @param {i32} y Posição Y.
+   * @param {u16} index Índice do tile.
+   *
+   * @return {boolean}
+   */
+  setTile(x: i32, y: i32, index: u16): boolean {
+    // Não seguir adiante quando uma das posições passadas ultrapassar os
+    // limites de linhas do tilemap...
+    if(y < 0 || y >= map.length) {
+      return false;
+    }
+
+    // Linha de tiles.
+    let row: i16[] = this.map[y];
+
+    // Não seguir adiante quando uma das posições passadas ultrapassar os
+    // limites de colunas do tilemap...
+    if(x < 0 || x >= row.length) {
+      return false;
+    }
+
+    row[x] = index;
+    return true;
+  }
+
+  /**
+   * Obtém um tile na posição especificada (em grade).
+   *
+   * @param {i32} x Posição X.
+   * @param {i32} y Posição Y.
+   *
+   * @return {u16}
+   */
+  getTile(x: i32, y: i32): i16 {
+    // Não seguir adiante quando uma das posições passadas ultrapassar os
+    // limites de linhas do tilemap...
+    if(y < 0 || y >= map.length) {
+      return 0;
+    }
+
+    // Linha de tiles.
+    let row: i16[] = this.map[y];
+
+    // Não seguir adiante quando uma das posições passadas ultrapassar os
+    // limites de colunas do tilemap...
+    if(x < 0 || x >= row.length) {
+      return 0;
+    }
+
+    return row[x];
+  }
+
+  /**
+   * Desenha o tilemap.
+   *
+   * @param {i32} x Posição X.
+   * @param {i32} y Posição Y.
+   * @param {u16} colors Ordem de cores da paleta.
+   */
+  tile(x: i32, y: i32, colors: u16): boolean {
+    return this.spritesheet.tile(x, y, this.tilemap, colors);
   }
 }
 
@@ -1095,13 +1194,13 @@ export class Spritesheet {
    *
    * @param {i32} x Posição X.
    * @param {i32} y Posição Y.
-   * @param {u16[][]} tilemap Tilemap (Array 2D).
+   * @param {i16[][]} tilemap Tilemap (Array 2D).
    * @param {u16} colors Ordem de cores da paleta.
    */
-  tile(x: i32, y: i32, tilemap: u16[][], colors: u16): boolean {
+  tile(x: i32, y: i32, tilemap: i16[][], colors: u16): boolean {
     // Percorrer linhas do tilemap...
     for(let row: i32 = 0; row < tilemap.length; row += 1) {
-      let line: u16[] = tilemap[row];
+      let line: i16[] = tilemap[row];
 
       // Calcular posição vertical de desenho na viewport.
       let viewY: i32 = canvas.viewY(y + (row * this.height));
