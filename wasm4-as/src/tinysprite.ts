@@ -35,7 +35,7 @@
 import * as w4 from "./wasm4";
 
 /** Versão da TinySprite. */
-export const TINYSPRITE_VERSION: string = "0.0.1";
+export const TINYSPRITE_VERSION: string = "0.0.2";
 
 /** Largura da tela do WASM-4. */
 export const SCREEN_WIDTH: i32 = 160;
@@ -282,8 +282,11 @@ export class Font {
  * Representa um mapa 2D. Pode ser usado para representar fases e cenários.
  */
 export class Tilemap {
-  /** Folha de sprites. */
-  spritesheet: Spritesheet;
+  /** Largura dos tiles. */
+  width: i32;
+
+  /** Altura dos tiles. */
+  height: i32;
 
   /** Tilemap (Array 2D). */
   map: i16[][];
@@ -292,10 +295,13 @@ export class Tilemap {
    * @constructor
    *
    * @param {Spritesheet} Folha de sprites.
+   * @param {i32} width Largura dos tiles.
+   * @param {i32} height Altura dos tiles.
    * @param {i16[][]} map Tilemap (Array 2D).
    */
-  constructor(spritesheet: Spritesheet, map: i16[][]) {
-    this.spritesheet = spritesheet;
+  constructor(width: i32, height: i32, map: i16[][]) {
+    this.width = width;
+    this.height = height;
     this.map = map;
   }
 
@@ -304,14 +310,14 @@ export class Tilemap {
    *
    * @param {i32} x Posição X.
    * @param {i32} y Posição Y.
-   * @param {u16} index Índice do tile.
+   * @param {i16} index Índice do tile.
    *
    * @return {boolean}
    */
-  setTile(x: i32, y: i32, index: u16): boolean {
+  setTile(x: i32, y: i32, index: i16): boolean {
     // Não seguir adiante quando uma das posições passadas ultrapassar os
     // limites de linhas do tilemap...
-    if(y < 0 || y >= map.length) {
+    if(y < 0 || y >= this.map.length) {
       return false;
     }
 
@@ -334,13 +340,13 @@ export class Tilemap {
    * @param {i32} x Posição X.
    * @param {i32} y Posição Y.
    *
-   * @return {u16}
+   * @return {i16}
    */
   getTile(x: i32, y: i32): i16 {
     // Não seguir adiante quando uma das posições passadas ultrapassar os
     // limites de linhas do tilemap...
-    if(y < 0 || y >= map.length) {
-      return 0;
+    if(y < 0 || y >= this.map.length) {
+      return -1;
     }
 
     // Linha de tiles.
@@ -349,7 +355,7 @@ export class Tilemap {
     // Não seguir adiante quando uma das posições passadas ultrapassar os
     // limites de colunas do tilemap...
     if(x < 0 || x >= row.length) {
-      return 0;
+      return -1;
     }
 
     return row[x];
@@ -360,10 +366,11 @@ export class Tilemap {
    *
    * @param {i32} x Posição X.
    * @param {i32} y Posição Y.
+   * @param {Spritesheet} spritesheet Folha de sprites.
    * @param {u16} colors Ordem de cores da paleta.
    */
-  tile(x: i32, y: i32, colors: u16): boolean {
-    return this.spritesheet.tile(x, y, this.tilemap, colors);
+  tile(x: i32, y: i32, spritesheet: Spritesheet, colors: u16): boolean {
+    return spritesheet.tile(x, y, this.tilemap, colors);
   }
 }
 
@@ -1345,6 +1352,36 @@ export class Sprite {
   }
 
   /**
+   * Calcula e retorna o posicionamento central deste sprite.
+   *
+   * @return {Vec2}
+   */
+  center(): Vec2 {
+    return new Vec2(
+      this.x + (Math.floor(this.width  / 2) as i32),
+      this.y + (Math.floor(this.height / 2) as i32)
+    );
+  }
+
+  /**
+   * Calcula e retorna o posicionamento equivalente deste sprite em uma grade.
+   *
+   * @param {i32} width Largura dos tiles.
+   * @param {i32} height Altura dos tiles.
+   *
+   * @return {Vec2}
+   */
+  grid(width: i32, height: i32): Vec2 {
+    // Posição central deste sprite.
+    let center: Vec2 = this.center();
+
+    return new Vec2(
+      Math.floor(center.x /  width) as i32,
+      Math.floor(center.y / height) as i32
+    );
+  }
+
+  /**
    * Movimenta este sprite em um ângulo específico.
    *
    * @param {i32} speed Velocidade de movimentação.
@@ -1482,6 +1519,62 @@ export class Sprite {
     }
 
     return results;
+  }
+
+  /**
+   * Checa a intersecção entre um sprite e um tilemap.
+   *
+   * @param {Tilemap} tilemap Tilemap.
+   * @param {i16[]} tiles Índices do tilemap a serem checados.
+   *
+   * @return {boolean}
+   */
+  intersectTiles(tilemap: Tilemap, tiles: i16[]): boolean {
+    // Posição equivalente deste sprite na grade.
+    let grid: Vec2 = this.grid(tilemap.width, tilemap.height);
+
+    // Percorrer tiles de colisão...
+    for(let index: i32 = 0; index < tiles.length; index += 1) {
+      let tile: i16 = tiles[index];
+
+      // Se um dos índices de colisão estiverem na mesma posição equivalente
+      // deste sprite na grade, então existe colisão:
+      if(tilemap.getTile(grid.x, grid.y) === tile) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  /**
+   * Checa a intersecção entre um sprite e um tilemap, em uma posição
+   * arbitrária.
+   *
+   * @param {Tilemap} tilemap Tilemap.
+   * @param {i16[]} tiles Índices do tilemap a serem checados.
+   * @param {i32} x X Posição X.
+   * @param {i32} y Y Posição Y.
+   *
+   * @return {boolean}
+   */
+  intersectTilesAt(tilemap: Tilemap, tiles: i16[], x: i32, y: i32): boolean {
+    // Salvar posição atual deste sprite temporariamente...
+    let xprev: i32 = this.x;
+    let yprev: i32 = this.y;
+
+    // Mover este sprite para uma posição arbitrária...
+    this.x = x;
+    this.y = y;
+
+    // Checar colisão com os tiles:
+    let result: boolean = this.intersectTiles(tilemap, tiles);
+
+    // Mover sprite de volta à sua posição original...
+    this.x = xprev;
+    this.y = yprev;
+
+    return result;
   }
 
   /**
