@@ -1376,9 +1376,12 @@ export class Sprite {
    * @return {Vec2}
    */
   grid(width: i32, height: i32): Vec2 {
+    // Posição central deste sprite.
+    let center: Vec2 = this.center();
+
     return new Vec2(
-      Math.floor(this.x /  width) as i32,
-      Math.floor(this.y / height) as i32
+      Math.floor(center.x /  width) as i32,
+      Math.floor(center.y / height) as i32
     );
   }
 
