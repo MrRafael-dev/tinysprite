@@ -2,6 +2,7 @@
  * @name TinySprite for WASM-4
  * @author Mr.Rafael
  * @license MIT
+ * @version 0.0.3
  *
  * ================================
  * Contents:
@@ -35,7 +36,7 @@
 import * as w4 from "./wasm4";
 
 /** Versão da TinySprite. */
-export const TINYSPRITE_VERSION: string = "0.0.2";
+export const TINYSPRITE_VERSION: string = "0.0.3";
 
 /** Largura da tela do WASM-4. */
 export const SCREEN_WIDTH: i32 = 160;
@@ -370,7 +371,7 @@ export class Tilemap {
    * @param {u16} colors Ordem de cores da paleta.
    */
   tile(x: i32, y: i32, spritesheet: Spritesheet, colors: u16): boolean {
-    return spritesheet.tile(x, y, this.tilemap, colors);
+    return spritesheet.tile(x, y, this.map, colors);
   }
 }
 
@@ -1252,6 +1253,9 @@ export class Spritesheet {
           x + (column * frame.width),
           y + (row * frame.height),
           index,
+          false,
+          false,
+          0,
           colors
         );
       }
@@ -1372,12 +1376,9 @@ export class Sprite {
    * @return {Vec2}
    */
   grid(width: i32, height: i32): Vec2 {
-    // Posição central deste sprite.
-    let center: Vec2 = this.center();
-
     return new Vec2(
-      Math.floor(center.x /  width) as i32,
-      Math.floor(center.y / height) as i32
+      Math.floor(this.x /  width) as i32,
+      Math.floor(this.y / height) as i32
     );
   }
 
@@ -1690,6 +1691,9 @@ export class Scene {
       // Classificar este sprite:
       this.tags.get(tag).push(sprite);
     }
+
+    // Acionar evento de update:
+    this.update();
 
     // Percorrer sprites...
     for(let index: i32 = 0; index < this.sprites.length; index += 1) {
