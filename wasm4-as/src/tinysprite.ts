@@ -1350,7 +1350,7 @@ export class Sprite {
     let min: u32 = 0x00000000;
     let max: u32 = 0xFFFFFFFF;
 
-    return Math.floor(Math.random() * (max - min)) + min;
+    return (Math.floor(Math.random() * (max - min)) as u32) + min;
   }
 
   /**
