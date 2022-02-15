@@ -2,7 +2,7 @@
  * @name TinySprite for WASM-4
  * @author Mr.Rafael
  * @license MIT
- * @version 0.0.3
+ * @version 0.0.4
  *
  * ================================
  * Contents:
@@ -36,7 +36,7 @@
 import * as w4 from "./wasm4";
 
 /** Versão da TinySprite. */
-export const TINYSPRITE_VERSION: string = "0.0.3";
+export const TINYSPRITE_VERSION: string = "0.0.4";
 
 /** Largura da tela do WASM-4. */
 export const SCREEN_WIDTH: i32 = 160;
@@ -1314,6 +1314,9 @@ export class Hitbox {
  * Classe de sprite genérica.
  */
 export class Sprite {
+  /** UID. */
+  uid: u32;
+
   /** Tag. */
   tag: string;
 
@@ -1339,12 +1342,25 @@ export class Sprite {
   _destroyed: boolean;
 
   /**
+   * Gera e retorna uma UID para este sprite.
+   *
+   * @return {u32}
+   */
+  static generateUID(): u32 {
+    let min: u32 = 0x00000000;
+    let max: u32 = 0xFFFFFFFF;
+
+    return Math.floor(Math.random() * (max - min)) + min;
+  }
+
+  /**
    * @constructor
    *
    * @param {i32} width Largura do sprite.
    * @param {i32} height Altura do sprite.
    */
   constructor(width: i32, height: i32) {
+    this.uid = Sprite.generateUID();
     this.tag = "Sprite";
     this.x = 0;
     this.y = 0;
