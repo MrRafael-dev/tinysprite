@@ -2,7 +2,7 @@
  * @name TinySprite for WASM-4
  * @author Mr.Rafael
  * @license MIT
- * @version 0.0.4
+ * @version 0.0.5
  *
  * ================================
  * Contents:
@@ -34,9 +34,6 @@
 
 // WASM-4.
 import * as w4 from "./wasm4";
-
-/** Versão da TinySprite. */
-export const TINYSPRITE_VERSION: string = "0.0.4";
 
 /** Largura da tela do WASM-4. */
 export const SCREEN_WIDTH: i32 = 160;
@@ -1649,6 +1646,9 @@ export class Scene {
   /** Lista de sprites do jogo. */
   sprites: Sprite[];
 
+  /** UIDs. */
+  uids: Map<u32, Sprite>;
+
   /** Tags. */
   tags: Map<string, Sprite[]>;
 
@@ -1657,11 +1657,40 @@ export class Scene {
    */
   constructor() {
     this.sprites = [];
+    this.uids = new Map<u32, Sprite>();
     this.tags = new Map<string, Sprite[]>();
   }
 
   /**
+   * Retorna se uma UID existe.
+   *
+   * @param {u32} uid UID.
+   *
+   * @return {boolean}
+   */
+  hasUID(uid: u32): boolean {
+    return this.uids.has(uid);
+  }
+
+  /**
+   * Obtém um sprite por sua UID.
+   *
+   * @param {u32} uid UID.
+   *
+   * @return {Sprite}
+   */
+  getUID(uid: u32): Sprite {
+    if(this.hasUID(uid)) {
+      return this.uids.get(uid);
+    }
+
+    return null;
+  }
+
+  /**
    * Retorna se uma tag existe e possui ao menos um sprite rotulado.
+   *
+   * @param {string} tag Tag.
    *
    * @return {boolean}
    */
@@ -1697,10 +1726,20 @@ export class Scene {
     // Filtro de sprites ativos.
     let filter: Sprite[] = [];
 
+    // Limpar UIDs e tags...
+    this.uids.clear();
+    this.tags.clear();
+
     // Clasificar sprites...
     for(let index: i32 = 0; index < this.sprites.length; index += 1) {
       let sprite: Sprite = this.sprites[index];
+      let uid   : u32    = sprite.uid;
       let tag   : string = sprite.tag;
+
+      // Salvar UID deste sprite:
+      if(!this.uids.has(uid)) {
+        this.uids.set(uid, sprite);
+      }
 
       // Criar identificador, caso não exista...
       if(!this.tags.has(tag)) {
@@ -1743,9 +1782,8 @@ export class Scene {
       }
     }
 
-    // Filtrar sprites e limpar tags...
+    // Filtrar sprites...
     this.sprites = filter;
-    this.tags.clear();
 
     // Atualizar paleta de cores + flags...
     canvas.updatePalette();
