@@ -2,7 +2,7 @@
  * @name TinySprite for WASM-4
  * @author Mr.Rafael
  * @license MIT
- * @version 0.0.5
+ * @version 0.0.6
  *
  * ================================
  * Contents:
@@ -66,6 +66,32 @@ export class Vec2 {
   constructor(x: i32, y: i32) {
     this.x = x;
     this.y = y;
+  }
+}
+
+// ==========================================================================
+// util.ts
+// ==========================================================================
+/**
+ * @class Util
+ *
+ * @description
+ * Funções utilitárias.
+ */
+export class Util {
+  /**
+   * Escolhe um número aleatório entre dois valores.
+   *
+   * @param {i32} min Valor mínimo.
+   * @param {i32} max Valor máximo.
+   *
+   * @return {i32}
+   */
+  static range(min: i32, max: i32): i32 {
+    min = Math.ceil(min) as i32;
+    max = Math.floor(max) as i32;
+
+    return (Math.floor(Math.random() * (max - min)) as i32) + min;
   }
 }
 
@@ -1339,15 +1365,12 @@ export class Sprite {
   _destroyed: boolean;
 
   /**
-   * Gera e retorna uma UID para este sprite.
+   * Gera e retorna uma UID para um sprite.
    *
    * @return {u32}
    */
   static generateUID(): u32 {
-    let min: u32 = 0x00000000;
-    let max: u32 = 0xFFFFFFFF;
-
-    return (Math.floor(Math.random() * (max - min)) as u32) + min;
+    return Util.range(0x00000000, 0xFFFFFFFF) as u32;
   }
 
   /**
@@ -1652,6 +1675,9 @@ export class Scene {
   /** Tags. */
   tags: Map<string, Sprite[]>;
 
+  /** Indica se o evento de criação já foi acionado. */
+  _created: boolean;
+
   /**
    * @constructor
    */
@@ -1659,6 +1685,7 @@ export class Scene {
     this.sprites = [];
     this.uids = new Map<u32, Sprite>();
     this.tags = new Map<string, Sprite[]>();
+    this._created = false;
   }
 
   /**
@@ -1750,6 +1777,12 @@ export class Scene {
       this.tags.get(tag).push(sprite);
     }
 
+    // Acionar evento de criação (apenas uma vez):
+    if(!this._created) {
+      this.created();
+      this._created = true;
+    }
+
     // Acionar evento de update:
     this.update();
 
@@ -1788,6 +1821,13 @@ export class Scene {
     // Atualizar paleta de cores + flags...
     canvas.updatePalette();
     canvas.updateSystemFlags();
+  }
+
+  /**
+   * @event create
+   */
+  created(): void {
+    // ...
   }
 
   /**
