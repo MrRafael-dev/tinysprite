@@ -27,7 +27,7 @@
  * ================================
  * Import lines:
  * ================================
- * >> import {TINYSPRITE_VERSION, SCREEN_WIDTH, SCREEN_HEIGHT, Vec2, Viewport, Font, Tilemap, Canvas, canvas, GamepadButton, Gamepad, p1, p2, p3, p4, Frame, Spritesheet, Hitbox, Sprite, Scene} from "./tinysprite";
+ * >> import {TINYSPRITE_VERSION, SCREEN_WIDTH, SCREEN_HEIGHT, Vec2, Viewport, Font, Tilemap, Canvas, canvas, GamepadButton, Gamepad, p1, p2, p3, p4, Frame, Spritesheet, Hitbox, Sprite, Scene, Core} from "./tinysprite";
  * >> import * as Tiny from "./tinysprite";
  * ================================
  */
