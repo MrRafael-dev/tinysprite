@@ -1837,3 +1837,79 @@ export class Scene {
     // ...
   }
 }
+
+// ==========================================================================
+// core.ts
+// ==========================================================================
+/**
+ * @class Core
+ *
+ * @description
+ * Gerenciador de cenas.
+ */
+export class Core {
+  /** Lista de cenas do jogo. */
+  scenes: Scene[];
+
+  /** Índice da cena selecionada como ativa. */
+  index: i32;
+
+  /** Quando `true`, seleciona a última cena da pilha como ativa. */
+  auto: boolean;
+
+  /**
+   * @constructor
+   */
+  constructor() {
+    this.scenes = [];
+    this.index = 0;
+    this.auto = true;
+  }
+
+  /**
+   * Obtém a cena ativa.
+   *
+   * @return {Scene}
+   */
+  getScene(): Scene {
+    if(this.auto) {
+      this.index = this.scenes.length - 1;
+    }
+
+    return this.scenes[this.index];
+  }
+
+  /**
+   * Game loop.
+   */
+  loop(): void {
+    // Verificar se existem cenas disponíveis...
+    if(this.scenes.length > 0) {
+      // Acionar evento de update:
+      this.update();
+
+      // Executar loop sob a cena:
+      let scene: Scene = this.getScene();
+          scene.loop();
+      }
+
+    // ...quando não há cenas disponíveis, um evento é acionado:
+    else {
+      this.empty();
+    }
+  }
+
+  /**
+   * @event update
+   */
+  update(): void {
+    // ...
+  }
+
+  /**
+   * @event error
+   */
+  empty(): void {
+    // ...
+  }
+}
