@@ -9,14 +9,14 @@
  * Você pode importá-la utilizando uma das duas linhas abaixo:
  *
  * ```
- * import {Vec2, Frame, Spritesheet, Font, Tilemap, canvas, p1, p2, p3, p4} from "./tinysprite";
+ * import {Vec2, vec2, Frame, Spritesheet, Font, Tilemap, canvas, p1, p2, p3, p4, mouse} from "./tinysprite";
  * import * as ts from "./tinysprite";
  * ```
  */
 import * as w4 from "./wasm4";
 
 // ==========================================================================
-// constants.ts
+// misc.ts
 // ==========================================================================
 /** Largura da tela do WASM-4. */
 const SCREEN_WIDTH: i32 = 160;
@@ -48,9 +48,6 @@ const GAMEPAD_STATE_HELD: u8 = 2;
 /** Estado de controle recém-solto. */
 const GAMEPAD_STATE_RELEASED: u8 = 3;
 
-// ==========================================================================
-// variables.ts
-// ==========================================================================
 /** Canvas principal. */
 export let canvas: Canvas = new Canvas();
 
@@ -65,6 +62,21 @@ export let p3: Gamepad = new Gamepad(GAMEPAD_P3);
 
 /** Controles do jogador 4. */
 export let p4: Gamepad = new Gamepad(GAMEPAD_P4);
+
+/** Cursor do mouse/touchscreen. */
+export let mouse: Mouse = new Mouse();
+
+/**
+ * Função de conveniência usada para instanciar uma nova coordenada 2D.
+ *
+ * @param {i32} x Posição X.
+ * @param {i32} y Posição Y.
+ *
+ * @return {Vec2}
+ */
+export function vec2(x: i32, y: i32): Vec2 {
+  return new Vec2(x, y);
+}
 
 // ==========================================================================
 // vec2.ts
@@ -89,6 +101,17 @@ export class Vec2 {
    * @param {i32} y Posição Y.
    */
   constructor(x: i32, y: i32) {
+    this.x = x;
+    this.y = y;
+  }
+
+  /**
+   * Define uma nova posição.
+   *
+   * @param {i32} x Posição X.
+   * @param {i32} y Posição Y.
+   */
+  set(x: i32, y: i32): void {
     this.x = x;
     this.y = y;
   }
@@ -1247,5 +1270,52 @@ export class Gamepad {
     this.right.nextState(gamepad & w4.BUTTON_RIGHT? true: false);
     this.b1.nextState(gamepad & w4.BUTTON_1? true: false);
     this.b2.nextState(gamepad & w4.BUTTON_2? true: false);
+  }
+}
+
+// ==========================================================================
+// mouse.ts
+// ==========================================================================
+/**
+ * @class Mouse
+ *
+ * @description
+ * Representa um cursor de mouse/touchscreen.
+ */
+export class Mouse {
+  /** Posição do mouse. */
+  position: Vec2;
+
+  /** Botão esquerdo do mouse. */
+  left: GamepadButton;
+
+  /** Botão direito do mouse. */
+  right: GamepadButton;
+
+  /** Botão do meio do mouse. */
+  middle: GamepadButton;
+
+  /**
+   * @constructor
+   */
+  constructor() {
+    this.position = new Vec2(0, 0);
+    this.left     = new GamepadButton();
+    this.right    = new GamepadButton();
+    this.middle   = new GamepadButton();
+  }
+
+  /**
+   * Atualiza todos os estados de tecla.
+   */
+  update(): void {
+    let mouse: usize = load<u8>(w4.MOUSE_BUTTONS);
+
+    this.left.nextState(mouse & w4.MOUSE_LEFT? true: false);
+    this.right.nextState(mouse & w4.MOUSE_RIGHT? true: false);
+    this.middle.nextState(mouse & w4.MOUSE_MIDDLE? true: false);
+
+    this.position.x = load<i16>(w4.MOUSE_X) as i32;
+    this.position.y = load<i16>(w4.MOUSE_Y) as i32;
   }
 }
