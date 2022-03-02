@@ -67,6 +67,29 @@ export class Vec2 {
     this.x = x;
     this.y = y;
   }
+
+  /**
+   * Define uma nova posição.
+   *
+   * @param {i32} x Posição X.
+   * @param {i32} y Posição Y.
+   */
+  set(x: i32, y: i32): void {
+    this.x = x;
+    this.y = y;
+  }
+}
+
+/**
+ * Função de conveniência usada para instanciar uma nova coordenada 2D.
+ *
+ * @param {i32} x Posição X.
+ * @param {i32} y Posição Y.
+ *
+ * @return {Vec2}
+ */
+export function vec2(x: i32, y: i32): Vec2 {
+  return new Vec2(x, y);
 }
 
 // ==========================================================================
@@ -948,6 +971,57 @@ export let p3: Gamepad = new Gamepad(GAMEPAD_P3);
 
 /** Controles do jogador 4. */
 export let p4: Gamepad = new Gamepad(GAMEPAD_P4);
+
+// ==========================================================================
+// mouse.ts
+// ==========================================================================
+/**
+ * @class Mouse
+ *
+ * @description
+ * Representa um cursor de mouse/touchscreen.
+ */
+export class Mouse {
+  /** Posição do mouse. */
+  position: Vec2;
+
+  /** Botão esquerdo do mouse. */
+  left: GamepadButton;
+
+  /** Botão direito do mouse. */
+  right: GamepadButton;
+
+  /** Botão do meio do mouse. */
+  middle: GamepadButton;
+
+  /**
+   * @constructor
+   */
+  constructor() {
+    this.position = new Vec2(0, 0);
+    this.left     = new GamepadButton();
+    this.right    = new GamepadButton();
+    this.middle   = new GamepadButton();
+  }
+
+  /**
+   * Atualiza todos os estados de tecla.
+   */
+  update(): void {
+    let mouse: usize = load<u8>(w4.MOUSE_BUTTONS);
+
+    this.left.nextState(mouse & w4.MOUSE_LEFT? true: false);
+    this.right.nextState(mouse & w4.MOUSE_RIGHT? true: false);
+    this.middle.nextState(mouse & w4.MOUSE_MIDDLE? true: false);
+
+    this.position.x = load<i16>(w4.MOUSE_X) as i32;
+    this.position.y = load<i16>(w4.MOUSE_Y) as i32;
+  }
+}
+
+/** Cursor do mouse/touchscreen. */
+export let mouse: Mouse = new Mouse();
+
 // ==========================================================================
 // frame.ts
 // ==========================================================================
@@ -1749,6 +1823,7 @@ export class Scene {
     p2.update();
     p3.update();
     p4.update();
+    mouse.update();
 
     // Filtro de sprites ativos.
     let filter: Sprite[] = [];
