@@ -800,7 +800,7 @@ export class Spritesheet {
   }
 
   /**
-   * Escreve um texto na tela, usando os quadros de animação como acaracteres.
+   * Escreve um texto na tela, usando os quadros de animação como caracteres.
    *
    * @param {i32} x Posição X.
    * @param {i32} y Posição Y.
