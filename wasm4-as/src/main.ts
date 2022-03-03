@@ -122,9 +122,9 @@ class RootScene extends Tiny.Scene {
   }
 
   /**
-   * @event created
+   * @event onCreate
    */
-  created(): void {
+  onCreate(): void {
     this.sprites.push(new Player(80, 80));
     this.sprites.push(new Collectable(64, 64));
   }
