@@ -2,7 +2,7 @@
  * @name TinySprite for WASM-4
  * @author Mr.Rafael
  * @license MIT
- * @version 0.0.6
+ * @version 0.0.7
  *
  * ================================
  * Contents:
@@ -15,19 +15,22 @@
  *  | let canvas
  * >> class GamepadButton    [100%]
  * >> class Gamepad          [100%]
+ * >> class Mouse            [100%]
  *  | let p1
  *  | let p2
  *  | let p3
  *  | let p4
+ *  | let mouse
  * >> class Frame            [100%]
  * >> class Spritesheet      [ 75%]
  * >> class Hitbox           [100%]
  * >> class Sprite           [ 75%]
  * >> class Scene            [ 50%]
+ * >> class Core             [ 50%]
  * ================================
  * Import lines:
  * ================================
- * >> import {SCREEN_WIDTH, SCREEN_HEIGHT, Vec2, Viewport, Font, Tilemap, Canvas, canvas, GamepadButton, Gamepad, p1, p2, p3, p4, Frame, Spritesheet, Hitbox, Sprite, Scene, Core} from "./tinysprite";
+ * >> import {SCREEN_WIDTH, SCREEN_HEIGHT, Vec2, vec2, Viewport, Font, Tilemap, Canvas, canvas, GamepadButton, Gamepad, Mouse, p1, p2, p3, p4, mouse, Frame, Spritesheet, Hitbox, Sprite, Scene, Core} from "./tinysprite";
  * >> import * as Tiny from "./tinysprite";
  * ================================
  */
@@ -1702,9 +1705,9 @@ export class Sprite {
   }
 
   /**
-   * @event create
+   * @event onCreate
    */
-  created(): void {
+  onCreate(): void {
     // ...
   }
 
@@ -1716,9 +1719,9 @@ export class Sprite {
   }
 
   /**
-   * @event destroyed
+   * @event onDestroy
    */
-  destroyed(): void {
+  onDestroy(): void {
     // ...
   }
 
@@ -1854,7 +1857,7 @@ export class Scene {
 
     // Acionar evento de criação (apenas uma vez):
     if(!this._created) {
-      this.created();
+      this.onCreate();
       this._created = true;
     }
 
@@ -1870,7 +1873,7 @@ export class Scene {
 
         // Acionar evento de criação (apenas uma vez):
         if(!sprite._created) {
-          sprite.created();
+          sprite.onCreate();
           sprite._created = true;
         }
 
@@ -1885,7 +1888,7 @@ export class Scene {
         }
         // ...do contrário, acionar evento de destruição:
         else {
-          sprite.destroyed();
+          sprite.onDestroy();
         }
       }
     }
@@ -1899,9 +1902,9 @@ export class Scene {
   }
 
   /**
-   * @event create
+   * @event onCreate
    */
-  created(): void {
+  onCreate(): void {
     // ...
   }
 
@@ -1982,7 +1985,7 @@ export class Core {
   }
 
   /**
-   * @event error
+   * @event empty
    */
   empty(): void {
     // ...
