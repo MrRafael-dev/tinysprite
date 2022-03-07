@@ -2,14 +2,14 @@
  * @name TinySprite Utils for WASM-4
  * @author Mr.Rafael
  * @license MIT
- * @version 1.0.0
+ * @version 1.1.0
  *
  * @description
  * Funções utilitárias da TinySprite (apenas gráficos e controles).
  * Você pode importá-la utilizando uma das duas linhas abaixo:
  *
  * ```
- * import {Vec2, vec2, Frame, Spritesheet, Font, Tilemap, canvas, p1, p2, p3, p4, mouse} from "./tinysprite";
+ * import {Vec2, vec2, Frame, Spritesheet, Font, Tilemap, canvas, p1, p2, p3, p4, mouse, Box} from "./tinysprite";
  * import * as ts from "./tinysprite";
  * ```
  */
@@ -67,7 +67,7 @@ export let p4: Gamepad = new Gamepad(GAMEPAD_P4);
 export let mouse: Mouse = new Mouse();
 
 /**
- * Função de conveniência usada para instanciar uma nova coordenada 2D.
+ * Função de conveniência usada para instanciar um novo vetor 2D.
  *
  * @param {i32} x Posição X.
  * @param {i32} y Posição Y.
@@ -85,7 +85,7 @@ export function vec2(x: i32, y: i32): Vec2 {
  * @class Vec2
  *
  * @description
- * Classe utilitária usada apenas para representar uma coordenada 2D na tela.
+ * Classe utilitária usada apenas para representar um vetor 2D na tela.
  */
 export class Vec2 {
   /** Posição X. */
@@ -106,7 +106,7 @@ export class Vec2 {
   }
 
   /**
-   * Define uma nova posição.
+   * Reposiciona as coordenadas deste vetor.
    *
    * @param {i32} x Posição X.
    * @param {i32} y Posição Y.
@@ -680,10 +680,11 @@ export class Spritesheet {
    * @param {u32} flags Flags de desenho da imagem de referência.
    * @param {i32} imageWidth Largura da imagem.
    * @param {i32} imageHeight Altura da imagem.
+   * @param {boolean} auto Quando `true`, recorta os quadros automaticamente.
    * @param {i32} width Largura dos quadros de animação.
    * @param {i32} height Altura dos quadros de animação.
    */
-  constructor(image: usize, flags: u32, imageWidth: i32, imageHeight: i32, width: i32, height: i32) {
+  constructor(image: usize, flags: u32, imageWidth: i32, imageHeight: i32, auto: boolean = false, width: i32 = 1, height: i32 = 1) {
     this.image       = image;
     this.flags       = flags;
     this.imageWidth  = imageWidth;
@@ -691,17 +692,19 @@ export class Spritesheet {
     this.width       = width;
     this.height      = height;
     this.rows        = Math.floor(imageHeight / height) as i32;
-    this.columns     = Math.floor(imageWidth / width) as i32;
+    this.columns     = Math.floor(imageWidth  /  width) as i32;
     this.frames      = [];
 
-    // Criar quadros de animação dinamicamente...
-    for(let row: i32 = 0; row < this.rows; row += 1) {
-      for(let column: i32 = 0; column < this.columns; column += 1) {
+    // Cortar e criar quadros de animação dinamicamente (opcional)...
+    if(auto) {
+      for(let row: i32 = 0; row < this.rows; row += 1) {
+        for(let column: i32 = 0; column < this.columns; column += 1) {
 
-        this.frames.push(
-          new Frame(column * width, row * height, width, height)
-        );
+          this.frames.push(
+            new Frame(column * width, row * height, width, height)
+          );
 
+        }
       }
     }
   }
@@ -883,33 +886,9 @@ export class Spritesheet {
     for(let row: i32 = 0; row < tilemap.length; row += 1) {
       let line: i16[] = tilemap[row];
 
-      // Calcular posição vertical de desenho na viewport.
-      let viewY: i32 = canvas.viewY(y + (row * this.height));
-
-      // Quando menor que zero, saltar para a próxima linha...
-      if(viewY < -this.height) {
-        continue;
-      }
-      // Quando maior que a altura da tela, encerrar iteração...
-      if(viewY >= 160) {
-        break;
-      }
-
       // Percorrer colunas do tilemap...
       for(let column: i32 = 0; column < line.length; column += 1) {
         let index: i32 = line[column] as i32;
-
-        // Calcular posição horizontal de desenho na viewport.
-        let viewX: i32 = canvas.viewX(x + (column * this.width));
-
-        // Quando menor que zero, saltar para a próxima coluna...
-        if(viewX < -this.width) {
-          continue;
-        }
-        // Quando maior que a largura da tela, encerrar iteração...
-        if(viewX >= 160) {
-          break;
-        }
 
         // Se o índice do tile ultrapassar o total de quadros de animação
         // existentes nesta folha de sprites, ele será ignorado...
@@ -1317,5 +1296,90 @@ export class Mouse {
 
     this.position.x = load<i16>(w4.MOUSE_X) as i32;
     this.position.y = load<i16>(w4.MOUSE_Y) as i32;
+  }
+}
+
+// ==========================================================================
+// box.ts
+// ==========================================================================
+/**
+ * @class Box
+ *
+ * @description
+ * Representa uma caixa de colisão.
+ */
+export class Box {
+  /** Posição X. */
+  x: i32;
+
+  /** Posição Y. */
+  y: i32;
+
+  /** Largura. */
+  width: i32;
+
+  /** Altura. */
+  height: i32;
+
+  /**
+   * @constructor
+   *
+   * @param {i32} x Posição X.
+   * @param {i32} y Posição Y.
+   * @param {i32} width Largura.
+   * @param {i32} height Altura.
+   */
+  constructor(x: i32, y: i32, width: i32, height: i32) {
+    this.x = x;
+    this.y = y;
+    this.width  = width;
+    this.height = height;
+  }
+
+  /**
+   * Reposiciona as coordenadas desta caixa.
+   *
+   * @param {i32} x Posição X.
+   * @param {i32} y Posição Y.
+   *
+   * @return {Box} Tail call.
+   */
+  set(x: i32, y: i32): Box {
+    this.x = x;
+    this.y = y;
+
+    return this;
+  }
+
+  /**
+   * Redimensiona o tamanho desta caixa.
+   *
+   * @param {i32} width Largura.
+   * @param {i32} height Altura.
+   *
+   * @return {Box} Tail call.
+   */
+  resize(width: i32, height: i32): Box {
+    this.width  = width;
+    this.height = height;
+
+    return this;
+  }
+
+  /**
+   * Detecta colisão entre esta e outra caixa.
+   *
+   * @param {Box} box Caixa de colisão.
+   *
+   * @return {boolean}
+   */
+  intersect(box: Box) {
+    return (
+      box != this
+      && this.x               < box.x + box.width
+      && this.x + this.width  > box.x
+      && this.y               < box.y + box.height
+      && this.height + this.y > box.y
+    );
   }
 }
