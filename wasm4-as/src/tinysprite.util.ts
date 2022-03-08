@@ -2,14 +2,14 @@
  * @name TinySprite Utils for WASM-4
  * @author Mr.Rafael
  * @license MIT
- * @version 1.1.0
+ * @version 1.1.1
  *
  * @description
  * Funções utilitárias da TinySprite (apenas gráficos e controles).
  * Você pode importá-la utilizando uma das duas linhas abaixo:
  *
  * ```
- * import {Vec2, vec2, Rect, Spritesheet, Font, Tilemap, canvas, p1, p2, p3, p4, mouse} from "./tinysprite";
+ * import {Vec2, Rect, Spritesheet, Font, Tilemap, canvas, p1, p2, p3, p4, mouse} from "./tinysprite";
  * import * as ts from "./tinysprite";
  * ```
  */
@@ -67,15 +67,20 @@ export let p4: Gamepad = new Gamepad(GAMEPAD_P4);
 export let mouse: Mouse = new Mouse();
 
 /**
- * Função de conveniência usada para instanciar um novo vetor 2D.
- *
- * @param {i32} x Posição X.
- * @param {i32} y Posição Y.
- *
- * @return {Vec2}
+ * Atualiza o estado de vários elementos do console, como o estado de teclas
+ * dos controles e paleta de cores. Deve ser chamada a cada novo quadro.
  */
-export function vec2(x: i32, y: i32): Vec2 {
-  return new Vec2(x, y);
+export function update(): void {
+  // Atualizar controles...
+  p1.update();
+  p2.update();
+  p3.update();
+  p4.update();
+  mouse.update();
+
+  // Atualizar paleta de cores + flags...
+  canvas.updatePalette();
+  canvas.updateSystemFlags();
 }
 
 // ==========================================================================
