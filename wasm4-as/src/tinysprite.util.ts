@@ -9,7 +9,7 @@
  * Você pode importá-la utilizando uma das duas linhas abaixo:
  *
  * ```
- * import {Vec2, vec2, Frame, Spritesheet, Font, Tilemap, canvas, p1, p2, p3, p4, mouse, Box} from "./tinysprite";
+ * import {Vec2, vec2, Rect, Spritesheet, Font, Tilemap, canvas, p1, p2, p3, p4, mouse} from "./tinysprite";
  * import * as ts from "./tinysprite";
  * ```
  */
@@ -118,15 +118,15 @@ export class Vec2 {
 }
 
 // ==========================================================================
-// viewport.ts
+// rect.ts
 // ==========================================================================
 /**
- * @class Viewport
+ * @class Rect
  *
  * @description
- * Representa uma área de tela. Também pode ser usada como uma câmera.
+ * Representa uma caixa de colisão.
  */
-export class Viewport {
+export class Rect {
   /** Posição X. */
   x: i32;
 
@@ -155,7 +155,37 @@ export class Viewport {
   }
 
   /**
-   * Retorna a posição superior-esquerda da tela (X e Y).
+   * Reposiciona as coordenadas desta caixa.
+   *
+   * @param {i32} x Posição X.
+   * @param {i32} y Posição Y.
+   *
+   * @return {Rect} Tail call.
+   */
+  set(x: i32, y: i32): Rect {
+    this.x = x;
+    this.y = y;
+
+    return this;
+  }
+
+  /**
+   * Redimensiona o tamanho desta caixa.
+   *
+   * @param {i32} width Largura.
+   * @param {i32} height Altura.
+   *
+   * @return {Rect} Tail call.
+   */
+  resize(width: i32, height: i32): Rect {
+    this.width  = width;
+    this.height = height;
+
+    return this;
+  }
+
+  /**
+   * Retorna a posição superior-esquerda desta caixa (X e Y).
    *
    * @return {Vec2}
    */
@@ -167,7 +197,7 @@ export class Viewport {
   }
 
   /**
-   * Retorna a posição superior-central da tela (X e Y).
+   * Retorna a posição superior-central desta caixa (X e Y).
    *
    * @return {Vec2}
    */
@@ -179,7 +209,7 @@ export class Viewport {
   }
 
   /**
-   * Retorna a posição superior-direita da tela (X e Y).
+   * Retorna a posição superior-direita desta caixa (X e Y).
    *
    * @return {Vec2}
    */
@@ -191,7 +221,7 @@ export class Viewport {
   }
 
   /**
-   * Retorna a posição centro-esquerda da tela (X e Y).
+   * Retorna a posição centro-esquerda desta caixa (X e Y).
    *
    * @return {Vec2}
    */
@@ -203,7 +233,7 @@ export class Viewport {
   }
 
   /**
-   * Retorna a posição central da tela (X e Y).
+   * Retorna a posição central desta caixa (X e Y).
    *
    * @return {Vec2}
    */
@@ -215,7 +245,7 @@ export class Viewport {
   }
 
   /**
-   * Retorna a posição centro-direita da tela (X e Y).
+   * Retorna a posição centro-direita desta caixa (X e Y).
    *
    * @return {Vec2}
    */
@@ -227,7 +257,7 @@ export class Viewport {
   }
 
   /**
-   * Retorna a posição inferior-esquerda da tela (X e Y).
+   * Retorna a posição inferior-esquerda desta caixa (X e Y).
    *
    * @return {Vec2}
    */
@@ -239,7 +269,7 @@ export class Viewport {
   }
 
   /**
-   * Retorna a posição inferior-central da tela (X e Y).
+   * Retorna a posição inferior-central desta caixa (X e Y).
    *
    * @return {Vec2}
    */
@@ -251,7 +281,7 @@ export class Viewport {
   }
 
   /**
-   * Retorna a posição inferior-direita da tela (X e Y).
+   * Retorna a posição inferior-direita desta caixa (X e Y).
    *
    * @return {Vec2}
    */
@@ -259,6 +289,23 @@ export class Viewport {
     return new Vec2(
       this.x + (this.width  - 1),
       this.y + (this.height - 1)
+    );
+  }
+
+  /**
+   * Detecta colisão entre esta e outra caixa.
+   *
+   * @param {Rect} rect Caixa de colisão.
+   *
+   * @return {boolean}
+   */
+  intersect(rect: Rect) {
+    return (
+      rect != this
+      && this.x               < rect.x + box.width
+      && this.x + this.width  > rect.x
+      && this.y               < rect.y + rect.height
+      && this.height + this.y > rect.y
     );
   }
 }
@@ -274,7 +321,7 @@ export class Viewport {
  */
 export class Canvas {
   /** Área de desenho. */
-  view: Viewport;
+  view: Rect;
 
   /** Paleta de cores. */
   palette: i32[];
@@ -287,12 +334,9 @@ export class Canvas {
 
   /**
    * @constructor
-   *
-   * @param {Viewport} Área de desenho.
-   * @param {Vec2} camera Câmera.
    */
   constructor() {
-    this.view = new Viewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+    this.view = new Rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
     this.palette = [
       0xe0f8cf,
       0x86c06c,
@@ -599,44 +643,6 @@ export class Canvas {
 }
 
 // ==========================================================================
-// frame.ts
-// ==========================================================================
-/**
- * @class Frame
- *
- * @description
- * Representa um quadro de animação usado em uma folha de sprites.
- */
-export class Frame {
-  /** Posição X. */
-  x: i32;
-
-  /** Posição Y. */
-  y: i32;
-
-  /** Largura. */
-  width: i32;
-
-  /** Altura. */
-  height: i32;
-
-  /**
-   * @constructor
-   *
-   * @param {i32} x Posição X.
-   * @param {i32} y Posição Y.
-   * @param {i32} width Largura.
-   * @param {i32} height Altura.
-   */
-  constructor(x: i32, y: i32, width: i32, height: i32) {
-    this.x      = x;
-    this.y      = y;
-    this.width  = width;
-    this.height = height;
-  }
-}
-
-// ==========================================================================
 // spritesheet.ts
 // ==========================================================================
 /**
@@ -671,7 +677,7 @@ export class Spritesheet {
   columns: i32;
 
   /** Quadros de animação. */
-  frames: Frame[];
+  frames: Rect[];
 
   /**
    * @constructor
@@ -701,7 +707,7 @@ export class Spritesheet {
         for(let column: i32 = 0; column < this.columns; column += 1) {
 
           this.frames.push(
-            new Frame(column * width, row * height, width, height)
+            new Rect(column * width, row * height, width, height)
           );
 
         }
@@ -780,7 +786,7 @@ export class Spritesheet {
     else                    { flags = rotations[rotationIndex];    }
 
     // Quadro de animação.
-    let frame: Frame = this.frames[index];
+    let frame: Rect = this.frames[index];
 
     // Alterar ordem de cores da paleta:
     store<u16>(w4.DRAW_COLORS, colors);
@@ -856,7 +862,7 @@ export class Spritesheet {
       index += start;
 
       // Quadro de animação equivalente ao do caractere.
-      let frame: Frame = this.frames[index];
+      let frame: Rect = this.frames[index];
 
       // Desenhar caractere...
       this.draw(
@@ -898,7 +904,7 @@ export class Spritesheet {
         }
 
         // Quadro de animação equivalente ao do caractere.
-        let frame: Frame = this.frames[index];
+        let frame: Rect = this.frames[index];
 
         // Desenhar caractere...
         this.draw(
@@ -1296,90 +1302,5 @@ export class Mouse {
 
     this.position.x = load<i16>(w4.MOUSE_X) as i32;
     this.position.y = load<i16>(w4.MOUSE_Y) as i32;
-  }
-}
-
-// ==========================================================================
-// box.ts
-// ==========================================================================
-/**
- * @class Box
- *
- * @description
- * Representa uma caixa de colisão.
- */
-export class Box {
-  /** Posição X. */
-  x: i32;
-
-  /** Posição Y. */
-  y: i32;
-
-  /** Largura. */
-  width: i32;
-
-  /** Altura. */
-  height: i32;
-
-  /**
-   * @constructor
-   *
-   * @param {i32} x Posição X.
-   * @param {i32} y Posição Y.
-   * @param {i32} width Largura.
-   * @param {i32} height Altura.
-   */
-  constructor(x: i32, y: i32, width: i32, height: i32) {
-    this.x = x;
-    this.y = y;
-    this.width  = width;
-    this.height = height;
-  }
-
-  /**
-   * Reposiciona as coordenadas desta caixa.
-   *
-   * @param {i32} x Posição X.
-   * @param {i32} y Posição Y.
-   *
-   * @return {Box} Tail call.
-   */
-  set(x: i32, y: i32): Box {
-    this.x = x;
-    this.y = y;
-
-    return this;
-  }
-
-  /**
-   * Redimensiona o tamanho desta caixa.
-   *
-   * @param {i32} width Largura.
-   * @param {i32} height Altura.
-   *
-   * @return {Box} Tail call.
-   */
-  resize(width: i32, height: i32): Box {
-    this.width  = width;
-    this.height = height;
-
-    return this;
-  }
-
-  /**
-   * Detecta colisão entre esta e outra caixa.
-   *
-   * @param {Box} box Caixa de colisão.
-   *
-   * @return {boolean}
-   */
-  intersect(box: Box) {
-    return (
-      box != this
-      && this.x               < box.x + box.width
-      && this.x + this.width  > box.x
-      && this.y               < box.y + box.height
-      && this.height + this.y > box.y
-    );
   }
 }
