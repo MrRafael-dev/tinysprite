@@ -2,14 +2,14 @@
  * @name TinySprite Utils for WASM-4
  * @author Mr.Rafael
  * @license MIT
- * @version 1.1.1
+ * @version 1.1.2
  *
  * @description
  * Funções utilitárias da TinySprite (apenas gráficos e controles).
  * Você pode importá-la utilizando uma das duas linhas abaixo:
  *
  * ```
- * import {Vec2, Rect, Spritesheet, Font, Tilemap, canvas, p1, p2, p3, p4, mouse} from "./tinysprite";
+ * import {Vec2, Rect, Spritesheet, Animation, Font, Tilemap, canvas, p1, p2, p3, p4, mouse} from "./tinysprite";
  * import * as ts from "./tinysprite";
  * ```
  */
@@ -926,6 +926,79 @@ export class Spritesheet {
     }
 
     return true;
+  }
+}
+
+// ==========================================================================
+// animation.ts
+// ==========================================================================
+/**
+ * @class Animation
+ *
+ * @description
+ * Implementação de animações simples.
+ */
+export class Animation {
+  /** Quadros de animação. */
+  frames: i16[];
+
+  /** Velocidade da animação (subtração de ticks). */
+  speed: f64;
+
+  /** Taxa de ciclos máxima por quadro. */
+  max: f64;
+
+  /** Contador de ciclos. */
+  ticks: f64;
+
+  /** Índice de quadro de animação atual. */
+  index: i32;
+
+  /**
+   * @constructor
+   *
+   * @param {i16[]} frames Quadros de animação.
+   * @param {f64} speed Velocidade da animação (subtração de ticks).
+   * @param {f64} max Taxa de ciclos máxima por quadro.
+   */
+  constructor(frames: i16[] = [], speed: f64 = 30.0, max: f64 = 60.0) {
+    this.frames = frames;
+    this.speed  = speed;
+    this.max    = max;
+    this.ticks  = 0.0;
+    this.index  = 0;
+  }
+
+  /**
+   * Retorna o quadro de animação atual, correspondente ao índice.
+   *
+   * @return {i16}
+   */
+  get(): i16 {
+    return this.frames[this.frames.length % this.frame];
+  }
+
+  /**
+   * Avança para o próximo índice de quadro de animação.
+   *
+   * @return {i32} Índice de quadro de animação atual.
+   */
+  next(): i32 {
+    this.index = this.frames.length % (this.frame + 1);
+    return this.index;
+  }
+
+  /**
+   * Atualiza o estado da animação.
+   */
+  update(): void {
+    if(this.ticks > 0.0) {
+      this.ticks -= this.speed;
+    }
+    else {
+      this.ticks = this.max;
+      this.next();
+    }
   }
 }
 
