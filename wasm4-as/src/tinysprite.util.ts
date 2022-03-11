@@ -2,14 +2,14 @@
  * @name TinySprite Utils for WASM-4
  * @author Mr.Rafael
  * @license MIT
- * @version 1.1.2
+ * @version 1.1.3
  *
  * @description
  * Funções utilitárias da TinySprite (apenas gráficos e controles).
  * Você pode importá-la utilizando uma das duas linhas abaixo:
  *
  * ```
- * import {Vec2, Rect, Spritesheet, Animation, Font, Tilemap, canvas, p1, p2, p3, p4, mouse} from "./tinysprite";
+ * import {Vec2, Rect, Spritesheet, Animation, Font, Tilemap, canvas, p1, p2, p3, p4, mouse, poll} from "./tinysprite";
  * import * as ts from "./tinysprite";
  * ```
  */
@@ -70,7 +70,7 @@ export let mouse: Mouse = new Mouse();
  * Atualiza o estado de vários elementos do console, como o estado de teclas
  * dos controles e paleta de cores. Deve ser chamada a cada novo quadro.
  */
-export function update(): void {
+export function poll(): void {
   // Atualizar controles...
   p1.update();
   p2.update();
@@ -304,14 +304,42 @@ export class Rect {
    *
    * @return {boolean}
    */
-  intersect(rect: Rect) {
+  intersect(rect: Rect): boolean {
     return (
       rect != this
-      && this.x               < rect.x + box.width
+      && this.x               < rect.x + rect.width
       && this.x + this.width  > rect.x
       && this.y               < rect.y + rect.height
       && this.height + this.y > rect.y
     );
+  }
+
+  /**
+   * Detecta colisão entre esta e outra caixa, em outra posição.
+   *
+   * @param {Rect} rect Caixa de colisão.
+   * @param {i32} x Posição X.
+   * @param {i32} y Posição Y.
+   *
+   * @return {boolean}
+   */
+  intersectAt(rect: Rect, x: i32, y: i32): boolean {
+    // Salvar posição atual temporariamente...
+    let tempX: i32 = this.x;
+    let tempY: i32 = this.y;
+
+    // Teleportar caixa...
+    this.x = x;
+    this.y = y;
+
+    // Obter resultado da colisão:
+    let result: boolean = this.intersect(rect);
+
+    // Restaurar posição original...
+    this.x = tempX;
+    this.y = tempY;
+
+    return result;
   }
 }
 
