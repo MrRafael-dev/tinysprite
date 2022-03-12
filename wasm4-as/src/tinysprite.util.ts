@@ -978,7 +978,6 @@ export class Spritesheet {
         // Se o índice do tile ultrapassar o total de quadros de animação
         // existentes nesta folha de sprites, ele será ignorado...
         if(index < 0 || index >= this.frames.length) {
-          column += 1;
           continue;
         }
 
