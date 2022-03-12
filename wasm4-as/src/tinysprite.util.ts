@@ -144,6 +144,9 @@ export class Rect {
   /** Altura. */
   height: i32;
 
+  /** Ativa ou desativa a detecção de colisão para esta caixa. */
+  collisionsEnabled: boolean;
+
   /**
    * @constructor
    *
@@ -157,6 +160,7 @@ export class Rect {
     this.y = y;
     this.width  = width;
     this.height = height;
+    this.collisionsEnabled = true;
   }
 
   /**
@@ -307,6 +311,8 @@ export class Rect {
   intersect(rect: Rect): boolean {
     return (
       rect != this
+      && this.collisionsEnabled
+      && rect.collisionsEnabled
       && this.x               < rect.x + rect.width
       && this.x + this.width  > rect.x
       && this.y               < rect.y + rect.height
@@ -412,6 +418,28 @@ export class Canvas {
 
     // Atualizar flags...
     store<u8>(w4.SYSTEM_FLAGS, bitA + bitB);
+    return true;
+  }
+
+  /**
+   * Limpa a tela com uma cor específica.
+   *
+   * @param {u16} colors Ordem de cores da paleta.
+   *
+   * @return {boolean}
+   */
+  clear(colors: u16): boolean {
+    // Alterar ordem de cores da paleta:
+    store<u16>(w4.DRAW_COLORS, colors);
+
+    // Desenhar retângulo...
+    w4.rect(
+      0,
+      0,
+      SCREEN_WIDTH,
+      SCREEN_HEIGHT
+    );
+
     return true;
   }
 
@@ -749,7 +777,7 @@ export class Spritesheet {
   }
 
   /**
-   * Desenha um quadro de animação.
+   * Desenha um quadro de animação, com parâmetros avançados.
    *
    * @param {i32} x Posição X.
    * @param {i32} y Posição Y.
@@ -759,7 +787,7 @@ export class Spritesheet {
    * @param {i32} rotation Ângulo de rotação (de 0º a 360º).
    * @param {u16} colors Ordem de cores da paleta.
    */
-  draw(x: i32, y: i32, index: i32, flipX: boolean, flipY: boolean, rotation: i32, colors: u16): boolean {
+  drawExt(x: i32, y: i32, index: i32, flipX: boolean, flipY: boolean, rotation: i32, colors: u16): boolean {
     // Não desenhar a imagem, caso o índice não exista:
     if(index < 0 || index >= this.frames.length) {
       return false;
@@ -842,6 +870,21 @@ export class Spritesheet {
   }
 
   /**
+   * Desenha um quadro de animação.
+   *
+   * @param {i32} x Posição X.
+   * @param {i32} y Posição Y.
+   * @param {i32} index Índice do quadro de animação.
+   * @param {boolean} flipX Inverte este quadro horizontalmente.
+   * @param {boolean} flipY Inverte este quadro verticalmente.
+   * @param {i32} rotation Ângulo de rotação (de 0º a 360º).
+   * @param {u16} colors Ordem de cores da paleta.
+   */
+  draw(x: i32, y: i32, index: i32, colors: u16): boolean {
+    return this.drawExt(x, y, index, false, false, 0, colors);
+  }
+
+  /**
    * Escreve um texto na tela, usando os quadros de animação como caracteres.
    *
    * @param {i32} x Posição X.
@@ -898,10 +941,13 @@ export class Spritesheet {
       let frame: Rect = this.frames[index];
 
       // Desenhar caractere...
-      this.draw(
+      this.drawExt(
         x + (column * (frame.width  + paddingX)),
         y + (line   * (frame.height + paddingY)),
         index,
+        false,
+        false,
+        0,
         colors
       );
 
@@ -936,11 +982,11 @@ export class Spritesheet {
           continue;
         }
 
-        // Quadro de animação equivalente ao do caractere.
+        // Quadro de animação equivalente ao do tile.
         let frame: Rect = this.frames[index];
 
-        // Desenhar caractere...
-        this.draw(
+        // Desenhar tile...
+        this.drawExt(
           x + (column * frame.width),
           y + (row * frame.height),
           index,
