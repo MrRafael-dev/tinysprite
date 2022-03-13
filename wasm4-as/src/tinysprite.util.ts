@@ -2,7 +2,7 @@
  * @name TinySprite Utils for WASM-4
  * @author Mr.Rafael
  * @license MIT
- * @version 1.1.3
+ * @version 1.1.4
  *
  * @description
  * Funções utilitárias da TinySprite (apenas gráficos e controles).
@@ -449,8 +449,8 @@ export class Canvas {
       w4.rect(
         this.viewX(0),
         this.viewY(0),
-        this.width,
-        this.height
+        this.view.width,
+        this.view.height
       );
     }
 
