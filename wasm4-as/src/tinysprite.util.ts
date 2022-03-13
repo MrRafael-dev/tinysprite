@@ -313,10 +313,10 @@ export class Rect {
       rect != this
       && this.collisionsEnabled
       && rect.collisionsEnabled
-      && this.x               < rect.x + rect.width
-      && this.x + this.width  > rect.x
-      && this.y               < rect.y + rect.height
-      && this.height + this.y > rect.y
+      && this.x               <= rect.x + rect.width
+      && this.x + this.width  >= rect.x
+      && this.y               <= rect.y + rect.height
+      && this.height + this.y >= rect.y
     );
   }
 
