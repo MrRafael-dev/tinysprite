@@ -2,7 +2,7 @@
  * @name TinySprite Utils for WASM-4
  * @author Mr.Rafael
  * @license MIT
- * @version 1.1.4
+ * @version 1.1.5
  *
  * @description
  * Funções utilitárias da TinySprite (apenas gráficos e controles).
@@ -711,7 +711,7 @@ export class Canvas {
     store<u16>(w4.DRAW_COLORS, colors);
 
     // Escrever texto (com fonte padrão)...
-    w4.text(text, x, y);
+    w4.text(text, viewX(x), viewY(y));
 
     return true;
   }
