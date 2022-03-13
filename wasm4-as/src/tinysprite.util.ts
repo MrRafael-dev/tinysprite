@@ -425,20 +425,34 @@ export class Canvas {
    * Limpa a tela com uma cor específica.
    *
    * @param {u16} colors Ordem de cores da paleta.
+   * @param {boolean} ignoreViewport Permite ignorar o posicionamento da
+   *        viewport, limpando a tela inteira. O valor padrão é `true`.
+   *
    *
    * @return {boolean}
    */
-  clear(colors: u16): boolean {
+  clear(colors: u16, ignoreViewport: boolean = true): boolean {
     // Alterar ordem de cores da paleta:
     store<u16>(w4.DRAW_COLORS, colors);
 
-    // Desenhar retângulo...
-    w4.rect(
-      0,
-      0,
-      SCREEN_WIDTH,
-      SCREEN_HEIGHT
-    );
+    // Desenhar retângulo (ignorando viewport)...
+    if(ignoreViewport) {
+      w4.rect(
+        0,
+        0,
+        SCREEN_WIDTH,
+        SCREEN_HEIGHT
+      );
+    }
+    // Desenhar retângulo (dentro da viewport)...
+    else {
+      w4.rect(
+        this.viewX(0),
+        this.viewY(0),
+        this.width,
+        this.height
+      );
+    }
 
     return true;
   }
