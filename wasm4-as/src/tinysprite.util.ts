@@ -711,7 +711,7 @@ export class Canvas {
     store<u16>(w4.DRAW_COLORS, colors);
 
     // Escrever texto (com fonte padrão)...
-    w4.text(text, viewX(x), viewY(y));
+    w4.text(text, this.viewX(x), this.viewY(y));
 
     return true;
   }
