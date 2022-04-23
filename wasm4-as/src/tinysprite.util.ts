@@ -1520,33 +1520,33 @@ class Sprite extends Rect {
   /**
    * Evento de criação. É acionado apenas uma vez.
    *
-   * @param {Sprite} parent Instância superior.
+   * @param {Scene} scene Cena deste sprite.
    */
-  onCreate(parent: Sprite): void {
+  onCreate(scene: Scene): void {
   }
 
   /**
    * Evento de update. É acionado a cada quadro.
    *
-   * @param {Sprite} parent Instância superior.
+   * @param {Scene} scene Cena deste sprite.
    */
-  onUpdate(parent: Sprite): void {
+  onUpdate(scene: Scene): void {
   }
 
   /**
    * Evento de desenho. É acionado a cada quadro.
    *
-   * @param {Sprite} parent Instância superior.
+   * @param {Scene} scene Cena deste sprite.
    */
-  onDraw(parent: Sprite): void {
+  onDraw(scene: Scene): void {
   }
 
   /**
    * Evento de destruição. É acionado apenas uma vez.
    *
-   * @param {Sprite} parent Instância superior.
+   * @param {Scene} scene Cena deste sprite.
    */
-  onDestroy(parent: Sprite): void {
+  onDestroy(scene: Scene): void {
   }
 }
 
@@ -1555,14 +1555,17 @@ class Sprite extends Rect {
 // ==========================================================================
 /**
  * @class Scene
- * @extends Sprite
+ * @extends Rect
  *
  * @description
  * Representa uma cena ou fase do jogo que pode conter vários sprites.
  */
-class Scene extends Sprite {
+class Scene extends Rect {
   /** Lista de sprites desta cena. */
   children: Sprite[];
+
+  /** Indica se o evento de criação já foi acionado. */
+  _created: boolean;
 
   /**
    * @constructor
@@ -1571,16 +1574,32 @@ class Scene extends Sprite {
    * @param {i32} height Altura (padrão: 160).
    */
   constructor(width: i32 = 160, height: i32 = 160) {
-    super(width, height);
+    super(0, 0, width, height);
     this.children = [];
   }
 
   /**
-   * Evento de desenho (overlay). É acionado a cada quadro.
-   *
-   * @param {Sprite} parent Instância superior.
+   * Evento de criação. É acionado apenas uma vez.
    */
-  onDrawHUD(parent: Sprite): void {
+  onCreate(): void {
+  }
+
+  /**
+   * Evento de update. É acionado a cada quadro.
+   */
+  onUpdate(): void {
+  }
+
+  /**
+   * Evento de desenho. É acionado a cada quadro.
+   */
+  onDraw(): void {
+  }
+
+  /**
+   * Evento de desenho (overlay). É acionado a cada quadro.
+   */
+  onDrawHUD(): void {
   }
 
   /**
@@ -1623,11 +1642,11 @@ class Scene extends Sprite {
     // Executar evento de criação:
     if(!this._created) {
       this._created = true;
-      this.onCreate(this);
+      this.onCreate();
     }
 
     // Executar evento de desenho:
-    this.onDraw(this);
+    this.onDraw();
 
     // Percorrer sprites...
     for(let index: i32 = 0; index < this.children.length; index += 1) {
@@ -1641,8 +1660,8 @@ class Scene extends Sprite {
     }
 
     // Executar eventos de update/desenho/overlay:
-    this.onUpdate(this);
-    this.onDrawHUD(this);
+    this.onUpdate();
+    this.onDrawHUD();
 
     // Percorrer lista de exclusão...
     for(let index: i32 = 0; index < discard.length; index += 1) {
