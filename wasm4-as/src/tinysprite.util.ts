@@ -1480,7 +1480,7 @@ export class Mouse {
  * @description
  * Representa um objeto de uso geral que pode ser controlado por eventos.
  */
-class Sprite extends Rect {
+export class Sprite extends Rect {
   /** Indica se o evento de criação já foi acionado. */
   _created: boolean;
 
@@ -1560,7 +1560,7 @@ class Sprite extends Rect {
  * @description
  * Representa uma cena ou fase do jogo que pode conter vários sprites.
  */
-class Scene extends Rect {
+export class Scene extends Rect {
   /** Lista de sprites desta cena. */
   children: Sprite[];
 
@@ -1659,9 +1659,8 @@ class Scene extends Rect {
       }
     }
 
-    // Executar eventos de update/desenho/overlay:
+    // Executar eventos de update:
     this.onUpdate();
-    this.onDrawHUD();
 
     // Percorrer lista de exclusão...
     for(let index: i32 = 0; index < discard.length; index += 1) {
@@ -1676,5 +1675,8 @@ class Scene extends Rect {
         this.children.splice(childIndex, 1);
       }
     }
+
+    // Executar evento de desenho (overlay):
+    this.onDrawHUD();
   }
 }
