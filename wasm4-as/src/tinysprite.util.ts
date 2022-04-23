@@ -2,14 +2,14 @@
  * @name TinySprite Utils for WASM-4
  * @author Mr.Rafael
  * @license MIT
- * @version 1.1.5
+ * @version 1.1.6
  *
  * @description
  * Funções utilitárias da TinySprite (apenas gráficos e controles).
  * Você pode importá-la utilizando uma das duas linhas abaixo:
  *
  * ```
- * import {Vec2, Rect, Spritesheet, Animation, Font, Tilemap, canvas, p1, p2, p3, p4, mouse, poll} from "./tinysprite";
+ * import {Vec2, Rect, Spritesheet, Animation, Font, Tilemap, Sprite, Scene, canvas, p1, p2, p3, p4, mouse, poll} from "./tinysprite";
  * import * as ts from "./tinysprite";
  * ```
  */
@@ -1467,5 +1467,195 @@ export class Mouse {
 
     this.position.x = load<i16>(w4.MOUSE_X) as i32;
     this.position.y = load<i16>(w4.MOUSE_Y) as i32;
+  }
+}
+
+// ==========================================================================
+// sprite.ts
+// ==========================================================================
+/**
+ * @class Sprite
+ * @extends Rect
+ *
+ * @description
+ * Representa um objeto de uso geral que pode ser controlado por eventos.
+ */
+class Sprite extends Rect {
+  /** Indica se o evento de criação já foi acionado. */
+  _created: boolean;
+
+  /** Indica se o evento de destruição já foi acionado. */
+  _destroyed: boolean;
+
+  /**
+   * @constructor
+   *
+   * @param {i32} width Largura.
+   * @param {i32} height Altura.
+   */
+  constructor(width: i32, height: i32) {
+    super(0, 0, width, height);
+    this._created   = false;
+    this._destroyed = false;
+  }
+
+  /**
+   * Marca este sprite para destruição.
+   *
+   * @return {boolean}
+   */
+  destroy(): boolean {
+    // A função retornará "true" apenas na primeira vez que for destruído...
+    if(!this._destroyed) {
+      this._destroyed        = true;
+      this.collisionsEnabled = false;
+
+      return true;
+    }
+
+    // ...do contrário, retornará "false", indicando que nenhum nada ocorreu:
+    return false;
+  }
+
+  /**
+   * Evento de criação. É acionado apenas uma vez.
+   *
+   * @param {Sprite} parent Instância superior.
+   */
+  onCreate(parent: Sprite): void {
+  }
+
+  /**
+   * Evento de update. É acionado a cada quadro.
+   *
+   * @param {Sprite} parent Instância superior.
+   */
+  onUpdate(parent: Sprite): void {
+  }
+
+  /**
+   * Evento de desenho. É acionado a cada quadro.
+   *
+   * @param {Sprite} parent Instância superior.
+   */
+  onDraw(parent: Sprite): void {
+  }
+
+  /**
+   * Evento de destruição. É acionado apenas uma vez.
+   *
+   * @param {Sprite} parent Instância superior.
+   */
+  onDestroy(parent: Sprite): void {
+  }
+}
+
+// ==========================================================================
+// scene.ts
+// ==========================================================================
+/**
+ * @class Scene
+ * @extends Sprite
+ *
+ * @description
+ * Representa uma cena ou fase do jogo que pode conter vários sprites.
+ */
+class Scene extends Sprite {
+  /** Lista de sprites desta cena. */
+  children: Sprite[];
+
+  /**
+   * @constructor
+   *
+   * @param {i32} width Largura (padrão: 160).
+   * @param {i32} height Altura (padrão: 160).
+   */
+  constructor(width: i32 = 160, height: i32 = 160) {
+    super(width, height);
+    this.children = [];
+  }
+
+  /**
+   * Evento de desenho (overlay). É acionado a cada quadro.
+   *
+   * @param {Sprite} parent Instância superior.
+   */
+  onDrawHUD(parent: Sprite): void {
+  }
+
+  /**
+   * Gerencia os eventos de um sprite.
+   *
+   * @param {Sprite} sprite Sprite.
+   *
+   * @return {boolean} Indica se o sprite foi destruído durante os eventos.
+   */
+  handleEvents(sprite: Sprite): boolean {
+    if(!sprite._destroyed) {
+      // Executar evento de criação:
+      if(!sprite._created) {
+        sprite._created = true;
+        sprite.onCreate(this);
+      }
+
+      // Executar evento de update:
+      sprite.onUpdate(this);
+
+      // Executar evento de desenho:
+      if(!sprite._destroyed) {
+        sprite.onDraw(this);
+      }
+    }
+
+    return sprite._destroyed;
+  }
+
+  /**
+   * Game loop.
+   */
+  loop(): void {
+    // Atualizar paleta e controles:
+    poll();
+
+    // Lista de exclusão.
+    let discard: Sprite[] = [];
+
+    // Executar evento de criação:
+    if(!this._created) {
+      this._created = true;
+      this.onCreate(this);
+    }
+
+    // Executar evento de desenho:
+    this.onDraw(this);
+
+    // Percorrer sprites...
+    for(let index: i32 = 0; index < this.children.length; index += 1) {
+      let child: Sprite      = this.children[index];
+      let destroyed: boolean = this.handleEvents(child);
+
+      // Adicionar sprites à lista de exclusão:
+      if(destroyed) {
+        discard.push(child);
+      }
+    }
+
+    // Executar eventos de update/desenho/overlay:
+    this.onUpdate(this);
+    this.onDrawHUD(this);
+
+    // Percorrer lista de exclusão...
+    for(let index: i32 = 0; index < discard.length; index += 1) {
+      let child: Sprite   = discard[index];
+      let childIndex: i32 = discard.indexOf(child);
+
+      // Executar evento de destruição:
+      child.onDestroy(this);
+
+      // Excluir sprites:
+      if(childIndex >= 0) {
+        this.children.splice(childIndex, 1);
+      }
+    }
   }
 }
