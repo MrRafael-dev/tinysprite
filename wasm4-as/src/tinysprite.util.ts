@@ -92,7 +92,7 @@ export function poll(): void {
  * @description
  * Representa um vetor de movimento.
  */
-class Velocity {
+export class Velocity {
   /** Velocidade atual. */
   spd: i32;
 
