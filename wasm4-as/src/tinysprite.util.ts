@@ -2,14 +2,14 @@
  * @name TinySprite Utils for WASM-4
  * @author Mr.Rafael
  * @license MIT
- * @version 1.1.7
+ * @version 1.1.8
  *
  * @description
  * Funções utilitárias da TinySprite (apenas gráficos e controles).
  * Você pode importá-la utilizando uma das duas linhas abaixo:
  *
  * ```
- * import {Vec2, Rect, Spritesheet, Animation, Font, Tilemap, canvas, p1, p2, p3, p4, mouse, poll} from "./tinysprite";
+ * import {Velocity, Vec2, Rect, Spritesheet, Animation, Font, Tilemap, canvas, p1, p2, p3, p4, mouse, poll} from "./tinysprite";
  * import * as ts from "./tinysprite";
  * ```
  */
@@ -81,6 +81,101 @@ export function poll(): void {
   // Atualizar paleta de cores + flags...
   canvas.updatePalette();
   canvas.updateSystemFlags();
+}
+
+// ==========================================================================
+// velocity.ts
+// ==========================================================================
+/**
+ * @class Velocity
+ *
+ * @description
+ * Representa um vetor de movimento.
+ */
+class Velocity {
+  /** Velocidade atual. */
+  spd: i32;
+
+  /** Força de aceleração. */
+  acc: i32;
+
+  /** Força de desaceleração. */
+  dec: i32;
+
+  /** Força máxima. */
+  max: i32;
+
+  /**
+   * @constructor
+   *
+   * @param {i32} spd Velocidade atual.
+   * @param {i32} acc Força de aceleração.
+   * @param {i32} dec Força de desaceleração.
+   * @param {i32} max Força máxima.
+   */
+  constructor(spd: i32 = 0, acc: i32 = 0, dec: i32 = 0, max: i32 = 0) {
+    this.spd = spd;
+    this.acc = acc;
+    this.dec = dec;
+    this.max = max;
+  }
+
+  /**
+   * Acelera este vetor de movimento.
+   *
+   * @param {i32} dir Direção.
+   *
+   * @return {i32}
+   */
+  move(dir: i32 = 0): i32 {
+    this.spd += this.acc * dir;
+    return this.spd;
+  }
+
+  /**
+   * Controla a aceleração desta velocidade.
+   *
+   * @return {i32}
+   */
+  update(): i32 {
+    // Controlar velocidade (+spd)...
+    if(this.spd > 0) {
+
+      // Controle de velocidade máxima (+spd):
+      if(this.spd > this.max) {
+        this.spd = this.max;
+      }
+
+      // Desaceleração (+spd):
+      else {
+        this.spd -= this.dec;
+
+        if(this.spd < 0) {
+          this.spd = 0;
+        }
+      }
+    }
+
+    // Controlar velocidade (-spd)...
+    else if(this.spd < 0) {
+
+      // Controle de velocidade máxima (-spd):
+      if(this.spd < -this.max) {
+        this.spd = -this.max;
+      }
+
+      // Desaceleração (-spd):
+      else {
+        this.spd += this.dec;
+
+        if(this.spd > 0) {
+          this.spd = 0;
+        }
+      }
+    }
+
+    return this.spd;
+  }
 }
 
 // ==========================================================================
