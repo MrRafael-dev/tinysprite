@@ -138,7 +138,7 @@ export class Velocity {
    */
   update(): f32 {
     // Controlar velocidade (+spd)...
-    if(this.spd > 0.0) {
+    if(this.spd > this.acc) {
 
       // Controle de velocidade máxima (+spd):
       if(this.spd > this.max) {
@@ -156,7 +156,7 @@ export class Velocity {
     }
 
     // Controlar velocidade (-spd)...
-    else if(this.spd < 0.0) {
+    else if(this.spd < -this.acc) {
 
       // Controle de velocidade máxima (-spd):
       if(this.spd < -this.max) {
