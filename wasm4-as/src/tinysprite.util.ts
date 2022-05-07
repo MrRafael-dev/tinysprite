@@ -126,16 +126,23 @@ export class Velocity {
   }
 
   /**
-   * Controla a aceleração desta velocidade.
+   * Acelera este vetor de velocidade.
    *
-   * @param {f32} spd Velocidade de movimento relativo.
+   * @param {f32} spd Velocidade de movimento.
+   *
+   * @return {f32}
+   */
+  move(spd: f32): f32 {
+    this.spd += this.acc * spd;
+    return this.spd;
+  }
+
+  /**
+   * Controla a aceleração desta velocidade.
    *
    * @return {i32}
    */
-  update(spd: f32 = 0.0): f32 {
-    // Aceleração (+spd, -spd, 0):
-    this.spd += this.acc * spd;
-
+  update(): f32 {
     // Controlar velocidade (+spd)...
     if(this.spd > 0.0) {
 
