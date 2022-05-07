@@ -102,26 +102,20 @@ export class Velocity {
   /** Força de desaceleração. */
   dec: f32;
 
-  /** Força mínima. */
-  min: f32;
-
   /** Força máxima. */
   max: f32;
 
   /**
    * @constructor
    *
-   * @param {f32} spd Velocidade atual.
    * @param {f32} acc Força de aceleração.
    * @param {f32} dec Força de desaceleração.
-   * @param {f32} min Força mínima.
    * @param {f32} max Força máxima.
    */
-  constructor(spd: f32 = 0.0, acc: f32 = 0.0, dec: f32 = 0.0, min: f32 = 0.0, max: f32 = 0.0) {
-    this.spd = spd;
+  constructor(acc: f32 = 0.0, dec: f32 = 0.0, max: f32 = 0.0) {
+    this.spd = 0.0;
     this.acc = acc;
     this.dec = dec;
-    this.min = min;
     this.max = max;
   }
 
@@ -164,9 +158,9 @@ export class Velocity {
     // Controlar velocidade (-spd)...
     else if(this.spd < 0.0) {
 
-      // Controle de velocidade mínima (-spd):
-      if(this.spd < -this.min) {
-        this.spd = -this.min;
+      // Controle de velocidade máxima (-spd):
+      if(this.spd < -this.max) {
+        this.spd = -this.max;
       }
 
       // Desaceleração (-spd):
