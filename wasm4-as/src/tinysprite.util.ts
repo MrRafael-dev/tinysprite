@@ -2,7 +2,7 @@
  * @name TinySprite Utils for WASM-4
  * @author Mr.Rafael
  * @license MIT
- * @version 1.1.8
+ * @version 1.1.9
  *
  * @description
  * Funções utilitárias da TinySprite (apenas gráficos e controles).
@@ -94,26 +94,26 @@ export function poll(): void {
  */
 export class Velocity {
   /** Velocidade atual. */
-  spd: i32;
+  spd: f32;
 
   /** Força de aceleração. */
-  acc: i32;
+  acc: f32;
 
   /** Força de desaceleração. */
-  dec: i32;
+  dec: f32;
 
   /** Força máxima. */
-  max: i32;
+  max: f32;
 
   /**
    * @constructor
    *
-   * @param {i32} spd Velocidade atual.
-   * @param {i32} acc Força de aceleração.
-   * @param {i32} dec Força de desaceleração.
-   * @param {i32} max Força máxima.
+   * @param {f32} spd Velocidade atual.
+   * @param {f32} acc Força de aceleração.
+   * @param {f32} dec Força de desaceleração.
+   * @param {f32} max Força máxima.
    */
-  constructor(spd: i32 = 0, acc: i32 = 0, dec: i32 = 0, max: i32 = 0) {
+  constructor(spd: f32 = 0.0, acc: f32 = 0.0, dec: f32 = 0.0, max: f32 = 0.0) {
     this.spd = spd;
     this.acc = acc;
     this.dec = dec;
@@ -123,11 +123,11 @@ export class Velocity {
   /**
    * Acelera este vetor de movimento.
    *
-   * @param {i32} dir Direção.
+   * @param {f32} dir Direção.
    *
-   * @return {i32}
+   * @return {f32}
    */
-  move(dir: i32 = 0): i32 {
+  move(dir: f32 = 0.0): f32 {
     this.spd += this.acc * dir;
     return this.spd;
   }
@@ -137,9 +137,9 @@ export class Velocity {
    *
    * @return {i32}
    */
-  update(): i32 {
+  update(): f32 {
     // Controlar velocidade (+spd)...
-    if(this.spd > 0) {
+    if(this.spd > 0.0) {
 
       // Controle de velocidade máxima (+spd):
       if(this.spd > this.max) {
@@ -150,14 +150,14 @@ export class Velocity {
       else {
         this.spd -= this.dec;
 
-        if(this.spd < 0) {
-          this.spd = 0;
+        if(this.spd < 0.0) {
+          this.spd = 0.0;
         }
       }
     }
 
     // Controlar velocidade (-spd)...
-    else if(this.spd < 0) {
+    else if(this.spd < 0.0) {
 
       // Controle de velocidade máxima (-spd):
       if(this.spd < -this.max) {
@@ -168,8 +168,8 @@ export class Velocity {
       else {
         this.spd += this.dec;
 
-        if(this.spd > 0) {
-          this.spd = 0;
+        if(this.spd > 0.0) {
+          this.spd = 0.0;
         }
       }
     }
@@ -1125,13 +1125,13 @@ export class Animation {
   frames: i16[];
 
   /** Velocidade da animação (subtração de ticks). */
-  speed: f64;
+  speed: f32;
 
   /** Taxa de ciclos máxima por quadro. */
-  max: f64;
+  max: f32;
 
   /** Contador de ciclos. */
-  ticks: f64;
+  ticks: f32;
 
   /** Índice de quadro de animação atual. */
   index: i32;
@@ -1140,10 +1140,10 @@ export class Animation {
    * @constructor
    *
    * @param {i16[]} frames Quadros de animação.
-   * @param {f64} speed Velocidade da animação (subtração de ticks).
-   * @param {f64} max Taxa de ciclos máxima por quadro.
+   * @param {f32} speed Velocidade da animação (subtração de ticks).
+   * @param {f32} max Taxa de ciclos máxima por quadro.
    */
-  constructor(frames: i16[] = [], speed: f64 = 30.0, max: f64 = 60.0) {
+  constructor(frames: i16[] = [], speed: f32 = 30.0, max: f32 = 60.0) {
     this.frames = frames;
     this.speed  = speed;
     this.max    = max;
