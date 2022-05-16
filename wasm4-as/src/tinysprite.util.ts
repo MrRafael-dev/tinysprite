@@ -2,7 +2,7 @@
  * @name TinySprite Utils for WASM-4
  * @author Mr.Rafael
  * @license MIT
- * @version 1.1.9
+ * @version 1.2.0
  *
  * @description
  * Funções utilitárias da TinySprite (apenas gráficos e controles).
@@ -806,6 +806,94 @@ export class Canvas {
 
     // Escrever texto (com fonte padrão)...
     w4.text(text, this.viewX(x), this.viewY(y));
+
+    return true;
+  }
+
+  /**
+   * Escreve um texto na tela, assumindo que todos os caracteres estejam
+   * organizados em apenas uma linha.
+   *
+   * @param {usize} image Imagem de referência.
+   * @param {i32} imageWidth Largura da imagem.
+   * @param {i32} imageHeight Altura da imagem.
+   * @param {i32} charWidth Largura dos caracteres.
+   * @param {i32} x Posição X.
+   * @param {i32} y Posição Y.
+   * @param {string} text Texto a ser escrito.
+   * @param {string} charset Charset com todos os caracteres a serem usados.
+   * @param {i32} paddingX Espaçamento horizontal entre cada caractere.
+   * @param {i32} paddingY Espaçamento vertical entre cada caractere.
+   * @param {i32} start Índice do quadro de animação do primeiro caractere.
+   * @param {u16} colors Ordem de cores da paleta.
+   * @param {u32} flags Flags de desenho da imagem de referência.
+   */
+   write(image: usize, imageWidth: i32, charWidth: i32, charHeight: i32, x: i32, y: i32, text: string, charset: string, start: i32, paddingX: i32, paddingY: i32, colors: u16, flags: u32): boolean {
+    // Contadores de linhas e colunas.
+    let line  : i32 = 0;
+    let column: i32 = 0;
+
+    // Caracteres especiais: "\n" (newline) e " " (space).
+    let newline: i32 = 10;
+    let space  : i32 = 32;
+
+    // Percorrer caracteres do texto...
+    for(let index: i32 = 0; index < text.length; index += 1) {
+      let char    : string = text[index];
+      let charCode: i32    = char.charCodeAt(0);
+
+      // Avançar para a próxima linha ao encontrar um "\n" (newline)...
+      if(charCode === newline) {
+        line  += 1;
+        column = 0;
+        continue;
+      }
+      // Avançar para a próxima coluna ao encontrar um " " (space)...
+      else if(charCode === space) {
+        column += 1;
+        continue;
+      }
+
+      // Índice do caractere no charset.
+      let index: i32 = charset.indexOf(char);
+
+      // Se o caractere não existir no charset, ou o índice ultrapassar o
+      // total de quadros de animação existentes nesta folha de sprites, ele
+      // será ignorado e tratado como um " " (space)...
+      if(index < 0 || index >= charset.length) {
+        column += 1;
+        continue;
+      }
+
+      // Ajustar índice do caractere para obter o índice do quadro de animação
+      // equivalente ao do caractere...
+      index += start;
+
+      // Quadro de animação equivalente ao do caractere.
+      let frame: Rect = new Rect(
+        index * charWidth,
+        0,
+        charWidth,
+        charHeight
+      );
+
+      // Desenhar caractere...
+      this.blitSub(
+        image,
+        this.viewX(x) + (column * (frame.width  + paddingX)),
+        this.viewY(y) + (line   * (frame.height + paddingY)),
+        charWidth,
+        charHeight,
+        frame.x,
+        frame.y,
+        imageWidth,
+        colors,
+        flags
+      );
+
+      // Avançar uma coluna...
+      column += 1;
+    }
 
     return true;
   }
