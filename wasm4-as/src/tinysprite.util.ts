@@ -2,14 +2,14 @@
  * @name TinySprite Utils for WASM-4
  * @author Mr.Rafael
  * @license MIT
- * @version 1.2.0
+ * @version 1.2.1
  *
  * @description
  * Funções utilitárias da TinySprite (apenas gráficos e controles).
  * Você pode importá-la utilizando uma das duas linhas abaixo:
  *
  * ```
- * import {Velocity, Vec2, Rect, Spritesheet, Animation, Font, Tilemap, canvas, p1, p2, p3, p4, mouse, poll} from "./tinysprite";
+ * import {Velocity, Vec2, Rect, Spritesheet, Animation, Font, Tilemap, canvas, p1, p2, p3, p4, mouse, prand, poll} from "./tinysprite";
  * import * as ts from "./tinysprite";
  * ```
  */
@@ -65,6 +65,22 @@ export let p4: Gamepad = new Gamepad(GAMEPAD_P4);
 
 /** Cursor do mouse/touchscreen. */
 export let mouse: Mouse = new Mouse();
+
+/**
+ * Gerador de números pseudo-aleatórios: Xorshift.
+ *
+ * @param {u16} seed Seed para o gerador.
+ *
+ * @return {u64}
+ */
+export function prand(seed: u64): u64 {
+  let next: u64 = seed as u64;
+      next ^= next << 13;
+      next ^= next >> 17;
+      next ^= next << 5;
+
+  return next;
+}
 
 /**
  * Atualiza o estado de vários elementos do console, como o estado de teclas
