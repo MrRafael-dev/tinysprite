@@ -92,7 +92,7 @@ export function prand(seed: u64): u64 {
  *
  * @return {u16}
  */
-function cflags(flags: u32 = 0, flipX: boolean = false, flipY: boolean = false, rotation: i32 = 0): u32 {
+export function cflags(flags: u32 = 0, flipX: boolean = false, flipY: boolean = false, rotation: i32 = 0): u32 {
   // Índice de rotação, alinhado em 90º.
   let rotationIndex: i32 = (Math.floor(Math.abs(rotation) / 90) as i32) % 4;
 
