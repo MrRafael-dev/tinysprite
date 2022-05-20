@@ -2,14 +2,14 @@
  * @name TinySprite Utils for WASM-4
  * @author Mr.Rafael
  * @license MIT
- * @version 1.2.1
+ * @version 1.2.2
  *
  * @description
  * Funções utilitárias da TinySprite (apenas gráficos e controles).
  * Você pode importá-la utilizando uma das duas linhas abaixo:
  *
  * ```
- * import {Velocity, Vec2, Rect, Spritesheet, Animation, Font, Tilemap, canvas, p1, p2, p3, p4, mouse, prand, poll} from "./tinysprite";
+ * import {Velocity, Vec2, Rect, Spritesheet, Animation, Font, Tilemap, canvas, p1, p2, p3, p4, mouse, prand, cflags, poll} from "./tinysprite";
  * import * as ts from "./tinysprite";
  * ```
  */
@@ -80,6 +80,73 @@ export function prand(seed: u64): u64 {
       next ^= next << 5;
 
   return next;
+}
+
+/**
+ * Calcula e retorna flags de desenho.
+ *
+ * @param {u32} flags Flags de desenho.
+ * @param {boolean} flipX Inverte este quadro horizontalmente.
+ * @param {boolean} flipY Inverte este quadro verticalmente.
+ * @param {i32} rotation Ângulo de rotação (de 0º a 360º).
+ *
+ * @return {u16}
+ */
+function cflags(flags: u32 = 0, flipX: boolean = false, flipY: boolean = false, rotation: i32 = 0): u32 {
+  // Índice de rotação, alinhado em 90º.
+  let rotationIndex: i32 = (Math.floor(Math.abs(rotation) / 90) as i32) % 4;
+
+  // Ajustar rotação para ângulos negativos...
+  if(rotation < 0) {
+    rotationIndex = (4 - rotationIndex) % 4;
+  }
+
+  // Look-Up Table de rotações (original).
+  // Ângulos: 0º, 90º, 180º e 270º, respectivamente.
+  let rotations: u32[] = [
+    flags,
+    flags | w4.BLIT_FLIP_X | w4.BLIT_FLIP_Y | w4.BLIT_ROTATE,
+    flags | w4.BLIT_FLIP_X | w4.BLIT_FLIP_Y,
+    flags | w4.BLIT_ROTATE
+  ];
+
+  // Look-Up Table de rotações (X invertido).
+  // Ângulos: 0º, 90º, 180º e 270º, respectivamente.
+  let rotationsFX: u32[] = [
+    flags | w4.BLIT_FLIP_X,
+    flags | w4.BLIT_FLIP_X | w4.BLIT_ROTATE,
+    flags | w4.BLIT_FLIP_Y,
+    flags | w4.BLIT_FLIP_Y | w4.BLIT_ROTATE
+  ];
+
+  // Look-Up Table de rotações (Y invertido).
+  // Ângulos: 0º, 90º, 180º e 270º, respectivamente.
+  let rotationsFY: u32[] = [
+    flags | w4.BLIT_FLIP_Y,
+    flags | w4.BLIT_FLIP_Y | w4.BLIT_ROTATE,
+    flags | w4.BLIT_FLIP_X,
+    flags | w4.BLIT_FLIP_X | w4.BLIT_ROTATE
+  ];
+
+  // Look-Up Table de rotações (X e Y invertidos).
+  // Ângulos: 0º, 90º, 180º e 270º, respectivamente.
+  let rotationsFXY: u32[] = [
+    flags | w4.BLIT_FLIP_X | w4.BLIT_FLIP_Y,
+    flags | w4.BLIT_ROTATE,
+    flags,
+    flags | w4.BLIT_FLIP_X | w4.BLIT_FLIP_Y | w4.BLIT_ROTATE
+  ];
+
+  // Flags de desenho.
+  let drawFlags: u32 = 0;
+
+  // Escolher flags especiais de rotação...
+       if(flipX && flipY) { drawFlags = rotationsFXY[rotationIndex]; }
+  else if(flipX)          { drawFlags = rotationsFX[rotationIndex];  }
+  else if(flipY)          { drawFlags = rotationsFY[rotationIndex];  }
+  else                    { drawFlags = rotations[rotationIndex];    }
+
+  return drawFlags;
 }
 
 /**
@@ -1005,58 +1072,8 @@ export class Spritesheet {
       return false;
     }
 
-    // Índice de rotação, alinhado em 90º.
-    let rotationIndex: i32 = (Math.floor(Math.abs(rotation) / 90) as i32) % 4;
-
-    // Ajustar rotação para ângulos negativos...
-    if(rotation < 0) {
-      rotationIndex = (4 - rotationIndex) % 4;
-    }
-
-    // Look-Up Table de rotações (original).
-    // Ângulos: 0º, 90º, 180º e 270º, respectivamente.
-    let rotations: u32[] = [
-      this.flags,
-      this.flags | w4.BLIT_FLIP_X | w4.BLIT_FLIP_Y | w4.BLIT_ROTATE,
-      this.flags | w4.BLIT_FLIP_X | w4.BLIT_FLIP_Y,
-      this.flags | w4.BLIT_ROTATE
-    ];
-
-    // Look-Up Table de rotações (X invertido).
-    // Ângulos: 0º, 90º, 180º e 270º, respectivamente.
-    let rotationsFX: u32[] = [
-      this.flags | w4.BLIT_FLIP_X,
-      this.flags | w4.BLIT_FLIP_X | w4.BLIT_ROTATE,
-      this.flags | w4.BLIT_FLIP_Y,
-      this.flags | w4.BLIT_FLIP_Y | w4.BLIT_ROTATE
-    ];
-
-    // Look-Up Table de rotações (Y invertido).
-    // Ângulos: 0º, 90º, 180º e 270º, respectivamente.
-    let rotationsFY: u32[] = [
-      this.flags | w4.BLIT_FLIP_Y,
-      this.flags | w4.BLIT_FLIP_Y | w4.BLIT_ROTATE,
-      this.flags | w4.BLIT_FLIP_X,
-      this.flags | w4.BLIT_FLIP_X | w4.BLIT_ROTATE
-    ];
-
-    // Look-Up Table de rotações (X e Y invertidos).
-    // Ângulos: 0º, 90º, 180º e 270º, respectivamente.
-    let rotationsFXY: u32[] = [
-      this.flags | w4.BLIT_FLIP_X | w4.BLIT_FLIP_Y,
-      this.flags | w4.BLIT_ROTATE,
-      this.flags,
-      this.flags | w4.BLIT_FLIP_X | w4.BLIT_FLIP_Y | w4.BLIT_ROTATE
-    ];
-
     // Flags de desenho.
-    let flags: u32 = 0;
-
-    // Escolher flags especiais de rotação...
-         if(flipX && flipY) { flags = rotationsFXY[rotationIndex]; }
-    else if(flipX)          { flags = rotationsFX[rotationIndex];  }
-    else if(flipY)          { flags = rotationsFY[rotationIndex];  }
-    else                    { flags = rotations[rotationIndex];    }
+    let flags: u32 = cflags(this.flags, flipX, flipY, rotation);
 
     // Quadro de animação.
     let frame: Rect = this.frames[index];
