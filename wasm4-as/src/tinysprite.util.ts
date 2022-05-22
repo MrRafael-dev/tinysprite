@@ -169,7 +169,7 @@ export function poll(): void {
   canvas.updateSystemFlags();
 
   // Aleatorizar seed...
-  rseed = prand(rseed as u64);
+  rseed = prand(rseed as u64) as u32;
 
   // Impedir que a seed possua um valor vazio...
   if(rseed === 0) {
@@ -1646,7 +1646,7 @@ export class Gamepad {
     rseed *= gamepad & w4.BUTTON_RIGHT? 16: 1;
     rseed *= gamepad & w4.BUTTON_1? 32: 1;
     rseed *= gamepad & w4.BUTTON_2? 64: 1;
-    rseed  = prand(rseed as u64);
+    rseed  = prand(rseed as u64) as u32;
 
     this.up.nextState(gamepad & w4.BUTTON_UP? true: false);
     this.down.nextState(gamepad & w4.BUTTON_DOWN? true: false);
@@ -1704,6 +1704,6 @@ export class Mouse {
 
     rseed += Math.abs(this.position.x) as u32;
     rseed += Math.abs(this.position.y) as u32;
-    rseed  = prand(rseed as u64);
+    rseed  = prand(rseed as u64) as u32;
   }
 }
