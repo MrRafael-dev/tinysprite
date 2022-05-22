@@ -170,6 +170,11 @@ export function poll(): void {
 
   // Aleatorizar seed...
   rseed = prand(rseed);
+
+  // Impedir que a seed possua um valor vazio...
+  if(rseed === 0) {
+    rseed = 4444;
+  }
 }
 
 // ==========================================================================
@@ -1636,12 +1641,12 @@ export class Gamepad {
     let gamepad: usize = this.gamepad();
 
     // @rng
-    rseed *= gamepad & w4.BUTTON_UP? 1: 1;
-    rseed *= gamepad & w4.BUTTON_DOWN? 2: 1;
-    rseed *= gamepad & w4.BUTTON_LEFT? 4: 1;
-    rseed *= gamepad & w4.BUTTON_RIGHT? 8: 1;
-    rseed *= gamepad & w4.BUTTON_1? 16: 1;
-    rseed *= gamepad & w4.BUTTON_2? 32: 1;
+    rseed *= gamepad & w4.BUTTON_UP? 2: 1;
+    rseed *= gamepad & w4.BUTTON_DOWN? 4: 1;
+    rseed *= gamepad & w4.BUTTON_LEFT? 8: 1;
+    rseed *= gamepad & w4.BUTTON_RIGHT? 16: 1;
+    rseed *= gamepad & w4.BUTTON_1? 32: 1;
+    rseed *= gamepad & w4.BUTTON_2? 64: 1;
     rseed  = prand(rseed);
 
     this.up.nextState(gamepad & w4.BUTTON_UP? true: false);
@@ -1698,8 +1703,8 @@ export class Mouse {
     this.position.x = load<i16>(w4.MOUSE_X) as i32;
     this.position.y = load<i16>(w4.MOUSE_Y) as i32;
 
-    rseed *= this.position.x;
-    rseed *= this.position.y;
+    rseed += Math.abs(this.position.x);
+    rseed += Math.abs(this.position.y);
     rseed  = prand(rseed);
   }
 }
