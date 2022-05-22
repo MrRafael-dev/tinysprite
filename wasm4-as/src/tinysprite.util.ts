@@ -1702,8 +1702,8 @@ export class Mouse {
     this.position.x = load<i16>(w4.MOUSE_X) as i32;
     this.position.y = load<i16>(w4.MOUSE_Y) as i32;
 
-    rseed += Math.abs(this.position.x);
-    rseed += Math.abs(this.position.y);
+    rseed += Math.abs(this.position.x) as u64;
+    rseed += Math.abs(this.position.y) as u64;
     rseed  = prand(rseed);
   }
 }
