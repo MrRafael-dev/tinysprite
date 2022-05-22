@@ -168,13 +168,8 @@ export function poll(): void {
   canvas.updatePalette();
   canvas.updateSystemFlags();
 
-  // Aleatorizar seed...
-  rseed = prand(rseed as u64) as u32;
-
-  // Impedir que a seed possua um valor vazio...
-  if(rseed === 0) {
-    rseed = 4444;
-  }
+  // Avançar seed...
+  rseed += 1;
 }
 
 // ==========================================================================
@@ -1641,12 +1636,11 @@ export class Gamepad {
     let gamepad: usize = this.gamepad();
 
     rseed *= gamepad & w4.BUTTON_UP? 2: 1;
-    rseed *= gamepad & w4.BUTTON_DOWN? 4: 1;
-    rseed *= gamepad & w4.BUTTON_LEFT? 8: 1;
-    rseed *= gamepad & w4.BUTTON_RIGHT? 16: 1;
-    rseed *= gamepad & w4.BUTTON_1? 32: 1;
-    rseed *= gamepad & w4.BUTTON_2? 64: 1;
-    rseed  = prand(rseed as u64) as u32;
+    rseed *= gamepad & w4.BUTTON_DOWN? 2: 1;
+    rseed *= gamepad & w4.BUTTON_LEFT? 3: 1;
+    rseed *= gamepad & w4.BUTTON_RIGHT? 3: 1;
+    rseed *= gamepad & w4.BUTTON_1? 4: 1;
+    rseed *= gamepad & w4.BUTTON_2? 4: 1;
 
     this.up.nextState(gamepad & w4.BUTTON_UP? true: false);
     this.down.nextState(gamepad & w4.BUTTON_DOWN? true: false);
@@ -1704,6 +1698,5 @@ export class Mouse {
 
     rseed += Math.abs(this.position.x) as u32;
     rseed += Math.abs(this.position.y) as u32;
-    rseed  = prand(rseed as u64) as u32;
   }
 }
