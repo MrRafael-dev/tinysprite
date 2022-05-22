@@ -2,14 +2,14 @@
  * @name TinySprite Utils for WASM-4
  * @author Mr.Rafael
  * @license MIT
- * @version 1.2.2
+ * @version 1.2.3
  *
  * @description
  * Funções utilitárias da TinySprite (apenas gráficos e controles).
  * Você pode importá-la utilizando uma das duas linhas abaixo:
  *
  * ```
- * import {Velocity, Vec2, Rect, Spritesheet, Animation, Font, Tilemap, canvas, p1, p2, p3, p4, mouse, prand, cflags, poll} from "./tinysprite";
+ * import {Velocity, Vec2, Rect, Spritesheet, Animation, Font, Tilemap, rseed, canvas, p1, p2, p3, p4, mouse, prand, cflags, poll} from "./tinysprite";
  * import * as ts from "./tinysprite";
  * ```
  */
@@ -47,6 +47,9 @@ const GAMEPAD_STATE_HELD: u8 = 2;
 
 /** Estado de controle recém-solto. */
 const GAMEPAD_STATE_RELEASED: u8 = 3;
+
+/** Seed para números aleatórios. */
+export let rseed: u64 = 4444;
 
 /** Canvas principal. */
 export let canvas: Canvas = new Canvas();
@@ -164,6 +167,9 @@ export function poll(): void {
   // Atualizar paleta de cores + flags...
   canvas.updatePalette();
   canvas.updateSystemFlags();
+
+  // Aleatorizar seed...
+  rseed = prand(rseed);
 }
 
 // ==========================================================================
@@ -1629,6 +1635,15 @@ export class Gamepad {
   update(): void {
     let gamepad: usize = this.gamepad();
 
+    // @rng
+    rseed *= gamepad & w4.BUTTON_UP? 1: 1;
+    rseed *= gamepad & w4.BUTTON_DOWN? 2: 1;
+    rseed *= gamepad & w4.BUTTON_LEFT? 4: 1;
+    rseed *= gamepad & w4.BUTTON_RIGHT? 8: 1;
+    rseed *= gamepad & w4.BUTTON_1? 16: 1;
+    rseed *= gamepad & w4.BUTTON_2? 32: 1;
+    rseed  = prand(rseed);
+
     this.up.nextState(gamepad & w4.BUTTON_UP? true: false);
     this.down.nextState(gamepad & w4.BUTTON_DOWN? true: false);
     this.left.nextState(gamepad & w4.BUTTON_LEFT? true: false);
@@ -1682,5 +1697,9 @@ export class Mouse {
 
     this.position.x = load<i16>(w4.MOUSE_X) as i32;
     this.position.y = load<i16>(w4.MOUSE_Y) as i32;
+
+    rseed *= this.position.x;
+    rseed *= this.position.y;
+    rseed  = prand(rseed);
   }
 }
