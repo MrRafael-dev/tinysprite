@@ -1640,7 +1640,6 @@ export class Gamepad {
   update(): void {
     let gamepad: usize = this.gamepad();
 
-    // @rng
     rseed *= gamepad & w4.BUTTON_UP? 2: 1;
     rseed *= gamepad & w4.BUTTON_DOWN? 4: 1;
     rseed *= gamepad & w4.BUTTON_LEFT? 8: 1;
