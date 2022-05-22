@@ -49,7 +49,7 @@ const GAMEPAD_STATE_HELD: u8 = 2;
 const GAMEPAD_STATE_RELEASED: u8 = 3;
 
 /** Seed para números aleatórios. */
-export let rseed: u64 = 4444;
+export let rseed: u32 = 4444;
 
 /** Canvas principal. */
 export let canvas: Canvas = new Canvas();
@@ -169,7 +169,7 @@ export function poll(): void {
   canvas.updateSystemFlags();
 
   // Aleatorizar seed...
-  rseed = prand(rseed);
+  rseed = prand(rseed as u64);
 
   // Impedir que a seed possua um valor vazio...
   if(rseed === 0) {
@@ -1646,7 +1646,7 @@ export class Gamepad {
     rseed *= gamepad & w4.BUTTON_RIGHT? 16: 1;
     rseed *= gamepad & w4.BUTTON_1? 32: 1;
     rseed *= gamepad & w4.BUTTON_2? 64: 1;
-    rseed  = prand(rseed);
+    rseed  = prand(rseed as u64);
 
     this.up.nextState(gamepad & w4.BUTTON_UP? true: false);
     this.down.nextState(gamepad & w4.BUTTON_DOWN? true: false);
@@ -1702,8 +1702,8 @@ export class Mouse {
     this.position.x = load<i16>(w4.MOUSE_X) as i32;
     this.position.y = load<i16>(w4.MOUSE_Y) as i32;
 
-    rseed += Math.abs(this.position.x) as u64;
-    rseed += Math.abs(this.position.y) as u64;
-    rseed  = prand(rseed);
+    rseed += Math.abs(this.position.x) as u32;
+    rseed += Math.abs(this.position.y) as u32;
+    rseed  = prand(rseed as u64);
   }
 }
