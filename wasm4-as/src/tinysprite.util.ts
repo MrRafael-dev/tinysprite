@@ -170,6 +170,11 @@ export function poll(): void {
 
   // Avançar seed...
   rseed += 1;
+
+  // Limitar valor máximo...
+  if(rseed > 0xFFFF) {
+    rseed = 0;
+  }
 }
 
 // ==========================================================================
