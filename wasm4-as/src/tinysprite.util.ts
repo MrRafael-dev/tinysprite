@@ -2,7 +2,7 @@
  * @name TinySprite Utils for WASM-4
  * @author Mr.Rafael
  * @license MIT
- * @version 1.2.3
+ * @version 1.2.4
  *
  * @description
  * Funções utilitárias da TinySprite (apenas gráficos e controles).
