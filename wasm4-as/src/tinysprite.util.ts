@@ -49,7 +49,7 @@ const GAMEPAD_STATE_HELD: u8 = 2;
 const GAMEPAD_STATE_RELEASED: u8 = 3;
 
 /** Seed para números aleatórios. */
-export let rseed: u32 = 4444;
+export let rseed: i32 = 4444;
 
 /** Canvas principal. */
 export let canvas: Canvas = new Canvas();
@@ -68,6 +68,21 @@ export let p4: Gamepad = new Gamepad(GAMEPAD_P4);
 
 /** Cursor do mouse/touchscreen. */
 export let mouse: Mouse = new Mouse();
+
+/**
+ * Sorteia um número aleatório entre dois valores.
+ *
+ * @param {i32} min Valor mínimo.
+ * @param {i32} max Valor máximo.
+ *
+ * @return {i32}
+ */
+export function range(min: i32 = 0, max: i32 = 0): i32 {
+  let cmin: f64 = Math.ceil(min);
+  let fmax: f64 = Math.floor(max);
+
+  return (Math.floor(Math.random() * (fmax - cmin)) as i32) + min;
+}
 
 /**
  * Gerador de números pseudo-aleatórios: Xorshift.
@@ -153,6 +168,16 @@ export function cflags(flags: u32 = 0, flipX: boolean = false, flipY: boolean = 
 }
 
 /**
+ * Aleatoriza a seed.
+ *
+ * @return {i32}
+ */
+export function reseed(): i32 {
+  rseed = range(0, 0x10000);
+  return rseed;
+}
+
+/**
  * Atualiza o estado de vários elementos do console, como o estado de teclas
  * dos controles e paleta de cores. Deve ser chamada a cada novo quadro.
  */
@@ -168,13 +193,8 @@ export function poll(): void {
   canvas.updatePalette();
   canvas.updateSystemFlags();
 
-  // Avançar seed...
-  rseed += 1;
-
-  // Limitar valor máximo...
-  if(rseed > 0xFFFF) {
-    rseed = 0;
-  }
+  // Aleatorizar seed...
+  reseed();
 }
 
 // ==========================================================================
@@ -1640,12 +1660,12 @@ export class Gamepad {
   update(): void {
     let gamepad: usize = this.gamepad();
 
-    rseed *= gamepad & w4.BUTTON_UP? 2: 1;
-    rseed *= gamepad & w4.BUTTON_DOWN? 2: 1;
-    rseed *= gamepad & w4.BUTTON_LEFT? 3: 1;
-    rseed *= gamepad & w4.BUTTON_RIGHT? 3: 1;
-    rseed *= gamepad & w4.BUTTON_1? 4: 1;
-    rseed *= gamepad & w4.BUTTON_2? 4: 1;
+    rseed += gamepad & w4.BUTTON_UP? 2: 1;
+    rseed += gamepad & w4.BUTTON_DOWN? 4: 1;
+    rseed += gamepad & w4.BUTTON_LEFT? 8: 1;
+    rseed += gamepad & w4.BUTTON_RIGHT? 16: 1;
+    rseed += gamepad & w4.BUTTON_1? 32: 1;
+    rseed += gamepad & w4.BUTTON_2? 64: 1;
 
     this.up.nextState(gamepad & w4.BUTTON_UP? true: false);
     this.down.nextState(gamepad & w4.BUTTON_DOWN? true: false);
@@ -1701,7 +1721,7 @@ export class Mouse {
     this.position.x = load<i16>(w4.MOUSE_X) as i32;
     this.position.y = load<i16>(w4.MOUSE_Y) as i32;
 
-    rseed += Math.abs(this.position.x) as u32;
-    rseed += Math.abs(this.position.y) as u32;
+    rseed += Math.abs(this.position.x) as i32;
+    rseed += Math.abs(this.position.y) as i32;
   }
 }
