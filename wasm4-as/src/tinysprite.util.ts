@@ -2,14 +2,14 @@
  * @name TinySprite Utils for WASM-4
  * @author Mr.Rafael
  * @license MIT
- * @version 1.2.4
+ * @version 1.2.5
  *
  * @description
  * Funções utilitárias da TinySprite (apenas gráficos e controles).
  * Você pode importá-la utilizando uma das duas linhas abaixo:
  *
  * ```
- * import {Velocity, Vec2, Rect, Spritesheet, Animation, Font, Tilemap, rseed, canvas, p1, p2, p3, p4, mouse, prand, cflags, poll} from "./tinysprite";
+ * import {Velocity, Vec2, Rect, Spritesheet, Animation, Font, Tilemap, canvas, p1, p2, p3, p4, mouse, prand, cflags, poll} from "./tinysprite";
  * import * as ts from "./tinysprite";
  * ```
  */
@@ -48,9 +48,6 @@ const GAMEPAD_STATE_HELD: u8 = 2;
 /** Estado de controle recém-solto. */
 const GAMEPAD_STATE_RELEASED: u8 = 3;
 
-/** Seed para números aleatórios. */
-export let rseed: i32 = 4444;
-
 /** Canvas principal. */
 export let canvas: Canvas = new Canvas();
 
@@ -87,15 +84,15 @@ export function range(min: i32 = 0, max: i32 = 0): i32 {
 /**
  * Gerador de números pseudo-aleatórios: Xorshift.
  *
- * @param {u16} seed Seed para o gerador.
+ * @param {u64} seed Seed para o gerador.
  *
  * @return {u64}
  */
 export function prand(seed: u64): u64 {
   let next: u64 = seed as u64;
       next ^= next << 13;
-      next ^= next >> 17;
-      next ^= next << 5;
+      next ^= next >> 7;
+      next ^= next << 17;
 
   return next;
 }
@@ -168,16 +165,6 @@ export function cflags(flags: u32 = 0, flipX: boolean = false, flipY: boolean = 
 }
 
 /**
- * Aleatoriza a seed.
- *
- * @return {i32}
- */
-export function reseed(): i32 {
-  rseed = range(0, 0x10000);
-  return rseed;
-}
-
-/**
  * Atualiza o estado de vários elementos do console, como o estado de teclas
  * dos controles e paleta de cores. Deve ser chamada a cada novo quadro.
  */
@@ -194,7 +181,7 @@ export function poll(): void {
   canvas.updateSystemFlags();
 
   // Aleatorizar seed...
-  reseed();
+  Math.random();
 }
 
 // ==========================================================================
@@ -1660,12 +1647,9 @@ export class Gamepad {
   update(): void {
     let gamepad: usize = this.gamepad();
 
-    rseed += gamepad & w4.BUTTON_UP? 2: 1;
-    rseed += gamepad & w4.BUTTON_DOWN? 4: 1;
-    rseed += gamepad & w4.BUTTON_LEFT? 8: 1;
-    rseed += gamepad & w4.BUTTON_RIGHT? 16: 1;
-    rseed += gamepad & w4.BUTTON_1? 32: 1;
-    rseed += gamepad & w4.BUTTON_2? 64: 1;
+    for(let index: usize = 0; index < gamepad; index += 1) {
+      Math.random();
+    }
 
     this.up.nextState(gamepad & w4.BUTTON_UP? true: false);
     this.down.nextState(gamepad & w4.BUTTON_DOWN? true: false);
@@ -1720,8 +1704,5 @@ export class Mouse {
 
     this.position.x = load<i16>(w4.MOUSE_X) as i32;
     this.position.y = load<i16>(w4.MOUSE_Y) as i32;
-
-    rseed += Math.abs(this.position.x) as i32;
-    rseed += Math.abs(this.position.y) as i32;
   }
 }
