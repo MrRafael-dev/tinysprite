@@ -2,7 +2,7 @@
  * @name TinySprite Utils for WASM-4
  * @author Mr.Rafael
  * @license MIT
- * @version 1.2.5
+ * @version 1.2.6
  *
  * @description
  * Funções utilitárias da TinySprite (apenas gráficos e controles).
@@ -691,6 +691,84 @@ export class Canvas {
    */
   viewY(y: i32): i32 {
     return y - this.view.y;
+  }
+
+  /**
+   * Obtém um pixel da tela.
+   *
+   * @param {i32} x Posição X.
+   * @param {i32} y Posição Y.
+   *
+   * @return {u8} Índice de cor deste pixel (de 0x00 a 0x03).
+   */
+  getPixel(x: i32, y: i32): u8 {
+    // Ignorar pixels fora da área da tela...
+    if((x < 0 || x >= 160) || (y < 0 || y >= 160)) {
+      return 0;
+    }
+
+    // Calcular offset e índice do pixel no framebuffer.
+    let offset: i32 = ((y * 40) + (x / 4));
+    let index: i32 = Math.abs(x % 4) as i32;
+
+    // Obter byte com os pixels da tela.
+    let pixelData: u8 = load<u8>(w4.FRAMEBUFFER + offset);
+
+    // Separar byte em bits 2bpp.
+    let pixels: u8[] = [
+      (pixelData & 0b00000011),
+      (pixelData & 0b00001100) >> 2,
+      (pixelData & 0b00110000) >> 4,
+      (pixelData & 0b11000000) >> 6
+    ];
+
+    return pixels[index];
+  }
+
+  /**
+   * Insere um pixel na tela.
+   *
+   * @param {i32} x Posição X.
+   * @param {i32} y Posição Y.
+   * @param {u8} color Índice de cor deste pixel (de 0x00 a 0x03).
+   *
+   * @return {boolean}
+   */
+  setPixel(x: i32, y: i32, color: u8): boolean {
+    // Ignorar pixels fora da área da tela...
+    if((x < 0 || x >= 160) || (y < 0 || y >= 160)) {
+      return false;
+    }
+
+    // Calcular offset e índice do pixel no framebuffer.
+    let offset: i32 = ((y * 40) + (x / 4));
+    let index: i32 = Math.abs(x % 4) as i32;
+
+    // Obter byte com os pixels da tela.
+    let pixelData: u8 = load<u8>(w4.FRAMEBUFFER + offset);
+
+    // Separar byte em bits 2bpp.
+    let pixels: u8[] = [
+      (pixelData & 0b00000011),
+      (pixelData & 0b00001100) >> 2,
+      (pixelData & 0b00110000) >> 4,
+      (pixelData & 0b11000000) >> 6
+    ];
+
+    // Alterar índice do pixel especificado...
+    pixels[index] = color % 4;
+
+    // Remontar byte...
+    pixelData = (
+      (pixels[3] << 6) +
+      (pixels[2] << 4) +
+      (pixels[1] << 2) +
+      (pixels[0])
+    );
+
+    // Alterar framebuffer...
+    store<u8>(w4.FRAMEBUFFER + offset, pixelData);
+    return true;
   }
 
   /**
