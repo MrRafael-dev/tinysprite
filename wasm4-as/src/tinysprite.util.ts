@@ -2,7 +2,7 @@
  * @name TinySprite Utils for WASM-4
  * @author Mr.Rafael
  * @license MIT
- * @version 1.2.6
+ * @version 1.2.7
  *
  * @description
  * Funções utilitárias da TinySprite (apenas gráficos e controles).
@@ -49,22 +49,22 @@ const GAMEPAD_STATE_HELD: u8 = 2;
 const GAMEPAD_STATE_RELEASED: u8 = 3;
 
 /** Canvas principal. */
-export let canvas: Canvas = new Canvas();
+export const canvas: Canvas = new Canvas();
 
 /** Controles do jogador 1. */
-export let p1: Gamepad = new Gamepad(GAMEPAD_P1);
+export const p1: Gamepad = new Gamepad(GAMEPAD_P1);
 
 /** Controles do jogador 2. */
-export let p2: Gamepad = new Gamepad(GAMEPAD_P2);
+export const p2: Gamepad = new Gamepad(GAMEPAD_P2);
 
 /** Controles do jogador 3. */
-export let p3: Gamepad = new Gamepad(GAMEPAD_P3);
+export const p3: Gamepad = new Gamepad(GAMEPAD_P3);
 
 /** Controles do jogador 4. */
-export let p4: Gamepad = new Gamepad(GAMEPAD_P4);
+export const p4: Gamepad = new Gamepad(GAMEPAD_P4);
 
 /** Cursor do mouse/touchscreen. */
-export let mouse: Mouse = new Mouse();
+export const mouse: Mouse = new Mouse();
 
 /**
  * Sorteia um número aleatório entre dois valores.
@@ -75,8 +75,8 @@ export let mouse: Mouse = new Mouse();
  * @return {i32}
  */
 export function range(min: i32 = 0, max: i32 = 0): i32 {
-  let cmin: f64 = Math.ceil(min);
-  let fmax: f64 = Math.floor(max);
+  const cmin: f64 = Math.ceil(min);
+  const fmax: f64 = Math.floor(max);
 
   return (Math.floor(Math.random() * (fmax - cmin)) as i32) + min;
 }
@@ -118,7 +118,7 @@ export function cflags(flags: u32 = 0, flipX: boolean = false, flipY: boolean = 
 
   // Look-Up Table de rotações (original).
   // Ângulos: 0º, 90º, 180º e 270º, respectivamente.
-  let rotations: u32[] = [
+  const rotations: u32[] = [
     flags,
     flags | w4.BLIT_FLIP_X | w4.BLIT_FLIP_Y | w4.BLIT_ROTATE,
     flags | w4.BLIT_FLIP_X | w4.BLIT_FLIP_Y,
@@ -127,7 +127,7 @@ export function cflags(flags: u32 = 0, flipX: boolean = false, flipY: boolean = 
 
   // Look-Up Table de rotações (X invertido).
   // Ângulos: 0º, 90º, 180º e 270º, respectivamente.
-  let rotationsFX: u32[] = [
+  const rotationsFX: u32[] = [
     flags | w4.BLIT_FLIP_X,
     flags | w4.BLIT_FLIP_X | w4.BLIT_ROTATE,
     flags | w4.BLIT_FLIP_Y,
@@ -136,7 +136,7 @@ export function cflags(flags: u32 = 0, flipX: boolean = false, flipY: boolean = 
 
   // Look-Up Table de rotações (Y invertido).
   // Ângulos: 0º, 90º, 180º e 270º, respectivamente.
-  let rotationsFY: u32[] = [
+  const rotationsFY: u32[] = [
     flags | w4.BLIT_FLIP_Y,
     flags | w4.BLIT_FLIP_Y | w4.BLIT_ROTATE,
     flags | w4.BLIT_FLIP_X,
@@ -145,7 +145,7 @@ export function cflags(flags: u32 = 0, flipX: boolean = false, flipY: boolean = 
 
   // Look-Up Table de rotações (X e Y invertidos).
   // Ângulos: 0º, 90º, 180º e 270º, respectivamente.
-  let rotationsFXY: u32[] = [
+  const rotationsFXY: u32[] = [
     flags | w4.BLIT_FLIP_X | w4.BLIT_FLIP_Y,
     flags | w4.BLIT_ROTATE,
     flags,
@@ -526,15 +526,15 @@ export class Rect {
    */
   intersectAt(rect: Rect, x: i32, y: i32): boolean {
     // Salvar posição atual temporariamente...
-    let tempX: i32 = this.x;
-    let tempY: i32 = this.y;
+    const tempX: i32 = this.x;
+    const tempY: i32 = this.y;
 
     // Teleportar caixa...
     this.x = x;
     this.y = y;
 
     // Obter resultado da colisão:
-    let result: boolean = this.intersect(rect);
+    const result: boolean = this.intersect(rect);
 
     // Restaurar posição original...
     this.x = tempX;
@@ -608,8 +608,8 @@ export class Canvas {
    */
   updateSystemFlags(): boolean {
     // Valores das flags.
-    let bitA: i32 = this.hideGamepadOverlay?  2: 0;
-    let bitB: i32 = this.preserveFrameBuffer? 1: 0;
+    const bitA: i32 = this.hideGamepadOverlay?  2: 0;
+    const bitB: i32 = this.preserveFrameBuffer? 1: 0;
 
     // Atualizar flags...
     store<u8>(w4.SYSTEM_FLAGS, bitA + bitB);
@@ -708,14 +708,14 @@ export class Canvas {
     }
 
     // Calcular offset e índice do pixel no framebuffer.
-    let offset: i32 = ((y * 40) + (x / 4));
-    let index: i32 = Math.abs(x % 4) as i32;
+    const offset: i32 = ((y * 40) + (x / 4));
+    const index: i32 = Math.abs(x % 4) as i32;
 
     // Obter byte com os pixels da tela.
-    let pixelData: u8 = load<u8>(w4.FRAMEBUFFER + offset);
+    const pixelData: u8 = load<u8>(w4.FRAMEBUFFER + offset);
 
     // Separar byte em bits 2bpp.
-    let pixels: u8[] = [
+    const pixels: u8[] = [
       (pixelData & 0b00000011),
       (pixelData & 0b00001100) >> 2,
       (pixelData & 0b00110000) >> 4,
@@ -741,11 +741,11 @@ export class Canvas {
     }
 
     // Calcular offset e índice do pixel no framebuffer.
-    let offset: i32 = ((y * 40) + (x / 4));
-    let index: i32 = Math.abs(x % 4) as i32;
+    const offset: i32 = ((y * 40) + (x / 4));
+    const index: i32 = Math.abs(x % 4) as i32;
 
     // Obter byte com os pixels da tela.
-    let pixelData: u8 = load<u8>(w4.FRAMEBUFFER + offset);
+    const pixelData: u8 = load<u8>(w4.FRAMEBUFFER + offset);
 
     // Separar byte em bits 2bpp.
     let pixels: u8[] = [
@@ -1013,13 +1013,13 @@ export class Canvas {
     let column: i32 = 0;
 
     // Caracteres especiais: "\n" (newline) e " " (space).
-    let newline: i32 = 10;
-    let space  : i32 = 32;
+    const newline: i32 = 10;
+    const space  : i32 = 32;
 
     // Percorrer caracteres do texto...
     for(let index: i32 = 0; index < text.length; index += 1) {
-      let char    : string = text[index];
-      let charCode: i32    = char.charCodeAt(0);
+      const char    : string = text[index];
+      const charCode: i32    = char.charCodeAt(0);
 
       // Avançar para a próxima linha ao encontrar um "\n" (newline)...
       if(charCode === newline) {
@@ -1049,7 +1049,7 @@ export class Canvas {
       index += start;
 
       // Quadro de animação equivalente ao do caractere.
-      let frame: Rect = new Rect(
+      const frame: Rect = new Rect(
         index * charWidth,
         0,
         charWidth,
@@ -1169,10 +1169,10 @@ export class Spritesheet {
     }
 
     // Flags de desenho.
-    let flags: u32 = cflags(this.flags, flipX, flipY, rotation);
+    const flags: u32 = cflags(this.flags, flipX, flipY, rotation);
 
     // Quadro de animação.
-    let frame: Rect = this.frames[index];
+    const frame: Rect = this.frames[index];
 
     // Alterar ordem de cores da paleta:
     store<u16>(w4.DRAW_COLORS, colors);
@@ -1232,8 +1232,8 @@ export class Spritesheet {
 
     // Percorrer caracteres do texto...
     for(let index: i32 = 0; index < text.length; index += 1) {
-      let char    : string = text[index];
-      let charCode: i32    = char.charCodeAt(0);
+      const char    : string = text[index];
+      const charCode: i32    = char.charCodeAt(0);
 
       // Avançar para a próxima linha ao encontrar um "\n" (newline)...
       if(charCode === newline) {
@@ -1263,7 +1263,7 @@ export class Spritesheet {
       index += start;
 
       // Quadro de animação equivalente ao do caractere.
-      let frame: Rect = this.frames[index];
+      const frame: Rect = this.frames[index];
 
       // Desenhar caractere...
       this.drawExt(
@@ -1294,11 +1294,11 @@ export class Spritesheet {
   tile(x: i32, y: i32, tilemap: i16[][], colors: u16): boolean {
     // Percorrer linhas do tilemap...
     for(let row: i32 = 0; row < tilemap.length; row += 1) {
-      let line: i16[] = tilemap[row];
+      const line: i16[] = tilemap[row];
 
       // Percorrer colunas do tilemap...
       for(let column: i32 = 0; column < line.length; column += 1) {
-        let index: i32 = line[column] as i32;
+        const index: i32 = line[column] as i32;
 
         // Se o índice do tile ultrapassar o total de quadros de animação
         // existentes nesta folha de sprites, ele será ignorado...
@@ -1307,7 +1307,7 @@ export class Spritesheet {
         }
 
         // Quadro de animação equivalente ao do tile.
-        let frame: Rect = this.frames[index];
+        const frame: Rect = this.frames[index];
 
         // Desenhar tile...
         this.drawExt(
@@ -1533,7 +1533,7 @@ export class Tilemap {
     }
 
     // Linha de tiles.
-    let row: i16[] = this.map[y];
+    const row: i16[] = this.map[y];
 
     // Não seguir adiante quando uma das posições passadas ultrapassar os
     // limites de colunas do tilemap...
@@ -1587,7 +1587,7 @@ export class GamepadButton {
    */
   nextState(pressed: boolean): u8 {
     // Ciclo de estados quando o botão estiver pressionado.
-    let whenPressed: u8[] = [
+    const whenPressed: u8[] = [
       GAMEPAD_STATE_PRESSED, // Quando inerte.
       GAMEPAD_STATE_HELD,    // Quando recém-pressionado.
       GAMEPAD_STATE_HELD,    // Quando mantido.
@@ -1595,7 +1595,7 @@ export class GamepadButton {
     ];
 
     // Ciclo de estados quando o botão estiver solto.
-    let whenReleased: u8[] = [
+    const whenReleased: u8[] = [
       GAMEPAD_STATE_IDLE,     // Quando inerte.
       GAMEPAD_STATE_RELEASED, // Quando recém-pressionado.
       GAMEPAD_STATE_RELEASED, // Quando mantido.
@@ -1723,7 +1723,7 @@ export class Gamepad {
    * Atualiza todos os estados de tecla.
    */
   update(): void {
-    let gamepad: usize = this.gamepad();
+    const gamepad: usize = this.gamepad();
 
     for(let index: usize = 0; index < gamepad; index += 1) {
       Math.random();
@@ -1774,7 +1774,7 @@ export class Mouse {
    * Atualiza todos os estados de tecla.
    */
   update(): void {
-    let mouse: usize = load<u8>(w4.MOUSE_BUTTONS);
+    const mouse: usize = load<u8>(w4.MOUSE_BUTTONS);
 
     this.left.nextState(mouse & w4.MOUSE_LEFT? true: false);
     this.right.nextState(mouse & w4.MOUSE_RIGHT? true: false);
