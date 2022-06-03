@@ -2,7 +2,7 @@
  * @name TinySprite Utils for WASM-4
  * @author Mr.Rafael
  * @license MIT
- * @version 1.2.7
+ * @version 1.2.8
  *
  * @description
  * Funções utilitárias da TinySprite (apenas gráficos e controles).
@@ -494,6 +494,15 @@ export class Rect {
       this.x + (this.width  - 1),
       this.y + (this.height - 1)
     );
+  }
+
+  /**
+   * Indica se esta caixa está em uma posição visível da tela.
+   *
+   * @return {boolean}
+   */
+  isOnScreen(): boolean {
+    return canvas.isVisible(this.x, this.y, this.width, this.height);
   }
 
   /**
