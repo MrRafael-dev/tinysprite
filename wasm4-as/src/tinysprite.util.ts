@@ -1,8 +1,10 @@
+/// <reference path="../node_modules/assemblyscript/index.d.ts"/>
+
 /**
  * @name TinySprite Utils for WASM-4
  * @author Mr.Rafael
  * @license MIT
- * @version 1.2.9
+ * @version 1.3.0
  *
  * @description
  * Funções utilitárias da TinySprite (apenas gráficos e controles).
@@ -45,24 +47,6 @@ const GAMEPAD_STATE_HELD: u8 = 2;
 
 /** Estado de controle recém-solto. */
 const GAMEPAD_STATE_RELEASED: u8 = 3;
-
-/** Canvas principal. */
-export const canvas: Canvas = new Canvas();
-
-/** Controles do jogador 1. */
-export const p1: Gamepad = new Gamepad(GAMEPAD_P1);
-
-/** Controles do jogador 2. */
-export const p2: Gamepad = new Gamepad(GAMEPAD_P2);
-
-/** Controles do jogador 3. */
-export const p3: Gamepad = new Gamepad(GAMEPAD_P3);
-
-/** Controles do jogador 4. */
-export const p4: Gamepad = new Gamepad(GAMEPAD_P4);
-
-/** Cursor do mouse/touchscreen. */
-export const mouse: Mouse = new Mouse();
 
 /**
  * Sorteia um número aleatório entre dois valores.
@@ -748,7 +732,7 @@ export class Canvas {
     const index: i32 = Math.abs(x % 4) as i32;
 
     // Obter byte com os pixels da tela.
-    const pixelData: u8 = load<u8>(w4.FRAMEBUFFER + offset);
+    let pixelData: u8 = load<u8>(w4.FRAMEBUFFER + offset);
 
     // Separar byte em bits 2bpp.
     let pixels: u8[] = [
@@ -1020,8 +1004,8 @@ export class Canvas {
     const space  : i32 = 32;
 
     // Percorrer caracteres do texto...
-    for(let index: i32 = 0; index < text.length; index += 1) {
-      const char    : string = text[index];
+    for(let charIndex: i32 = 0; charIndex < text.length; charIndex += 1) {
+      const char    : string = text.charAt(charIndex);
       const charCode: i32    = char.charCodeAt(0);
 
       // Avançar para a próxima linha ao encontrar um "\n" (newline)...
@@ -1233,8 +1217,8 @@ export class Spritesheet {
     let space  : i32 = 32;
 
     // Percorrer caracteres do texto...
-    for(let index: i32 = 0; index < text.length; index += 1) {
-      const char    : string = text[index];
+    for(let charIndex: i32 = 0; charIndex < text.length; charIndex += 1) {
+      const char    : string = text.charAt(charIndex);
       const charCode: i32    = char.charCodeAt(0);
 
       // Avançar para a próxima linha ao encontrar um "\n" (newline)...
@@ -1781,3 +1765,22 @@ export class Mouse {
   }
 }
 //#endregion </mouse.ts>
+//#region <variables.ts>
+/** Canvas principal. */
+export const canvas: Canvas = new Canvas();
+
+/** Controles do jogador 1. */
+export const p1: Gamepad = new Gamepad(GAMEPAD_P1);
+
+/** Controles do jogador 2. */
+export const p2: Gamepad = new Gamepad(GAMEPAD_P2);
+
+/** Controles do jogador 3. */
+export const p3: Gamepad = new Gamepad(GAMEPAD_P3);
+
+/** Controles do jogador 4. */
+export const p4: Gamepad = new Gamepad(GAMEPAD_P4);
+
+/** Cursor do mouse/touchscreen. */
+export const mouse: Mouse = new Mouse();
+//#endregion </variables.ts>
