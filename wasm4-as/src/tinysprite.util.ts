@@ -2,7 +2,7 @@
  * @name TinySprite Utils for WASM-4
  * @author Mr.Rafael
  * @license MIT
- * @version 1.2.8
+ * @version 1.2.9
  *
  * @description
  * Funções utilitárias da TinySprite (apenas gráficos e controles).
@@ -15,9 +15,7 @@
  */
 import * as w4 from "./wasm4";
 
-// ==========================================================================
-// misc.ts
-// ==========================================================================
+//#region <misc.ts>
 /** Largura da tela do WASM-4. */
 const SCREEN_WIDTH: i32 = 160;
 
@@ -184,9 +182,8 @@ export function poll(): void {
   Math.random();
 }
 
-// ==========================================================================
-// velocity.ts
-// ==========================================================================
+//#endregion </misc.ts>
+//#region <velocity.ts>
 /**
  * @class Velocity
  *
@@ -278,9 +275,8 @@ export class Velocity {
   }
 }
 
-// ==========================================================================
-// vec2.ts
-// ==========================================================================
+//#endregion </velocity.ts>
+//#region <vec2.ts>
 /**
  * @class Vec2
  *
@@ -317,9 +313,8 @@ export class Vec2 {
   }
 }
 
-// ==========================================================================
-// rect.ts
-// ==========================================================================
+//#endregion </vec2.ts>
+//#region <rect.ts>
 /**
  * @class Rect
  *
@@ -553,9 +548,8 @@ export class Rect {
   }
 }
 
-// ==========================================================================
-// canvas.ts
-// ==========================================================================
+//#endregion </rect.ts>
+//#region <canvas.ts>
 /**
  * @class Canvas
  *
@@ -1087,9 +1081,8 @@ export class Canvas {
   }
 }
 
-// ==========================================================================
-// spritesheet.ts
-// ==========================================================================
+//#endregion </canvas.ts>
+//#region <spritesheet.ts>
 /**
  * @class Spritesheet
  *
@@ -1336,9 +1329,8 @@ export class Spritesheet {
   }
 }
 
-// ==========================================================================
-// animation.ts
-// ==========================================================================
+//#endregion </spritesheet.ts>
+//#region <animation.ts>
 /**
  * @class Animation
  *
@@ -1409,9 +1401,8 @@ export class Animation {
   }
 }
 
-// ==========================================================================
-// font.ts
-// ==========================================================================
+//#endregion </animation.ts>
+//#region <font.ts>
 /**
  * @class Font
  *
@@ -1464,9 +1455,8 @@ export class Font {
   }
 }
 
-// ==========================================================================
-// tilemap.ts
-// ==========================================================================
+//#endregion </font.ts>
+//#region <tilemap.ts>
 /**
  * @class Tilemap
  *
@@ -1566,9 +1556,8 @@ export class Tilemap {
   }
 }
 
-// ==========================================================================
-// gamepad_button.ts
-// ==========================================================================
+//#endregion </tilemap.ts>
+//#region <gamepad_button.ts>
 /**
  * @class GamepadButton
  *
@@ -1654,13 +1643,12 @@ export class GamepadButton {
    * @return {boolean}
    */
   released(): boolean {
-    return this.sate === GAMEPAD_STATE_RELEASED;
+    return this.state === GAMEPAD_STATE_RELEASED;
   }
 }
 
-// ==========================================================================
-// gamepad.ts
-// ==========================================================================
+//#endregion <gamepad_button.ts>
+//#region <gamepad.ts>
 /**
  * @class Gamepad
  *
@@ -1747,9 +1735,8 @@ export class Gamepad {
   }
 }
 
-// ==========================================================================
-// mouse.ts
-// ==========================================================================
+//#endregion </gamepad.ts>
+//#region <mouse.ts>
 /**
  * @class Mouse
  *
@@ -1793,3 +1780,4 @@ export class Mouse {
     this.position.y = load<i16>(w4.MOUSE_Y) as i32;
   }
 }
+//#endregion </mouse.ts>
