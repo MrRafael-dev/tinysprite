@@ -1,5 +1,4 @@
 /// <reference path="../node_modules/assemblyscript/index.d.ts"/>
-
 /**
  * @name TinySprite Utils for WASM-4
  * @author Mr.Rafael
