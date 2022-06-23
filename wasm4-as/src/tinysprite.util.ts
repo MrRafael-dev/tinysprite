@@ -1374,7 +1374,7 @@ export class Animation {
    * @return {i16}
    */
   get(): i16 {
-    return this.frames[this.frames.length % this.frame];
+    return this.frames[this.frames.length % this.index];
   }
 
   /**
@@ -1383,7 +1383,7 @@ export class Animation {
    * @return {i32} Índice de quadro de animação atual.
    */
   next(): i32 {
-    this.index = this.frames.length % (this.frame + 1);
+    this.index = this.frames.length % (this.index + 1);
     return this.index;
   }
 
