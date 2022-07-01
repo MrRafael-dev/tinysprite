@@ -3,7 +3,7 @@
  * @name TinySprite Utils for WASM-4
  * @author Mr.Rafael
  * @license MIT
- * @version 1.3.0
+ * @version 1.3.1
  *
  * @description
  * Funções utilitárias da TinySprite (apenas gráficos e controles).
@@ -53,7 +53,7 @@ const GAMEPAD_STATE_RELEASED: u8 = 3;
  * @param {i32} min Valor mínimo.
  * @param {i32} max Valor máximo.
  *
- * @return {i32}
+ * @returns {i32}
  */
 export function range(min: i32 = 0, max: i32 = 0): i32 {
   const cmin: f64 = Math.ceil(min);
@@ -67,7 +67,7 @@ export function range(min: i32 = 0, max: i32 = 0): i32 {
  *
  * @param {u64} seed Seed para o gerador.
  *
- * @return {u64}
+ * @returns {u64}
  */
 export function prand(seed: u64): u64 {
   let next: u64 = seed as u64;
@@ -86,7 +86,7 @@ export function prand(seed: u64): u64 {
  * @param {boolean} flipY Inverte este quadro verticalmente.
  * @param {i32} rotation Ângulo de rotação (de 0º a 360º).
  *
- * @return {u16}
+ * @returns {u16}
  */
 export function cflags(flags: u32 = 0, flipX: boolean = false, flipY: boolean = false, rotation: i32 = 0): u32 {
   // Índice de rotação, alinhado em 90º.
@@ -205,7 +205,7 @@ export class Velocity {
    *
    * @param {f32} spd Velocidade de movimento.
    *
-   * @return {f32}
+   * @returns {f32}
    */
   move(spd: f32): f32 {
     this.spd += this.acc * spd;
@@ -215,7 +215,7 @@ export class Velocity {
   /**
    * Controla a aceleração desta velocidade.
    *
-   * @return {i32}
+   * @returns {i32}
    */
   update(): f32 {
     // Controlar velocidade (+spd)...
@@ -342,7 +342,7 @@ export class Rect {
    * @param {i32} x Posição X.
    * @param {i32} y Posição Y.
    *
-   * @return {Rect} Tail call.
+   * @returns {Rect} Tail call.
    */
   set(x: i32, y: i32): Rect {
     this.x = x;
@@ -357,7 +357,7 @@ export class Rect {
    * @param {i32} width Largura.
    * @param {i32} height Altura.
    *
-   * @return {Rect} Tail call.
+   * @returns {Rect} Tail call.
    */
   resize(width: i32, height: i32): Rect {
     this.width  = width;
@@ -369,7 +369,7 @@ export class Rect {
   /**
    * Retorna a posição superior-esquerda desta caixa (X e Y).
    *
-   * @return {Vec2}
+   * @returns {Vec2}
    */
   topLeft(): Vec2 {
     return new Vec2(
@@ -381,7 +381,7 @@ export class Rect {
   /**
    * Retorna a posição superior-central desta caixa (X e Y).
    *
-   * @return {Vec2}
+   * @returns {Vec2}
    */
   topCenter(): Vec2 {
     return new Vec2(
@@ -393,7 +393,7 @@ export class Rect {
   /**
    * Retorna a posição superior-direita desta caixa (X e Y).
    *
-   * @return {Vec2}
+   * @returns {Vec2}
    */
   topRight(): Vec2 {
     return new Vec2(
@@ -405,7 +405,7 @@ export class Rect {
   /**
    * Retorna a posição centro-esquerda desta caixa (X e Y).
    *
-   * @return {Vec2}
+   * @returns {Vec2}
    */
   centerLeft(): Vec2 {
     return new Vec2(
@@ -417,7 +417,7 @@ export class Rect {
   /**
    * Retorna a posição central desta caixa (X e Y).
    *
-   * @return {Vec2}
+   * @returns {Vec2}
    */
   center(): Vec2 {
     return new Vec2(
@@ -429,7 +429,7 @@ export class Rect {
   /**
    * Retorna a posição centro-direita desta caixa (X e Y).
    *
-   * @return {Vec2}
+   * @returns {Vec2}
    */
   centerRight(): Vec2 {
     return new Vec2(
@@ -441,7 +441,7 @@ export class Rect {
   /**
    * Retorna a posição inferior-esquerda desta caixa (X e Y).
    *
-   * @return {Vec2}
+   * @returns {Vec2}
    */
   bottomLeft(): Vec2 {
     return new Vec2(
@@ -453,7 +453,7 @@ export class Rect {
   /**
    * Retorna a posição inferior-central desta caixa (X e Y).
    *
-   * @return {Vec2}
+   * @returns {Vec2}
    */
   bottomCenter(): Vec2 {
     return new Vec2(
@@ -465,7 +465,7 @@ export class Rect {
   /**
    * Retorna a posição inferior-direita desta caixa (X e Y).
    *
-   * @return {Vec2}
+   * @returns {Vec2}
    */
   bottomRight(): Vec2 {
     return new Vec2(
@@ -477,10 +477,27 @@ export class Rect {
   /**
    * Indica se esta caixa está em uma posição visível da tela.
    *
-   * @return {boolean}
+   * @returns {boolean}
    */
   isOnScreen(): boolean {
     return canvas.isVisible(this.x, this.y, this.width, this.height);
+  }
+
+  /**
+   * Indica se uma posição está dentro dos limites desta caixa.
+   * 
+   * @param x {i32} Posição X.
+   * @param y {i32} Posição Y.
+   * 
+   * @returns {boolean}
+   */
+  within(x: i32, y: i32): boolean {
+    return (
+      this.x               <= x + 1 &&
+      this.x + this.width  >= x     &&
+      this.y               <= y + 1 &&
+      this.height + this.y >= y
+    );
   }
 
   /**
@@ -488,7 +505,7 @@ export class Rect {
    *
    * @param {Rect} rect Caixa de colisão.
    *
-   * @return {boolean}
+   * @returns {boolean}
    */
   intersect(rect: Rect): boolean {
     return (
@@ -509,7 +526,7 @@ export class Rect {
    * @param {i32} x Posição X.
    * @param {i32} y Posição Y.
    *
-   * @return {boolean}
+   * @returns {boolean}
    */
   intersectAt(rect: Rect, x: i32, y: i32): boolean {
     // Salvar posição atual temporariamente...
@@ -570,7 +587,7 @@ export class Canvas {
   /**
    * Atualiza a paleta de cores.
    *
-   * @return {boolean}
+   * @returns {boolean}
    */
   updatePalette(): boolean {
     // Não atualizar a paleta quando não houver a quantidade mínima de cores:
@@ -590,7 +607,7 @@ export class Canvas {
   /**
    * Atualiza as flags.
    *
-   * @return {boolean}
+   * @returns {boolean}
    */
   updateSystemFlags(): boolean {
     // Valores das flags.
@@ -610,7 +627,7 @@ export class Canvas {
    *        viewport, limpando a tela inteira. O valor padrão é `true`.
    *
    *
-   * @return {boolean}
+   * @returns {boolean}
    */
   clear(colors: u16, ignoreViewport: boolean = true): boolean {
     // Alterar ordem de cores da paleta:
@@ -646,7 +663,7 @@ export class Canvas {
    * @param {i32} width Largura.
    * @param {i32} height Altura.
    *
-   * @return {boolean}
+   * @returns {boolean}
    */
   isVisible(x: i32, y: i32, width: i32, height: i32): boolean {
     return (
@@ -662,7 +679,7 @@ export class Canvas {
    *
    * @param {i32} x Posição X.
    *
-   * @return {i32}
+   * @returns {i32}
    */
   viewX(x: i32): i32 {
     return x - this.view.x;
@@ -673,7 +690,7 @@ export class Canvas {
    *
    * @param {i32} x Posição X.
    *
-   * @return {i32}
+   * @returns {i32}
    */
   viewY(y: i32): i32 {
     return y - this.view.y;
@@ -685,7 +702,7 @@ export class Canvas {
    * @param {i32} x Posição X.
    * @param {i32} y Posição Y.
    *
-   * @return {u8} Índice de cor deste pixel (de 0x00 a 0x03).
+   * @returns {u8} Índice de cor deste pixel (de 0x00 a 0x03).
    */
   getPixel(x: i32, y: i32): u8 {
     // Ignorar pixels fora da área da tela...
@@ -718,7 +735,7 @@ export class Canvas {
    * @param {i32} y Posição Y.
    * @param {u8} color Índice de cor deste pixel (de 0x00 a 0x03).
    *
-   * @return {boolean}
+   * @returns {boolean}
    */
   setPixel(x: i32, y: i32, color: u8): boolean {
     // Ignorar pixels fora da área da tela...
@@ -963,7 +980,7 @@ export class Canvas {
    * @param {i32} y Posição Y.
    * @param {u16} colors Ordem de cores da paleta.
    *
-   * @return {boolean}
+   * @returns {boolean}
    */
   text(text: string, x: i32, y: i32, colors: u16): boolean {
     // Alterar ordem de cores da paleta:
@@ -1354,7 +1371,7 @@ export class Animation {
   /**
    * Retorna o quadro de animação atual, correspondente ao índice.
    *
-   * @return {i16}
+   * @returns {i16}
    */
   get(): i16 {
     return this.frames[this.frames.length % this.index];
@@ -1363,7 +1380,7 @@ export class Animation {
   /**
    * Avança para o próximo índice de quadro de animação.
    *
-   * @return {i32} Índice de quadro de animação atual.
+   * @returns {i32} Índice de quadro de animação atual.
    */
   next(): i32 {
     this.index = this.frames.length % (this.index + 1);
@@ -1477,7 +1494,7 @@ export class Tilemap {
    * @param {i32} y Posição Y.
    * @param {i16} index Índice do tile.
    *
-   * @return {boolean}
+   * @returns {boolean}
    */
   setTile(x: i32, y: i32, index: i16): boolean {
     // Não seguir adiante quando uma das posições passadas ultrapassar os
@@ -1505,7 +1522,7 @@ export class Tilemap {
    * @param {i32} x Posição X.
    * @param {i32} y Posição Y.
    *
-   * @return {i16}
+   * @returns {i16}
    */
   getTile(x: i32, y: i32): i16 {
     // Não seguir adiante quando uma das posições passadas ultrapassar os
@@ -1564,7 +1581,7 @@ export class GamepadButton {
    *
    * @param {boolean} pressed Indica se o botão de entrada está pressionado.
    *
-   * @return {u8}
+   * @returns {u8}
    */
   nextState(pressed: boolean): u8 {
     // Ciclo de estados quando o botão estiver pressionado.
@@ -1596,7 +1613,7 @@ export class GamepadButton {
   /**
    * Indica se este botão está inerte.
    *
-   * @return {boolean}
+   * @returns {boolean}
    */
   idle(): boolean {
     return this.state === GAMEPAD_STATE_IDLE;
@@ -1605,7 +1622,7 @@ export class GamepadButton {
   /**
    * Indica se este botão está recém-pressionado.
    *
-   * @return {boolean}
+   * @returns {boolean}
    */
   pressed(): boolean {
     return this.state === GAMEPAD_STATE_PRESSED;
@@ -1614,7 +1631,7 @@ export class GamepadButton {
   /**
    * Indica se este botão está mantido.
    *
-   * @return {boolean}
+   * @returns {boolean}
    */
   held(): boolean {
     return this.state === GAMEPAD_STATE_HELD;
@@ -1623,7 +1640,7 @@ export class GamepadButton {
   /**
    * Indica se este botão está solto.
    *
-   * @return {boolean}
+   * @returns {boolean}
    */
   released(): boolean {
     return this.state === GAMEPAD_STATE_RELEASED;
@@ -1678,7 +1695,7 @@ export class Gamepad {
   /**
    * Retorna a entrada de referência do jogador deste controle.
    *
-   * @return {usize}
+   * @returns {usize}
    */
   gamepad(): usize {
     // Porta do jogador 1...
