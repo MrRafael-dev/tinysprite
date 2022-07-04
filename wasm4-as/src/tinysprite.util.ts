@@ -3,14 +3,14 @@
  * @name TinySprite Utils for WASM-4
  * @author Mr.Rafael
  * @license MIT
- * @version 1.3.1
+ * @version 1.3.2
  *
  * @description
  * Funções utilitárias da TinySprite (apenas gráficos e controles).
  * Você pode importá-la utilizando uma das duas linhas abaixo:
  *
  * ```
- * import {Velocity, Vec2, Rect, Spritesheet, Animation, Font, Tilemap, canvas, p1, p2, p3, p4, mouse, prand, cflags, poll} from "./tinysprite";
+ * import {Velocity, Vec2, Rect, Spritesheet, Animation, Font, Tilemap, canvas, p1, p2, p3, p4, mouse, range, prand, cflags, tfreq, tdur, tvol, tflags, poll} from "./tinysprite";
  * import * as ts from "./tinysprite";
  * ```
  */
@@ -143,6 +143,57 @@ export function cflags(flags: u32 = 0, flipX: boolean = false, flipY: boolean = 
   else                    { drawFlags = rotations[rotationIndex];    }
 
   return drawFlags;
+}
+
+/**
+ * Calcula e retorna flags de frequência de áudio.
+ * 
+ * @param {i32} freq1 Frequência (1/2). De `0x0000` a `0xFFFF`.
+ * @param {i32} freq2 Frequência (2/2). De `0x0000` a `0xFFFF`.
+ * 
+ * @returns {u32}
+ */
+export function tfreq(freq1: i32 = 0, freq2: i32 = 0): u32 {
+	return freq1 | (freq2 << 16);
+}
+
+/**
+ * Calcula e retorna flags de duração de áudio.
+ * 
+ * @param {i32} attack Ataque sonoro. De `0x00` a `0xFF`.
+ * @param {i32} decay Esmaecimento sonoro. De `0x00` a `0xFF`.
+ * @param {i32} sustain Sustentação da nota. De `0x00` a `0xFF`.
+ * @param {i32} release Soltura da nota. De `0x00` a `0xFF`.
+ * 
+ * @returns {u32}
+ */
+export function tdur(attack: i32 = 0, decay: i32 = 0, sustain: i32 = 0, release: i32 = 0): u32 {
+	return (attack << 24) | (decay << 16) | sustain | (release << 8);
+}
+
+/**
+ * Calcula e retorna flags de volume de áudio.
+ * 
+ * @param {i32} peak Pico da nota. De `0` a `100`.
+ * @param {i32} volume Volume da nota. De `0` a `100`.
+ * 
+ * @returns {u32}
+ */
+export function tvol(peak: i32 = 0, volume: i32 = 0): u32 {
+	return (peak << 8) | volume;
+}
+
+/**
+ * Calcula e retorna flags de áudio.
+ * 
+ * @param {i32} channel Canal de áudio. De `0` a `3`.
+ * @param {i32} mode Modo de áudio. De `0` a `3`.
+ * @param {i32} pan Direção dos auto-falantes (esquerda/direita).
+ * 
+ * @returns {i32}
+ */
+export function tflags(channel: i32 = 0, mode: i32 = 0, pan: i32 = 0): u32 {
+	return channel | (mode << 2) | (pan << 4);
 }
 
 /**
