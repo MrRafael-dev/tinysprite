@@ -545,7 +545,7 @@ export class Rect {
    */
   bottomLeft(): Vec2 {
     return new Vec2(
-      this.y,
+      this.x,
       this.y + (this.height - 1)
     );
   }
