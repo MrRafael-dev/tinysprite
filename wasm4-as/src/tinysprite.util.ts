@@ -3,7 +3,7 @@
  * @name TinySprite Utils for WASM-4
  * @author Mr.Rafael
  * @license MIT
- * @version 1.3.2
+ * @version 1.3.3
  *
  * @description
  * Funções utilitárias da TinySprite (apenas gráficos e controles).
@@ -340,10 +340,59 @@ export class Vec2 {
    *
    * @param {i32} x Posição X.
    * @param {i32} y Posição Y.
+   * 
+   * @returns {Vec2} Tail call.
    */
-  set(x: i32, y: i32): void {
+  set(x: i32, y: i32): Vec2 {
     this.x = x;
     this.y = y;
+
+    return this;
+  }
+
+  /**
+   * Movimenta as coordenadas deste vetor em uma posição relativa.
+   * 
+   * @param {i32} x Posição X.
+   * @param {i32} y Posição Y.
+   * 
+   * @returns {Vec2} Tail call.
+   */
+  move(x: i32, y: i32): Vec2 {
+    this.x += x;
+    this.y += y;
+
+    return this;
+  }
+
+  /**
+   * Alinha as coordenadas deste vetor para representar índices de uma grade.
+   * 
+   * @param {i32} width Largura da grade.
+   * @param {i32} height Altura da grade.
+   * 
+   * @returns {Vec2} Tail call.
+   */
+  grid(width: i32, height: i32): Vec2 {
+    this.x = Math.floor(this.x / width) as i32;
+    this.y = Math.floor(this.y / height) as i32;
+
+    return this;
+  }
+
+  /**
+   * Converte índices de grade representadas por este vetor para coordenadas.
+   * 
+   * @param {i32} width Largura da grade.
+   * @param {i32} height Altura da grade.
+   * 
+   * @returns Tail call.
+   */
+  ungrid(width: i32, height: i32): Vec2 {
+    this.x = this.x * width;
+    this.y = this.y * height;
+
+    return this;
   }
 }
 
