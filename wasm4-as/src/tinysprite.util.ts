@@ -3,7 +3,7 @@
  * @name TinySprite Utils for WASM-4
  * @author Mr.Rafael
  * @license MIT
- * @version 1.3.3
+ * @version 1.3.4
  *
  * @description
  * Funções utilitárias da TinySprite (apenas gráficos e controles).
@@ -336,6 +336,15 @@ export class Vec2 {
   }
 
   /**
+   * Retorna uma representação deste objeto em texto.
+   * 
+   * @returns {string}
+   */
+  toString(): string {
+    return `${this.x.toString()},${this.y.toString()}`;
+  }
+
+  /**
    * Reposiciona as coordenadas deste vetor.
    *
    * @param {i32} x Posição X.
@@ -386,7 +395,7 @@ export class Vec2 {
    * @param {i32} width Largura da grade.
    * @param {i32} height Altura da grade.
    * 
-   * @returns Tail call.
+   * @returns {Vec2} Tail call.
    */
   ungrid(width: i32, height: i32): Vec2 {
     this.x = this.x * width;
@@ -437,6 +446,15 @@ export class Rect {
   }
 
   /**
+   * Retorna uma representação deste objeto em texto.
+   * 
+   * @returns {string}
+   */
+  toString(): string {
+    return `${this.x.toString()},${this.y.toString()};${this.width.toString()},${this.height.toString()};${this.collisionsEnabled? 1: 0}`;
+  }
+
+  /**
    * Reposiciona as coordenadas desta caixa.
    *
    * @param {i32} x Posição X.
@@ -447,6 +465,51 @@ export class Rect {
   set(x: i32, y: i32): Rect {
     this.x = x;
     this.y = y;
+
+    return this;
+  }
+
+  /**
+   * Movimenta as coordenadas desta caixa em uma posição relativa.
+   * 
+   * @param {i32} x Posição X.
+   * @param {i32} y Posição Y.
+   * 
+   * @returns {Rect} Tail call.
+   */
+  move(x: i32, y: i32): Rect {
+    this.x += x;
+    this.y += y;
+
+    return this;
+  }
+
+  /**
+   * Alinha as coordenadas desta caixa para representar índices de uma grade.
+   * 
+   * @param {i32} width Largura da grade.
+   * @param {i32} height Altura da grade.
+   * 
+   * @returns {Rect} Tail call.
+   */
+  grid(width: i32, height: i32): Rect {
+    this.x = Math.floor(this.x / width) as i32;
+    this.y = Math.floor(this.y / height) as i32;
+
+    return this;
+  }
+
+  /**
+   * Converte índices de grade representadas por esta caixa para coordenadas.
+   * 
+   * @param {i32} width Largura da grade.
+   * @param {i32} height Altura da grade.
+   * 
+   * @returns {Rect} Tail call.
+   */
+  ungrid(width: i32, height: i32): Rect {
+    this.x = this.x * width;
+    this.y = this.y * height;
 
     return this;
   }
