@@ -3,7 +3,7 @@
  * @name TinySprite Utils for WASM-4
  * @author Mr.Rafael
  * @license MIT
- * @version 1.3.4
+ * @version 1.3.5
  *
  * @description
  * Funções utilitárias da TinySprite (apenas gráficos e controles).
@@ -724,7 +724,7 @@ export class Canvas {
   view: Rect;
 
   /** Paleta de cores. */
-  palette: i32[];
+  palette: Int32Array;
 
   /** Quando "true", mantém a tela "suja". */
   preserveFrameBuffer: boolean;
@@ -737,14 +737,39 @@ export class Canvas {
    */
   constructor() {
     this.view = new Rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
-    this.palette = [
-      0xe0f8cf,
-      0x86c06c,
-      0x306850,
-      0x071821
-    ];
+    this.palette = new Int32Array(4);
     this.preserveFrameBuffer = false;
     this.hideGamepadOverlay  = false;
+
+    this.resetPalette();
+  }
+
+  /**
+   * Redefine a paleta de cores de volta para a padrão.
+   * 
+   * @returns {boolean}
+   */
+  resetPalette(): boolean {
+    return this.setPalette(0xE0F8CF, 0x86C06C, 0x306850, 0x071821);
+  }
+
+  /**
+   * Define uma nova paleta de cores.
+   * 
+   * @param {i32} color1 Cor da paleta (1/4).
+   * @param {i32} color2 Cor da paleta (2/4).
+   * @param {i32} color3 Cor da paleta (3/4).
+   * @param {i32} color4 Cor da paleta (4/4).
+   * 
+   * @returns {boolean}
+   */
+  setPalette(color1: i32, color2: i32, color3: i32, color4: i32): boolean {
+    this.palette[0] = color1;
+    this.palette[1] = color2;
+    this.palette[2] = color3;
+    this.palette[3] = color4;
+
+    return true;
   }
 
   /**
@@ -753,11 +778,6 @@ export class Canvas {
    * @returns {boolean}
    */
   updatePalette(): boolean {
-    // Não atualizar a paleta quando não houver a quantidade mínima de cores:
-    if(this.palette.length < 4) {
-      return false;
-    }
-
     // Atualizar paleta de cores...
     store<u32>(w4.PALETTE, this.palette[0] as u32, 0 * sizeof<u32>());
     store<u32>(w4.PALETTE, this.palette[1] as u32, 1 * sizeof<u32>());
