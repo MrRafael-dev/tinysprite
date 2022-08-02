@@ -3,7 +3,7 @@
  * @name TinySprite Utils for WASM-4
  * @author Mr.Rafael
  * @license MIT
- * @version 1.3.5
+ * @version 1.3.6
  *
  * @description
  * Funções utilitárias da TinySprite (apenas gráficos e controles).
@@ -99,39 +99,35 @@ export function cflags(flags: u32 = 0, flipX: boolean = false, flipY: boolean = 
 
   // Look-Up Table de rotações (original).
   // Ângulos: 0º, 90º, 180º e 270º, respectivamente.
-  const rotations: u32[] = [
-    flags,
-    flags | w4.BLIT_FLIP_X | w4.BLIT_FLIP_Y | w4.BLIT_ROTATE,
-    flags | w4.BLIT_FLIP_X | w4.BLIT_FLIP_Y,
-    flags | w4.BLIT_ROTATE
-  ];
+  const rotations: Uint32Array = new Uint32Array(4);
+        rotations[0] = flags;
+        rotations[1] = flags | w4.BLIT_FLIP_X | w4.BLIT_FLIP_Y | w4.BLIT_ROTATE;
+        rotations[2] = flags | w4.BLIT_FLIP_X | w4.BLIT_FLIP_Y;
+        rotations[3] = flags | w4.BLIT_ROTATE;
 
   // Look-Up Table de rotações (X invertido).
   // Ângulos: 0º, 90º, 180º e 270º, respectivamente.
-  const rotationsFX: u32[] = [
-    flags | w4.BLIT_FLIP_X,
-    flags | w4.BLIT_FLIP_X | w4.BLIT_ROTATE,
-    flags | w4.BLIT_FLIP_Y,
-    flags | w4.BLIT_FLIP_Y | w4.BLIT_ROTATE
-  ];
+  const rotationsFX: Uint32Array = new Uint32Array(4);
+        rotationsFX[0] = flags | w4.BLIT_FLIP_X;
+        rotationsFX[1] = flags | w4.BLIT_FLIP_X | w4.BLIT_ROTATE;
+        rotationsFX[2] = flags | w4.BLIT_FLIP_Y;
+        rotationsFX[3] = flags | w4.BLIT_FLIP_Y | w4.BLIT_ROTATE;
 
   // Look-Up Table de rotações (Y invertido).
   // Ângulos: 0º, 90º, 180º e 270º, respectivamente.
-  const rotationsFY: u32[] = [
-    flags | w4.BLIT_FLIP_Y,
-    flags | w4.BLIT_FLIP_Y | w4.BLIT_ROTATE,
-    flags | w4.BLIT_FLIP_X,
-    flags | w4.BLIT_FLIP_X | w4.BLIT_ROTATE
-  ];
+  const rotationsFY: Uint32Array = new Uint32Array(4);
+        rotationsFY[0] = flags | w4.BLIT_FLIP_Y;
+        rotationsFY[1] = flags | w4.BLIT_FLIP_Y | w4.BLIT_ROTATE;
+        rotationsFY[2] = flags | w4.BLIT_FLIP_X;
+        rotationsFY[3] = flags | w4.BLIT_FLIP_X | w4.BLIT_ROTATE;
 
   // Look-Up Table de rotações (X e Y invertidos).
   // Ângulos: 0º, 90º, 180º e 270º, respectivamente.
-  const rotationsFXY: u32[] = [
-    flags | w4.BLIT_FLIP_X | w4.BLIT_FLIP_Y,
-    flags | w4.BLIT_ROTATE,
-    flags,
-    flags | w4.BLIT_FLIP_X | w4.BLIT_FLIP_Y | w4.BLIT_ROTATE
-  ];
+  const rotationsFXY: Uint32Array = new Uint32Array(4);
+        rotationsFXY[0] = flags | w4.BLIT_FLIP_X | w4.BLIT_FLIP_Y;
+        rotationsFXY[1] = flags | w4.BLIT_ROTATE;
+        rotationsFXY[2] = flags;
+        rotationsFXY[3] = flags | w4.BLIT_FLIP_X | w4.BLIT_FLIP_Y | w4.BLIT_ROTATE;
 
   // Flags de desenho.
   let drawFlags: u32 = 0;
@@ -864,6 +860,7 @@ export class Canvas {
    *
    * @returns {i32}
    */
+  @inline
   viewX(x: i32): i32 {
     return x - this.view.x;
   }
@@ -875,6 +872,7 @@ export class Canvas {
    *
    * @returns {i32}
    */
+  @inline
   viewY(y: i32): i32 {
     return y - this.view.y;
   }
@@ -901,12 +899,11 @@ export class Canvas {
     const pixelData: u8 = load<u8>(w4.FRAMEBUFFER + offset);
 
     // Separar byte em bits 2bpp.
-    const pixels: u8[] = [
-      (pixelData & 0b00000011),
-      (pixelData & 0b00001100) >> 2,
-      (pixelData & 0b00110000) >> 4,
-      (pixelData & 0b11000000) >> 6
-    ];
+    const pixels: Uint8Array = new Uint8Array(4);
+          pixels[0] = (pixelData & 0b00000011);
+          pixels[1] = (pixelData & 0b00001100) >> 2;
+          pixels[2] = (pixelData & 0b00110000) >> 4;
+          pixels[3] = (pixelData & 0b11000000) >> 6;
 
     return pixels[index];
   }
@@ -934,12 +931,11 @@ export class Canvas {
     let pixelData: u8 = load<u8>(w4.FRAMEBUFFER + offset);
 
     // Separar byte em bits 2bpp.
-    let pixels: u8[] = [
-      (pixelData & 0b00000011),
-      (pixelData & 0b00001100) >> 2,
-      (pixelData & 0b00110000) >> 4,
-      (pixelData & 0b11000000) >> 6
-    ];
+    let pixels: Uint8Array = new Uint8Array(4);
+        pixels[0] = (pixelData & 0b00000011);
+        pixels[1] = (pixelData & 0b00001100) >> 2;
+        pixels[2] = (pixelData & 0b00110000) >> 4;
+        pixels[3] = (pixelData & 0b11000000) >> 6;
 
     // Alterar índice do pixel especificado...
     pixels[index] = color % 4;
@@ -1768,20 +1764,18 @@ export class GamepadButton {
    */
   nextState(pressed: boolean): u8 {
     // Ciclo de estados quando o botão estiver pressionado.
-    const whenPressed: u8[] = [
-      GAMEPAD_STATE_PRESSED, // Quando inerte.
-      GAMEPAD_STATE_HELD,    // Quando recém-pressionado.
-      GAMEPAD_STATE_HELD,    // Quando mantido.
-      GAMEPAD_STATE_PRESSED  // Quando recém-solto.
-    ];
+    const whenPressed: Uint8Array = new Uint8Array(4);
+          whenPressed[0] = GAMEPAD_STATE_PRESSED; // Quando inerte.
+          whenPressed[1] = GAMEPAD_STATE_HELD;    // Quando recém-pressionado.
+          whenPressed[2] = GAMEPAD_STATE_HELD;    // Quando mantido.
+          whenPressed[3] = GAMEPAD_STATE_PRESSED; // Quando recém-solto.
 
     // Ciclo de estados quando o botão estiver solto.
-    const whenReleased: u8[] = [
-      GAMEPAD_STATE_IDLE,     // Quando inerte.
-      GAMEPAD_STATE_RELEASED, // Quando recém-pressionado.
-      GAMEPAD_STATE_RELEASED, // Quando mantido.
-      GAMEPAD_STATE_IDLE      // Quando recém-solto.
-    ];
+    const whenReleased: Uint8Array = new Uint8Array(4);
+          whenReleased[0] = GAMEPAD_STATE_IDLE;     // Quando inerte.
+          whenReleased[1] = GAMEPAD_STATE_RELEASED; // Quando recém-pressionado.
+          whenReleased[2] = GAMEPAD_STATE_RELEASED; // Quando mantido.
+          whenReleased[3] = GAMEPAD_STATE_IDLE;     // Quando recém-solto.
 
     if(pressed) {
       this.state = whenPressed[this.state];
