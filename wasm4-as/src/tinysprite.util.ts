@@ -10,7 +10,7 @@
  * Você pode importá-la utilizando uma das duas linhas abaixo:
  *
  * ```
- * import {Velocity, Vec2, Rect, Spritesheet, Animation, Font, Tilemap, canvas, p1, p2, p3, p4, mouse, range, prand, cflags, tfreq, tdur, tvol, tflags, poll} from "./tinysprite";
+ * import {Track, Velocity, Vec2, Rect, Spritesheet, Animation, Font, Tilemap, canvas, p1, p2, p3, p4, mouse, range, prand, cflags, tfreq, tdur, tvol, tflags, poll} from "./tinysprite";
  * import * as ts from "./tinysprite";
  * ```
  */
