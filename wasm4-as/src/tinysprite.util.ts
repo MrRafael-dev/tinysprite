@@ -308,7 +308,7 @@ export class Track {
     /** Período de espera. usado para pausar o tempo de execução. */
     wait: u16;
 
-    /** Indica se uma instrução NOP foi interpretada. */
+    /** Indica se uma instrução `NOP` foi interpretada. */
     toNop: boolean;
 
     /** Indica se foi solicitado o encerramento da execução. */
