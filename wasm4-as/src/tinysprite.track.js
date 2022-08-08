@@ -2,7 +2,7 @@
  * @name TinySprite Track Script for WASM-4
  * @author Mr.Rafael
  * @license MIT
- * @version 1.0.0
+ * @version 1.0.1
  *
  * @description
  * Função que ajudam a entender e criar trilhas sonoras para a classe `Track`.
@@ -31,7 +31,7 @@ const Opcode = {
   PLAY       : 0xEE,
 };
 
-/** Bytecode resultante. */
+/** Bytecode resultante. Exporte-o como `memory.data<u8>([ ... ]);` */
 const bytecode = [];
 
 /**
