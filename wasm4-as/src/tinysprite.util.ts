@@ -3,7 +3,7 @@
  * @name TinySprite Utils for WASM-4
  * @author Mr.Rafael
  * @license MIT
- * @version 1.3.6
+ * @version 1.3.7
  *
  * @description
  * Funções utilitárias da TinySprite (apenas gráficos e controles).
@@ -46,6 +46,63 @@ const GAMEPAD_STATE_HELD: u8 = 2;
 
 /** Estado de controle recém-solto. */
 const GAMEPAD_STATE_RELEASED: u8 = 3;
+
+/** Opcode: `nop() => toNop` */
+const TRACK_OPCODE_NOP: u8 = 0x00;
+
+/** Opcode: `halt()` */
+const TRACK_OPCODE_HALT: u8 = 0xFF;
+
+/** Opcode: `jump(u16/little-endian)` */
+const TRACK_OPCODE_JUMP: u8 = 0xFE;
+
+/** Opcode: `ifjump(u16/little-endian)` */
+const TRACK_OPCODE_IFJUMP: u8 = 0xFD;
+
+/** Opcode: `ifnotjump(u16/little-endian)` */
+const TRACK_OPCODE_IFNOTJUMP: u8 = 0xFC;
+
+/** Opcode: `syscall(u16/little-endian) => toSyscall` */
+const TRACK_OPCODE_SYSCALL: u8 = 0xFB;
+
+/** Opcode: `set(u8)` */
+const TRACK_OPCODE_SET: u8 = 0xFA;
+
+/** Opcode: `add(u8)` */
+const TRACK_OPCODE_ADD: u8 = 0xF9;
+
+/** Opcode: `sub(u8)` */
+const TRACK_OPCODE_SUB: u8 = 0xF8;
+
+/** Opcode: `equal(u8)` */
+const TRACK_OPCODE_EQUAL: u8 = 0xF7;
+
+/** Opcode: `lt(u8)` */
+const TRACK_OPCODE_LT: u8 = 0xF6;
+
+/** Opcode: `gt(u8)` */
+const TRACK_OPCODE_GT: u8 = 0xF5;
+
+/** Opcode: `ltequal(u8)` */
+const TRACK_OPCODE_LTEQUAL: u8 = 0xF4;
+
+/** Opcode: `gtequal(u8)` */
+const TRACK_OPCODE_GTEQUAL: u8 = 0xF3;
+
+/** Opcode: `ticks(u8)` */
+const TRACK_OPCODE_TICKS: u8 = 0xF2;
+
+/** Opcode: `wait(u8)` */
+const TRACK_OPCODE_WAIT: u8 = 0xF1;
+
+/** Opcode: `wait16(u16/little-endian)` */
+const TRACK_OPCODE_WAIT16: u8 = 0xF0;
+
+/** Opcode: `instrument(u8)` */
+const TRACK_OPCODE_INSTRUMENT: u8 = 0xEF;
+
+/** Opcode: `play(u8)` */
+const TRACK_OPCODE_PLAY: u8 = 0xEE;
 
 /**
  * Sorteia um número aleatório entre dois valores.
@@ -213,6 +270,287 @@ export function poll(): void {
 }
 
 //#endregion </misc.ts>
+//#region <track.ts>
+/**
+ * @class Track
+ * 
+ * Representa uma trilha sonora, que funciona a partir de uma série de eventos
+ * controlados por opcodes.
+ */
+export class Track {
+    /** Ponteiro de referência. */
+    data: usize;
+    
+    /** Cursor responsável por coletar as instruções. */
+    cursor: u16;
+
+    /** Contador interno de ticks. Pode ser controlado com `wait`. */
+    counter: u8;
+
+    /** Registrador único. Usado para operações simples. */
+    register: u8;
+
+    /** Acumulador único. Salva comparações feitas no registrador. */
+    accumulator: boolean;
+
+    /** Índice do instrumento selecionado. */
+    instrument: u8;
+
+    /** Nota do instrumento solicitada para tocar. */
+    note: u8;
+
+    /** Código de *syscall*. Usado para se comunicar externamente. */
+    syscall: u16;
+
+    /** Atraso de ticks por quadro. A execução para quando igual a `0xFF`. */
+    ticks: u8;
+
+    /** Período de espera. usado para pausar o tempo de execução. */
+    wait: u16;
+
+    /** Indica se uma instrução NOP foi interpretada. */
+    toNop: boolean;
+
+    /** Indica se foi solicitado o encerramento da execução. */
+    toHalt: boolean;
+
+    /** Indica se foi solicitada uma *syscall*. */
+    toSyscall: boolean;
+
+    /** Indica se foi solicitado o toque da nota. */
+    toPlay: boolean;
+
+    /**
+     * @constructor
+     * 
+     * @param {usize} data Ponteiro de referência.
+     */
+    constructor(data: usize) {
+        this.data    = data;
+        this.cursor  = 0;
+        this.counter = 0;
+
+        this.register    = 0;
+        this.accumulator = false;
+        this.instrument  = 0;
+        this.note        = 0;
+        this.syscall     = 0;
+        this.ticks       = 0;
+        this.wait        = 0;
+
+        this.toNop     = false;
+        this.toHalt    = false;
+        this.toSyscall = false;
+        this.toPlay    = false;
+    }
+
+    /**
+     * @event update
+     * Evento de *update* para esta trilha sonora.
+     * 
+     * @returns 
+     */
+    update(): void {
+        // Este valor poderão ser alterados novamente
+        // até o encerramento da função...
+        this.toNop     = false;
+        this.toSyscall = false;
+        this.toPlay    = false;
+        
+        // Não executar quando o encerramento tiver sido solicitado...
+        if(this.toHalt) {
+            return;
+        }
+
+        // A taxa de tamanho `255` (`0xFF`) pausa a música...
+        if(this.ticks === 0xFF) {
+            this.ticks = 0xFF;
+            return;
+        }
+
+        // Não executar até sincronizar com a taxa de ticks por ciclo...
+        if(this.counter > 0) {
+            this.counter -= 1;
+            return;
+        }
+
+        // Redefinir taxa de ticks:
+        this.counter = this.ticks;
+
+        // Não executar enquanto estiver em um período de espera...
+        if(this.wait > 0) {
+            this.wait -= 1;
+            return;
+        }
+
+        // Executar código (com recursão de até 255 loops)...
+        for(let index: u8 = 0; index < 255; index += 1) {
+            // Offset e opcode da instrução a ser executada.
+            const offset: usize  = this.data + (this.cursor as usize);
+            const opcode: u8 = load<u8>(offset);
+
+            // Operação vazia.
+            if(opcode === TRACK_OPCODE_NOP) {
+                this.toNop = true;
+                this.cursor += 1;
+                break;
+            }
+
+            // Solicita o encerramento da execução.
+            if(opcode === TRACK_OPCODE_HALT) {
+                this.toHalt = true;
+                break;
+            }
+
+            // Salta para um outro offset.
+            if(opcode === TRACK_OPCODE_JUMP) {
+                this.cursor = load<u16>(offset + 1);
+                continue;
+            }
+
+            // Salta para um outro offset, quando o valor do acumulador
+            // é igual a `true`.
+            if(opcode === TRACK_OPCODE_IFJUMP) {
+                if(this.accumulator === true) {
+                    this.cursor = load<u16>(offset + 1);
+                    continue;
+                }
+                
+                this.cursor += 2;
+                break;
+            }
+
+            // Salta para um outro offset, quando o valor do acumulador
+            // é igual a `false`.
+            if(opcode === TRACK_OPCODE_IFNOTJUMP) {
+                if(this.accumulator === false) {
+                    this.cursor = load<u16>(offset + 1);
+                    continue;
+                }
+                
+                this.cursor += 2;
+                break;
+            }
+
+            // Solicita a execução de uma syscall.
+            if(opcode === TRACK_OPCODE_SYSCALL) {
+                this.syscall = load<u16>(offset + 1);
+                this.toSyscall = true;
+                this.cursor += 3;
+
+                break;
+            }
+
+            // Define um valor para o registrador.
+            if(opcode === TRACK_OPCODE_SET) {
+                this.register = load<u8>(offset + 1);
+                this.cursor += 2;
+                continue;
+            }
+
+            // Adiciona um valor para o registrador.
+            if(opcode === TRACK_OPCODE_ADD) {
+                this.register += load<u8>(offset + 1);
+                this.cursor += 2;
+                continue;
+            }
+
+            // Subtrai um valor do registrador.
+            if(opcode === TRACK_OPCODE_SUB) {
+                this.register -= load<u8>(offset + 1);
+                this.cursor += 2;
+                continue;
+            }
+
+            // Compara se o registrador é igual ao valor.
+            if(opcode === TRACK_OPCODE_EQUAL) {
+                const value: u8 = load<u8>(offset + 1);
+                this.accumulator = this.register === value;
+                this.cursor += 2;
+                continue;
+            }
+
+            // Compara se o registrador é menor que o valor.
+            if(opcode === TRACK_OPCODE_LT) {
+                const value: u8 = load<u8>(offset + 1);
+                this.accumulator = this.register < value;
+                this.cursor += 2;
+                continue;
+            }
+
+            // Compara se o registrador é maior que o valor.
+            if(opcode === TRACK_OPCODE_GT) {
+                const value: u8 = load<u8>(offset + 1);
+                this.accumulator = this.register > value;
+                this.cursor += 2;
+                continue;
+            }
+
+            // Compara se o registrador é menor ou igual que o valor.
+            if(opcode === TRACK_OPCODE_LTEQUAL) {
+                const value: u8 = load<u8>(offset + 1);
+                this.accumulator = this.register <= value;
+                this.cursor += 2;
+                continue;
+            }
+
+            // Compara se o registrador é maior ou igual que o valor.
+            if(opcode === TRACK_OPCODE_GTEQUAL) {
+                const value: u8 = load<u8>(offset + 1);
+                this.accumulator = this.register >= value;
+                this.cursor += 2;
+                continue;
+            }
+
+            // Define uma taxa de ticks de execução.
+            if(opcode === TRACK_OPCODE_TICKS) {
+                this.ticks = load<u8>(offset + 1);
+                this.cursor += 2;
+                continue;
+            }
+
+            // Define um período de espera até a próxima instrução.
+            if(opcode === TRACK_OPCODE_WAIT) {
+                this.wait = (load<u8>(offset + 1) as u16);
+                this.cursor += 2;
+                break;
+            }
+
+            // Define um período de espera até a próxima instrução (16-bits).
+            if(opcode === TRACK_OPCODE_WAIT16) {
+                this.wait = load<u16>(offset + 1);
+                this.cursor += 3;
+                break;
+            }
+
+            // Define um índice de instrumento para uso.
+            if(opcode === TRACK_OPCODE_INSTRUMENT) {
+                this.instrument = load<u8>(offset + 1);
+                this.cursor += 2;
+                continue;
+            }
+
+            // Solicita o toque de uma nota do instrumento.
+            if(opcode === TRACK_OPCODE_PLAY) {
+                this.note = load<u8>(offset + 1);
+                this.toPlay = true;
+                this.cursor += 2;
+
+                break;
+            }
+            
+            // Quando um opcode não se associa a uma determinada instrução, ele
+            // será considerado uma nota:
+            this.note = load<u8>(offset);
+            this.toPlay = true;
+            this.cursor += 1;
+            
+            break;
+        }
+    }
+}
+
+//#endregion </track.ts>
 //#region <velocity.ts>
 /**
  * @class Velocity
