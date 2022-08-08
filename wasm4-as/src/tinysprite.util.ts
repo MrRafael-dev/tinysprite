@@ -399,6 +399,7 @@ export class Track {
             // Solicita o encerramento da execução.
             if(opcode === TRACK_OPCODE_HALT) {
                 this.toHalt = true;
+                this.cursor += 1;
                 break;
             }
 
