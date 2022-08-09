@@ -2,7 +2,7 @@
  * @name TinySprite Track Script for WASM-4
  * @author Mr.Rafael
  * @license MIT
- * @version 1.0.1
+ * @version 1.0.2
  *
  * @description
  * Função que ajudam a entender e criar trilhas sonoras para a classe `Track`.
@@ -25,10 +25,11 @@ const Opcode = {
   LTEQUAL    : 0xF4,
   GTEQUAL    : 0xF3,
   TICKS      : 0xF2,
-  WAIT       : 0xF1,
-  WAIT16     : 0xF0,
-  INSTRUMENT : 0xEF,
-  PLAY       : 0xEE,
+  TICKS16    : 0xF1,
+  WAIT       : 0xF0,
+  WAIT16     : 0xEF,
+  INSTRUMENT : 0xEE,
+  PLAY       : 0xED,
 };
 
 /** Bytecode resultante. Exporte-o como `memory.data<u8>([ ... ]);` */
@@ -222,12 +223,22 @@ function gtequal(value) {
 
 /**
  * @opcode TICKS
- * Define uma taxa de ticks de execução. Pausa a música quando igual a `0xFF`.
+ * Define uma taxa de ticks de execução.
  * 
  * @param {u8} value Taxa de ticks.
  */
 function ticks(value) {
 	bytecode.push(Opcode.TICKS, u8(value));
+}
+
+/**
+ * @opcode TICKS
+ * Define uma taxa de ticks de execução (16-bits).
+ * 
+ * @param {u16} value Taxa de ticks.
+ */
+ function ticks16(value) {
+	bytecode.push(Opcode.TICKS16, u16(value));
 }
 
 /**
@@ -268,4 +279,36 @@ function instrument(value) {
  */
 function play(value) {
 	bytecode.push(Opcode.INSTRUMENT, u8(value));
+}
+
+if(globalThis.hasOwnProperty("module")) {
+	/** Exportação de módulos (Node.js). */
+	module.exports = {
+		Opcode, 
+		bytecode, 
+		u8, 
+		u16,
+		len, 
+		db, 
+		nop, 
+		halt, 
+		jump, 
+		ifjump, 
+		ifnotjump, 
+		syscall, 
+		set, 
+		add, 
+		sub,
+		equal, 
+		lt, 
+		gt, 
+		ltequal, 
+		gtequal, 
+		ticks, 
+		ticks16, 
+		wait, 
+		wait16, 
+		instrument, 
+		play
+	};
 }
