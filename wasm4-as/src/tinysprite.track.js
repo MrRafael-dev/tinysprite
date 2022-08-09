@@ -46,6 +46,13 @@ function u8(value) {
 	return Math.abs(value) % 256;
 }
 
+function u16hilo(value) {
+  const hi = (Math.abs(value) % 65536) >> 8;
+	const lo = (Math.abs(value) % 65536) - hi;
+
+  return [hi, lo];
+}
+
 /**
  * Representa um valor de 16-bits.
  * Os valores são convertidos para uma ordem diferente.
@@ -143,7 +150,8 @@ function halt() {
  * @param {u16} value Offset.
  */
 function jump(value) {
-	bytecode.push(Opcode.JUMP, u16(value));
+  const bytes = u16hilo(value);
+	bytecode.push(Opcode.JUMP, bytes[1], bytes[0]);
 }
 
 /**
@@ -154,7 +162,8 @@ function jump(value) {
  * @param {u16} value Offset.
  */
 function ifjump(value) {
-	bytecode.push(Opcode.IFJUMP, u16(value));
+  const bytes = u16hilo(value);
+	bytecode.push(Opcode.IFJUMP, bytes[1], bytes[0]);
 }
 
 /**
@@ -165,7 +174,8 @@ function ifjump(value) {
  * @param {u16} value Offset.
  */
 function ifnotjump(value) {
-	bytecode.push(Opcode.IFNOTJUMP, u16(value));
+  const bytes = u16hilo(value);
+	bytecode.push(Opcode.IFNOTJUMP, bytes[1], bytes[0]);
 }
 
 /**
@@ -175,7 +185,8 @@ function ifnotjump(value) {
  * @param {u16} value Código da *syscall*.
  */
 function syscall(value) {
-	bytecode.push(Opcode.SYSCALL, u16(value));
+  const bytes = u16hilo(value);
+	bytecode.push(Opcode.SYSCALL, bytes[1], bytes[0]);
 }
 
 /**
@@ -212,50 +223,50 @@ function sub(value) {
  * @opcode EQUAL
  * Compara se o registrador é igual ao valor.
  * 
- * @param {u16} value Valor.
+ * @param {u8} value Valor.
  */
 function equal(value) {
-	bytecode.push(Opcode.EQUAL, u16(value));
+	bytecode.push(Opcode.EQUAL, u8(value));
 }
 
 /**
  * @opcode LT
  * Compara se o registrador é menor que o valor.
  * 
- * @param {u16} value Valor.
+ * @param {u8} value Valor.
  */
 function lt(value) {
-	bytecode.push(Opcode.LT, u16(value));
+	bytecode.push(Opcode.LT, u8(value));
 }
 
 /**
  * @opcode GT
  * Compara se o registrador é maior que o valor.
  * 
- * @param {u16} value Valor.
+ * @param {u8} value Valor.
  */
 function gt(value) {
-	bytecode.push(Opcode.GT, u16(value));
+	bytecode.push(Opcode.GT, u8(value));
 }
 
 /**
  * @opcode LTEQUAL
  * Compara se o registrador é menor ou igual ao valor.
  * 
- * @param {u16} value Valor.
+ * @param {u8} value Valor.
  */
 function ltequal(value) {
-	bytecode.push(Opcode.LTEQUAL, u16(value));
+	bytecode.push(Opcode.LTEQUAL, u8(value));
 }
 
 /**
  * @opcode GTEQUAL
  * Compara se o registrador é maior ou igual ao valor.
  * 
- * @param {u16} value Valor.
+ * @param {u8} value Valor.
  */
 function gtequal(value) {
-	bytecode.push(Opcode.GTEQUAL, u16(value));
+	bytecode.push(Opcode.GTEQUAL, u8(value));
 }
 
 /**
@@ -275,7 +286,8 @@ function ticks(value) {
  * @param {u16} value Taxa de ticks.
  */
  function ticks16(value) {
-	bytecode.push(Opcode.TICKS16, u16(value));
+  const bytes = u16hilo(value);
+	bytecode.push(Opcode.TICKS16, bytes[1], bytes[0]);
 }
 
 /**
@@ -295,7 +307,8 @@ function wait(value) {
  * @param {u16} value Índice do instrumento.
  */
 function wait16(value) {
-	bytecode.push(Opcode.WAIT16, u16(value));
+  const bytes = u16hilo(value);
+	bytecode.push(Opcode.WAIT16, bytes[1], bytes[0]);
 }
 
 /**
@@ -476,7 +489,7 @@ class Track {
 		  this.cursor += 2;
 		  break;
 		}
-		
+
 		// Salta para um outro offset, quando o valor do acumulador
 		// é igual a `false`.
 		if(opcode === Opcode.IFNOTJUMP) {
