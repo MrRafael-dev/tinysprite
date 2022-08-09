@@ -46,6 +46,13 @@ function u8(value) {
 	return Math.abs(value) % 256;
 }
 
+/**
+ * Separa um valor de 16-bits em uma array com os 2 bytes separados.
+ * 
+ * @param {u16} value Valor a ser separado.
+ * 
+ * @returns {u8[]}
+ */
 function u16hilo(value) {
   const hi = (Math.abs(value) % 65536) >> 8;
 	const lo = (Math.abs(value) % 65536) - hi;
