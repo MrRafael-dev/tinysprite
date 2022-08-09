@@ -288,7 +288,7 @@ export class Track {
   cursor: u16;
 
   /** Contador interno de ticks. Pode ser controlado com `wait`. */
-  counter: u8;
+  counter: u16;
 
   /** Registrador único. Usado para operações simples. */
   register: u8;
