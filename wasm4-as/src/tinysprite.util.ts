@@ -381,19 +381,20 @@ export class Track {
       return;
     }
 
-    // Escutar syscall...
-    if(this.sentSyscall) {
-      this.syscall(this.syscode);
-    }
-
-    // Escutar notas...
-    if(this.sentPlay) {
-      this.play(this.note);
-    }
-
     // Não executar até sincronizar com a taxa de ticks por ciclo...
     if(this.counter > 0) {
       this.counter -= 1;
+
+      // Escutar syscall...
+      if(this.sentSyscall) {
+        this.syscall(this.syscode);
+      }
+
+      // Escutar notas...
+      if(this.sentPlay) {
+        this.play(this.note);
+      }
+
       return;
     }
 
