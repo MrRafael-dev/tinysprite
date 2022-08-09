@@ -3,7 +3,7 @@
  * @name TinySprite Utils for WASM-4
  * @author Mr.Rafael
  * @license MIT
- * @version 1.3.7
+ * @version 1.3.8
  *
  * @description
  * Funções utilitárias da TinySprite (apenas gráficos e controles).
@@ -47,10 +47,10 @@ const GAMEPAD_STATE_HELD: u8 = 2;
 /** Estado de controle recém-solto. */
 const GAMEPAD_STATE_RELEASED: u8 = 3;
 
-/** Opcode: `nop() => toNop` */
+/** Opcode: `nop()` */
 const TRACK_OPCODE_NOP: u8 = 0x00;
 
-/** Opcode: `halt()` */
+/** Opcode: `halt() => sentHalt` */
 const TRACK_OPCODE_HALT: u8 = 0xFF;
 
 /** Opcode: `jump(u16/little-endian)` */
@@ -62,7 +62,7 @@ const TRACK_OPCODE_IFJUMP: u8 = 0xFD;
 /** Opcode: `ifnotjump(u16/little-endian)` */
 const TRACK_OPCODE_IFNOTJUMP: u8 = 0xFC;
 
-/** Opcode: `syscall(u16/little-endian) => toSyscall` */
+/** Opcode: `syscall(u16/little-endian) => sentSyscall` */
 const TRACK_OPCODE_SYSCALL: u8 = 0xFB;
 
 /** Opcode: `set(u8)` */
@@ -92,17 +92,20 @@ const TRACK_OPCODE_GTEQUAL: u8 = 0xF3;
 /** Opcode: `ticks(u8)` */
 const TRACK_OPCODE_TICKS: u8 = 0xF2;
 
+/** Opcode: `ticks(u16/little-endian)` */
+const TRACK_OPCODE_TICKS16: u8 = 0xF1;
+
 /** Opcode: `wait(u8)` */
-const TRACK_OPCODE_WAIT: u8 = 0xF1;
+const TRACK_OPCODE_WAIT: u8 = 0xF0;
 
 /** Opcode: `wait16(u16/little-endian)` */
-const TRACK_OPCODE_WAIT16: u8 = 0xF0;
+const TRACK_OPCODE_WAIT16: u8 = 0xEF;
 
 /** Opcode: `instrument(u8)` */
-const TRACK_OPCODE_INSTRUMENT: u8 = 0xEF;
+const TRACK_OPCODE_INSTRUMENT: u8 = 0xEE;
 
-/** Opcode: `play(u8)` */
-const TRACK_OPCODE_PLAY: u8 = 0xEE;
+/** Opcode: `play(u8) => sentPlay` */
+const TRACK_OPCODE_PLAY: u8 = 0xED;
 
 /**
  * Sorteia um número aleatório entre dois valores.
@@ -300,25 +303,22 @@ export class Track {
   note: u8;
 
   /** Código de *syscall*. Usado para se comunicar externamente. */
-  syscall: u16;
+  syscode: u16;
 
-  /** Atraso de ticks por quadro. A execução para quando igual a `0xFF`. */
-  ticks: u8;
+  /** Atraso de ticks por quadro. */
+  ticks: u16;
 
   /** Período de espera. usado para pausar o tempo de execução. */
   wait: u16;
 
-  /** Indica se uma instrução `NOP` foi interpretada. */
-  toNop: boolean;
-
   /** Indica se foi solicitado o encerramento da execução. */
-  toHalt: boolean;
+  sentHalt: boolean;
 
   /** Indica se foi solicitada uma *syscall*. */
-  toSyscall: boolean;
+  sentSyscall: boolean;
 
   /** Indica se foi solicitado o toque da nota. */
-  toPlay: boolean;
+  sentPlay: boolean;
 
   /**
    * @constructor
@@ -334,14 +334,38 @@ export class Track {
     this.accumulator = false;
     this.instrument  = 0;
     this.note        = 0;
-    this.syscall     = 0;
+    this.syscode     = 0;
     this.ticks       = 0;
     this.wait        = 0;
 
-    this.toNop     = false;
-    this.toHalt    = false;
-    this.toSyscall = false;
-    this.toPlay    = false;
+    this.sentHalt    = false;
+    this.sentSyscall = false;
+    this.sentPlay    = false;
+  }
+
+  /**
+   * @event halt
+   * Evento acionado ao encerrar a execução.
+   */
+  halt(): void {
+  }
+
+  /**
+   * @event syscall
+   * Evento acionado ao receber um código de *syscall*.
+   * 
+   * @param {u16} syscode Código de *syscall*.
+   */
+  syscall(syscode: u16): void {
+  }
+
+  /**
+   * @event play
+   * Evento acionado ao receber uma nota para tocar.
+   * 
+   * @param {u8} note Nota a ser tocada.
+   */
+  play(note: u8): void {
   }
 
   /**
@@ -351,21 +375,20 @@ export class Track {
    * @returns 
    */
   update(): void {
-    // Este valor poderão ser alterados novamente
-    // até o encerramento da função...
-    this.toNop     = false;
-    this.toSyscall = false;
-    this.toPlay    = false;
-    
     // Não executar quando o encerramento tiver sido solicitado...
-    if(this.toHalt) {
+    if(this.sentHalt) {
+      this.halt();
       return;
     }
 
-    // A taxa de tamanho `255` (`0xFF`) pausa a música...
-    if(this.ticks === 0xFF) {
-      this.ticks = 0xFF;
-      return;
+    // Escutar syscall...
+    if(this.sentSyscall) {
+      this.syscall(this.syscode);
+    }
+
+    // Escutar notas...
+    if(this.sentPlay) {
+      this.play(this.note);
     }
 
     // Não executar até sincronizar com a taxa de ticks por ciclo...
@@ -376,6 +399,11 @@ export class Track {
 
     // Redefinir taxa de ticks:
     this.counter = this.ticks;
+
+    // Este valor poderão ser alterados novamente
+    // até o encerramento da função...
+    this.sentSyscall = false;
+    this.sentPlay    = false;
 
     // Não executar enquanto estiver em um período de espera...
     if(this.wait > 0) {
@@ -391,15 +419,16 @@ export class Track {
 
       // Operação vazia.
       if(opcode === TRACK_OPCODE_NOP) {
-        this.toNop = true;
         this.cursor += 1;
         break;
       }
 
       // Solicita o encerramento da execução.
       if(opcode === TRACK_OPCODE_HALT) {
-        this.toHalt = true;
+        this.sentHalt = true;
         this.cursor += 1;
+
+        this.halt();
         break;
       }
 
@@ -435,9 +464,11 @@ export class Track {
 
       // Solicita a execução de uma syscall.
       if(opcode === TRACK_OPCODE_SYSCALL) {
-        this.syscall = load<u16>(offset + 1);
-        this.toSyscall = true;
+        this.syscode = load<u16>(offset + 1);
+        this.sentSyscall = true;
         this.cursor += 3;
+
+        this.syscall(this.syscode);
         break;
       }
 
@@ -504,9 +535,18 @@ export class Track {
 
       // Define uma taxa de ticks de execução.
       if(opcode === TRACK_OPCODE_TICKS) {
-        this.ticks = load<u8>(offset + 1);
+        this.ticks = (load<u8>(offset + 1) as u16);
+        this.counter = this.ticks;
         this.cursor += 2;
         continue;
+      }
+
+      // Define uma taxa de ticks de execução. (16-bits).
+      if(opcode === TRACK_OPCODE_TICKS16) {
+        this.ticks = load<u16>(offset + 1);
+        this.counter = this.ticks;
+        this.cursor += 3;
+        break;
       }
 
       // Define um período de espera até a próxima instrução.
@@ -533,17 +573,20 @@ export class Track {
       // Solicita o toque de uma nota do instrumento.
       if(opcode === TRACK_OPCODE_PLAY) {
         this.note = load<u8>(offset + 1);
-        this.toPlay = true;
+        this.sentPlay = true;
         this.cursor += 2;
+
+        this.play(this.note);
         break;
       }
 
       // Quando um opcode não se associa a uma determinada instrução, ele
       // será considerado uma nota:
       this.note = load<u8>(offset);
-      this.toPlay = true;
+      this.sentPlay = true;
       this.cursor += 1;
-        
+      
+      this.play(this.note);
       break;
     }
   }
