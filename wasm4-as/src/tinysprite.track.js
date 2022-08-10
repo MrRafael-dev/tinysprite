@@ -16,20 +16,21 @@ const Opcode = {
   IFJUMP     : 0xFD,
   IFNOTJUMP  : 0xFC,
   SYSCALL    : 0xFB,
-  SET        : 0xFA,
-  ADD        : 0xF9,
-  SUB        : 0xF8,
-  EQUAL      : 0xF7,
-  LT         : 0xF6,
-  GT         : 0xF5,
-  LTEQUAL    : 0xF4,
-  GTEQUAL    : 0xF3,
-  TICKS      : 0xF2,
-  TICKS16    : 0xF1,
-  WAIT       : 0xF0,
-  WAIT16     : 0xEF,
-  INSTRUMENT : 0xEE,
-  PLAY       : 0xED,
+  RESET      : 0xFA,
+  SET        : 0xF9,
+  ADD        : 0xF8,
+  SUB        : 0xF7,
+  EQUAL      : 0xF6,
+  LT         : 0xF5,
+  GT         : 0xF4,
+  LTEQUAL    : 0xF3,
+  GTEQUAL    : 0xF2,
+  TICKS      : 0xF1,
+  TICKS16    : 0xF0,
+  WAIT       : 0xEF,
+  WAIT16     : 0xEE,
+  INSTRUMENT : 0xED,
+  PLAY       : 0xEC,
 };
 
 /** Bytecode resultante. Exporte-o como `memory.data<u8>([ ... ]);` */
@@ -44,7 +45,7 @@ const bytecode = [];
  */
 function u8(value) {
 	const u8value = Math.abs(value) % 256;
-  return isNaN(u8value)? 0: u8value;
+	return isNaN(u8value)? 0: u8value;
 }
 
 /**
@@ -195,6 +196,14 @@ function ifnotjump(value) {
 function syscall(value) {
   const bytes = u16hilo(value);
 	bytecode.push(Opcode.SYSCALL, bytes[1], bytes[0]);
+}
+
+/**
+ * @opcode RESET
+ * Reseta todos os valores desta trilha de volta aos originais.
+ */
+function reset() {
+	bytecode.push(Opcode.RESET);
 }
 
 /**
@@ -392,23 +401,23 @@ class Track {
 	  this.sentPlay = false;
 	}
 
-  /**
-   * Reseta todos os valores desta trilha de volta aos originais.
-   */
-  reset() {
-    this.cursor      = u16(0);
-    this.counter     = u16(0);
-    this.register    = u8(0);
-    this.accumulator = false;
-    this.instrument  = u8(0);
-    this.note        = u8(0);
-    this.syscode     = u16(0);
-    this.ticks       = u16(0);
-    this.wait        = u16(0);
-    this.sentHalt    = false;
-    this.sentSyscall = false;
-    this.sentPlay    = false;
-  }
+	/**
+	 * Reseta todos os valores desta trilha de volta aos originais.
+	 */
+	reset() {
+		this.cursor      = u16(0);
+    	this.counter     = u16(0);
+    	this.register    = u8(0);
+    	this.accumulator = false;
+    	this.instrument  = u8(0);
+    	this.note        = u8(0);
+    	this.syscode     = u16(0);
+    	this.ticks       = u16(0);
+    	this.wait        = u16(0);
+    	this.sentHalt    = false;
+    	this.sentSyscall = false;
+    	this.sentPlay    = false;
+	}
   
 	/**
 	 * @event halt
@@ -641,6 +650,7 @@ class Track {
 		  this.note = loadu8(offset + 1);
 		  this.sentPlay = true;
 		  this.cursor += 2;
+  
 		  this.play(this.note);
 		  break;
 		}
@@ -672,6 +682,7 @@ if(globalThis.hasOwnProperty("module")) {
 		ifjump, 
 		ifnotjump, 
 		syscall, 
+		reset, 
 		set, 
 		add, 
 		sub,
