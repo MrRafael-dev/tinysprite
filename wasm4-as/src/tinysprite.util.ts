@@ -3,7 +3,7 @@
  * @name TinySprite Utils for WASM-4
  * @author Mr.Rafael
  * @license MIT
- * @version 1.3.8
+ * @version 1.3.9
  *
  * @description
  * Funções utilitárias da TinySprite (apenas gráficos e controles).
@@ -65,47 +65,50 @@ const TRACK_OPCODE_IFNOTJUMP: u8 = 0xFC;
 /** Opcode: `syscall(u16/little-endian) => sentSyscall` */
 const TRACK_OPCODE_SYSCALL: u8 = 0xFB;
 
+/** Opcode: `reset()` */
+const TRACK_OPCODE_RESET: u8 = 0xFA;
+
 /** Opcode: `set(u8)` */
-const TRACK_OPCODE_SET: u8 = 0xFA;
+const TRACK_OPCODE_SET: u8 = 0xF9;
 
 /** Opcode: `add(u8)` */
-const TRACK_OPCODE_ADD: u8 = 0xF9;
+const TRACK_OPCODE_ADD: u8 = 0xF8;
 
 /** Opcode: `sub(u8)` */
-const TRACK_OPCODE_SUB: u8 = 0xF8;
+const TRACK_OPCODE_SUB: u8 = 0xF7;
 
 /** Opcode: `equal(u8)` */
-const TRACK_OPCODE_EQUAL: u8 = 0xF7;
+const TRACK_OPCODE_EQUAL: u8 = 0xF6;
 
 /** Opcode: `lt(u8)` */
-const TRACK_OPCODE_LT: u8 = 0xF6;
+const TRACK_OPCODE_LT: u8 = 0xF5;
 
 /** Opcode: `gt(u8)` */
-const TRACK_OPCODE_GT: u8 = 0xF5;
+const TRACK_OPCODE_GT: u8 = 0xF4;
 
 /** Opcode: `ltequal(u8)` */
-const TRACK_OPCODE_LTEQUAL: u8 = 0xF4;
+const TRACK_OPCODE_LTEQUAL: u8 = 0xF3;
 
 /** Opcode: `gtequal(u8)` */
-const TRACK_OPCODE_GTEQUAL: u8 = 0xF3;
+const TRACK_OPCODE_GTEQUAL: u8 = 0xF2;
 
 /** Opcode: `ticks(u8)` */
-const TRACK_OPCODE_TICKS: u8 = 0xF2;
+const TRACK_OPCODE_TICKS: u8 = 0xF1;
 
 /** Opcode: `ticks(u16/little-endian)` */
-const TRACK_OPCODE_TICKS16: u8 = 0xF1;
+const TRACK_OPCODE_TICKS16: u8 = 0xF0;
 
 /** Opcode: `wait(u8)` */
-const TRACK_OPCODE_WAIT: u8 = 0xF0;
+const TRACK_OPCODE_WAIT: u8 = 0xEF;
 
 /** Opcode: `wait16(u16/little-endian)` */
-const TRACK_OPCODE_WAIT16: u8 = 0xEF;
+const TRACK_OPCODE_WAIT16: u8 = 0xEE;
 
 /** Opcode: `instrument(u8)` */
-const TRACK_OPCODE_INSTRUMENT: u8 = 0xEE;
+const TRACK_OPCODE_INSTRUMENT: u8 = 0xED;
 
 /** Opcode: `play(u8) => sentPlay` */
-const TRACK_OPCODE_PLAY: u8 = 0xED;
+const TRACK_OPCODE_PLAY: u8 = 0xEC;
 
 /**
  * Sorteia um número aleatório entre dois valores.
@@ -344,6 +347,26 @@ export class Track {
   }
 
   /**
+   * Reseta todos os valores desta trilha de volta aos originais.
+   */
+  reset(): void {
+    this.cursor  = 0;
+    this.counter = 0;
+
+    this.register    = 0;
+    this.accumulator = false;
+    this.instrument  = 0;
+    this.note        = 0;
+    this.syscode     = 0;
+    this.ticks       = 0;
+    this.wait        = 0;
+
+    this.sentHalt    = false;
+    this.sentSyscall = false;
+    this.sentPlay    = false;
+  }
+
+  /**
    * @event halt
    * Evento acionado ao encerrar a execução.
    */
@@ -473,6 +496,12 @@ export class Track {
         break;
       }
 
+      // Reseta todos os valores desta trilha de volta aos originais.
+      if(opcode === TRACK_OPCODE_RESET) {
+        this.reset();
+        break;
+      }
+
       // Define um valor para o registrador.
       if(opcode === TRACK_OPCODE_SET) {
         this.register = load<u8>(offset + 1);
@@ -570,7 +599,7 @@ export class Track {
         this.cursor += 2;
         continue;
       }
-
+      
       // Solicita o toque de uma nota do instrumento.
       if(opcode === TRACK_OPCODE_PLAY) {
         this.note = load<u8>(offset + 1);
