@@ -585,7 +585,7 @@ class Track {
 		  this.ticks = loadu8(offset + 1);
 		  this.counter = this.ticks;
 		  this.cursor += 2;
-		  continue;
+		  break;
 		}
   
 		// Define uma taxa de ticks de execução. (16-bits).
