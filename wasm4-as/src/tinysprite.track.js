@@ -335,7 +335,7 @@ function instrument(value) {
  * @param {u8} value Índice do instrumento.
  */
 function play(value) {
-	bytecode.push(Opcode.INSTRUMENT, u8(value));
+	bytecode.push(Opcode.PLAY, u8(value));
 }
 
 /**
