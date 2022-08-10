@@ -2,7 +2,7 @@
  * @name TinySprite Track Script for WASM-4
  * @author Mr.Rafael
  * @license MIT
- * @version 1.0.3
+ * @version 1.0.4
  *
  * @description
  * Função que ajudam a entender e criar trilhas sonoras para a classe `Track`.
@@ -43,7 +43,8 @@ const bytecode = [];
  * @returns {u8}
  */
 function u8(value) {
-	return Math.abs(value) % 256;
+	const u8value = Math.abs(value) % 256;
+  return isNaN(u8value)? 0: u8value;
 }
 
 /**
@@ -54,8 +55,8 @@ function u8(value) {
  * @returns {u8[]}
  */
 function u16hilo(value) {
-  const hi = (Math.abs(value) % 65536) >> 8;
-	const lo = (Math.abs(value) % 65536) - hi;
+  const hi = u8((Math.abs(value) % 65536) >> 8);
+	const lo = u8((Math.abs(value) % 65536) - hi);
 
   return [hi, lo];
 }
@@ -71,8 +72,8 @@ function u16hilo(value) {
  * @returns {u8}
  */
 function u16(value) {
-	const hi = (Math.abs(value) % 65536) >> 8;
-	const lo = (Math.abs(value) % 65536) - hi;
+	const hi = u8((Math.abs(value) % 65536) >> 8);
+	const lo = u8((Math.abs(value) % 65536) - hi);
 
 	return (lo * 0x100) | hi;
 }
@@ -108,8 +109,8 @@ function loadu8(offset) {
  * @returns {u16}
  */
 function loadu16(offset) {
-  const lo = (Math.abs(bytecode[offset    ])) % 256;
-  const hi = (Math.abs(bytecode[offset + 1])) % 256;
+  const lo = u8((Math.abs(bytecode[offset    ])) % 256);
+  const hi = u8((Math.abs(bytecode[offset + 1])) % 256);
 
   return (hi * 0x100) | lo;
 }
@@ -390,6 +391,24 @@ class Track {
     /** Indica se foi solicitado o toque da nota. */
 	  this.sentPlay = false;
 	}
+
+  /**
+   * Reseta todos os valores desta trilha de volta aos originais.
+   */
+  reset() {
+    this.cursor      = u16(0);
+    this.counter     = u16(0);
+    this.register    = u8(0);
+    this.accumulator = false;
+    this.instrument  = u8(0);
+    this.note        = u8(0);
+    this.syscode     = u16(0);
+    this.ticks       = u16(0);
+    this.wait        = u16(0);
+    this.sentHalt    = false;
+    this.sentSyscall = false;
+    this.sentPlay    = false;
+  }
   
 	/**
 	 * @event halt
@@ -622,7 +641,6 @@ class Track {
 		  this.note = loadu8(offset + 1);
 		  this.sentPlay = true;
 		  this.cursor += 2;
-  
 		  this.play(this.note);
 		  break;
 		}
