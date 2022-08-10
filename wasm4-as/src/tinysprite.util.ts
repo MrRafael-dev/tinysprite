@@ -539,7 +539,7 @@ export class Track {
         this.ticks = (load<u8>(offset + 1) as u16);
         this.counter = this.ticks;
         this.cursor += 2;
-        continue;
+        break;
       }
 
       // Define uma taxa de ticks de execução. (16-bits).
