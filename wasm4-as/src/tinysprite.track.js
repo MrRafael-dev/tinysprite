@@ -2,7 +2,7 @@
  * @name TinySprite Track Script for WASM-4
  * @author Mr.Rafael
  * @license MIT
- * @version 1.0.6
+ * @version 1.0.7
  *
  * @description
  * Função que ajudam a entender e criar trilhas sonoras para a classe `Track`.
@@ -713,7 +713,6 @@ class Track {
 		// Define uma taxa de ticks de execução.
 		if(opcode === Opcode.TICKS) {
 		  this.ticks = loadu8(offset + 1);
-		  this.counter = this.ticks;
 		  this.cursor += 2;
 		  break;
 		}
@@ -721,7 +720,6 @@ class Track {
 		// Define uma taxa de ticks de execução. (16-bits).
 		if(opcode === Opcode.TICKS16) {
 		  this.ticks = loadu16(offset + 1);
-		  this.counter = this.ticks;
 		  this.cursor += 3;
 		  break;
 		}
