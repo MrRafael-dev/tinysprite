@@ -2,7 +2,7 @@
  * @name TinySprite Track Script for WASM-4
  * @author Mr.Rafael
  * @license MIT
- * @version 1.0.5
+ * @version 1.0.6
  *
  * @description
  * Função que ajudam a entender e criar trilhas sonoras para a classe `Track`.
@@ -151,7 +151,7 @@ function nop() {
 }
 
 /**
- * @opcode HALT @requests requestedToHalt
+ * @opcode HALT @requests sentHalt
  * Solicita o encerramento da execução.
  */
 function halt() {
@@ -228,7 +228,7 @@ function ifnotrepeat() {
 }
 
 /**
- * @opcode SYSCALL @requests requestedSyscall
+ * @opcode SYSCALL @requests sentSyscall
  * Solicita uma *syscall* externa.
  * 
  * @param {u16} value Código da *syscall*.
@@ -369,7 +369,7 @@ function wait16(value) {
 }
 
 /**
- * @opcode INSTRUMENT
+ * @opcode INSTRUMENT @requests sentInstrument
  * Define um índice de instrumento para uso.
  * 
  * @param {u8} value Índice do instrumento.
@@ -379,7 +379,7 @@ function instrument(value) {
 }
 
 /**
- * @opcode INSTRUMENTSET
+ * @opcode INSTRUMENTSET @requests sentInstrument
  * Define um índice de instrumento para uso.
  * Utiliza o valor salvo no registrador.
  */
@@ -388,7 +388,7 @@ function instrumentset() {
 }
 
 /**
- * @opcode PLAY @requests requestedToPlay
+ * @opcode PLAY @requests sentPlay
  * Define um índice de instrumento para uso.
  * 
  * @param {u8} value Índice do instrumento.
@@ -398,7 +398,7 @@ function play(value) {
 }
 
 /**
- * @opcode PLAYSET @requests requestedToPlay
+ * @opcode PLAYSET @requests sentPlay
  * Define um índice de instrumento para uso.
  * Utiliza o valor salvo no registrador.
  */
@@ -458,6 +458,9 @@ class Track {
     /** Indica se foi solicitada uma *syscall*. */
 	  this.sentSyscall = false;
 
+		/** Indica se foi solicitado a troca de instrumento. */
+		this.sentInstrument = false;
+
     /** Indica se foi solicitado o toque da nota. */
 	  this.sentPlay = false;
 	}
@@ -466,44 +469,45 @@ class Track {
 	 * Reseta todos os valores desta trilha de volta aos originais.
 	 */
 	reset() {
-		this.cursor      = u16(0);
-    this.counter     = u16(0);
-		this.section     = u16(0);
-    this.register    = u8(0);
-    this.accumulator = false;
-    this.instrument  = u8(0);
-    this.note        = u8(0);
-    this.syscode     = u16(0);
-    this.ticks       = u16(0);
-    this.wait        = u16(0);
-    this.sentHalt    = false;
-    this.sentSyscall = false;
-    this.sentPlay    = false;
+		this.cursor         = u16(0);
+    this.counter        = u16(0);
+		this.section        = u16(0);
+    this.register       = u8(0);
+    this.accumulator    = false;
+    this.instrument     = u8(0);
+    this.note           = u8(0);
+    this.syscode        = u16(0);
+    this.ticks          = u16(0);
+    this.wait           = u16(0);
+    this.sentHalt       = false;
+    this.sentSyscall    = false;
+		this.sentInstrument = false;
+    this.sentPlay       = false;
 	}
   
 	/**
-	 * @event halt
+	 * @event onHalt
 	 * Evento acionado ao encerrar a execução.
 	 */
-	halt() {
+	onHalt() {
 	}
   
 	/**
-	 * @event syscall
+	 * @event onSyscall
 	 * Evento acionado ao receber um código de *syscall*.
 	 * 
 	 * @param {u16} syscode Código de *syscall*.
 	 */
-	syscall(syscode) {
+	onSyscall(syscode) {
 	}
   
 	/**
-	 * @event play
+	 * @event onPlay
 	 * Evento acionado ao receber uma nota para tocar.
 	 * 
 	 * @param {u8} note Nota a ser tocada.
 	 */
-	play(note) {
+	onPlay(note) {
 	}
   
 	/**
@@ -513,25 +517,14 @@ class Track {
 	update() {
 	  // Não executar quando o encerramento tiver sido solicitado...
 	  if(this.sentHalt) {
-		this.halt();
-		return;
+			this.onHalt();
+			return;
 	  }
   
 	  // Não executar até sincronizar com a taxa de ticks por ciclo...
 	  if(this.counter > 0) {
-		this.counter -= 1;
-  
-		// Escutar syscall...
-		if(this.sentSyscall) {
-		  this.syscall(this.syscode);
-		}
-  
-		// Escutar notas...
-		if(this.sentPlay) {
-		  this.play(this.note);
-		}
-  
-		return;
+			this.counter -= 1;
+			return;
 	  }
   
 	  // Redefinir taxa de ticks:
@@ -539,8 +532,9 @@ class Track {
   
 	  // Este valor poderão ser alterados novamente
 	  // até o encerramento da função...
-	  this.sentSyscall = false;
-	  this.sentPlay    = false;
+	  this.sentSyscall    = false;
+		this.sentInstrument = false;
+	  this.sentPlay       = false;
   
 	  // Não executar enquanto estiver em um período de espera...
 	  if(this.wait > 0) {
@@ -565,7 +559,7 @@ class Track {
 		  this.sentHalt = true;
 		  this.cursor += 1;
   
-		  this.halt();
+		  this.onHalt();
 		  break;
 		}
   
@@ -642,7 +636,7 @@ class Track {
 		  this.sentSyscall = true;
 		  this.cursor += 3;
   
-		  this.syscall(this.syscode);
+		  this.onSyscall(this.syscode);
 		  break;
 		}
   
@@ -740,7 +734,10 @@ class Track {
 		// Define um índice de instrumento para uso.
 		if(opcode === Opcode.INSTRUMENT) {
 		  this.instrument = loadu8(offset + 1);
+			this.sentInstrument = true;
 		  this.cursor += 2;
+
+			this.onInstrument(this.instrument);
 		  continue;
 		}
 
@@ -748,7 +745,10 @@ class Track {
     // Utiliza o valor salvo no registrador.
 		if(opcode === Opcode.INSTRUMENTSET) {
 		  this.instrument = this.register;
+			this.sentInstrument = true;
 		  this.cursor += 1;
+
+			this.onInstrument(this.instrument);
 		  continue;
 		}
   
@@ -758,7 +758,7 @@ class Track {
 		  this.sentPlay = true;
 		  this.cursor += 2;
   
-		  this.play(this.note);
+		  this.onPlay(this.note);
 		  break;
 		}
 
@@ -769,7 +769,7 @@ class Track {
 		  this.sentPlay = true;
 		  this.cursor += 1;
   
-		  this.play(this.note);
+		  this.onPlay(this.note);
 		  break;
 		}
   
@@ -779,7 +779,7 @@ class Track {
 		this.sentPlay = true;
 		this.cursor += 1;
 		
-		this.play(this.note);
+		this.onPlay(this.note);
 		break;
 	  }
 	}
