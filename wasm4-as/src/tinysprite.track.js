@@ -500,6 +500,15 @@ class Track {
 	 */
 	onSyscall(syscode) {
 	}
+
+	/**
+   * @event onInstrument
+   * Evento acionado ao receber um instrumento para trocar.
+   * 
+   * @param {u8} instrumento Instrumento a ser trocado.
+   */
+	onInstrument(instrument) {
+  }
   
 	/**
 	 * @event onPlay
