@@ -2,7 +2,7 @@
  * @name TinySprite Track Script for WASM-4
  * @author Mr.Rafael
  * @license MIT
- * @version 1.0.4
+ * @version 1.0.5
  *
  * @description
  * Função que ajudam a entender e criar trilhas sonoras para a classe `Track`.
@@ -10,27 +10,33 @@
 
 /** Opcodes usados pelas trilhas. */
 const Opcode = {
-  NOP        : 0x00,
-  HALT       : 0xFF,
-  JUMP       : 0xFE,
-  IFJUMP     : 0xFD,
-  IFNOTJUMP  : 0xFC,
-  SYSCALL    : 0xFB,
-  RESET      : 0xFA,
-  SET        : 0xF9,
-  ADD        : 0xF8,
-  SUB        : 0xF7,
-  EQUAL      : 0xF6,
-  LT         : 0xF5,
-  GT         : 0xF4,
-  LTEQUAL    : 0xF3,
-  GTEQUAL    : 0xF2,
-  TICKS      : 0xF1,
-  TICKS16    : 0xF0,
-  WAIT       : 0xEF,
-  WAIT16     : 0xEE,
-  INSTRUMENT : 0xED,
-  PLAY       : 0xEC,
+  NOP          : 0x00,
+  HALT         : 0xFF,
+  JUMP         : 0xFE,
+  IFJUMP       : 0xFD,
+  IFNOTJUMP    : 0xFC,
+  SECTION      : 0xFB,
+  REPEAT       : 0xFA,
+  IFREPEAT     : 0xF9,
+  IFNOTREPEAT  : 0xF8,
+  SYSCALL      : 0xF7,
+  RESET        : 0xF6,
+  SET          : 0xF5,
+  ADD          : 0xF4,
+  SUB          : 0xF3,
+  EQUAL        : 0xF2,
+  LT           : 0xF1,
+  GT           : 0xF0,
+  LTEQUAL      : 0xEF,
+  GTEQUAL      : 0xEE,
+  TICKS        : 0xED,
+  TICKS16      : 0xEC,
+  WAIT         : 0xEB,
+  WAIT16       : 0xEA,
+  INSTRUMENT   : 0xE9,
+  INSTRUMENTSET: 0xE8,
+  PLAY         : 0xE7,
+  PLAYSET      : 0xE6,
 };
 
 /** Bytecode resultante. Exporte-o como `memory.data<u8>([ ... ]);` */
@@ -188,6 +194,40 @@ function ifnotjump(value) {
 }
 
 /**
+ * @opcode SECTION
+ * Salva um offset para saltar depois.
+ */
+function section() {
+  bytecode.push(Opcode.SECTION);
+}
+
+/**
+ * @opcode REPEAT
+ * Salta para o offset salvo.
+ */
+function repeat() {
+  bytecode.push(Opcode.REPEAT);
+}
+
+/**
+ * @opcode IFREPEAT
+ * Salta para o offset salvo, quando o valor do acumulador
+ * é igual a `true`.
+ */
+function ifrepeat() {
+  bytecode.push(Opcode.IFREPEAT);
+}
+
+/**
+ * @opcode IFNOTREPEAT
+ * Salta para o offset salvo, quando o valor do acumulador
+ * é igual a `false`.
+ */
+function ifnotrepeat() {
+  bytecode.push(Opcode.IFNOTREPEAT);
+}
+
+/**
  * @opcode SYSCALL @requests requestedSyscall
  * Solicita uma *syscall* externa.
  * 
@@ -339,12 +379,30 @@ function instrument(value) {
 }
 
 /**
+ * @opcode INSTRUMENTSET
+ * Define um índice de instrumento para uso.
+ * Utiliza o valor salvo no registrador.
+ */
+function instrumentset() {
+  bytecode.push(Opcode.INSTRUMENTSET);
+}
+
+/**
  * @opcode PLAY @requests requestedToPlay
  * Define um índice de instrumento para uso.
  * 
  * @param {u8} value Índice do instrumento.
  */
 function play(value) {
+	bytecode.push(Opcode.PLAY, u8(value));
+}
+
+/**
+ * @opcode PLAYSET @requests requestedToPlay
+ * Define um índice de instrumento para uso.
+ * Utiliza o valor salvo no registrador.
+ */
+function playset(value) {
 	bytecode.push(Opcode.PLAY, u8(value));
 }
 
@@ -369,6 +427,9 @@ class Track {
 
     /** Contador interno de ticks. Pode ser controlado com `wait`. */
 	  this.counter = u16(0);
+
+	  /** Seção temporária da trilha. Pode ser saltada diretamente. */
+	  this.section = u16(0);
     
     /** Registrador único. Usado para operações simples. */
 	  this.register = u8(0);
@@ -406,17 +467,18 @@ class Track {
 	 */
 	reset() {
 		this.cursor      = u16(0);
-    	this.counter     = u16(0);
-    	this.register    = u8(0);
-    	this.accumulator = false;
-    	this.instrument  = u8(0);
-    	this.note        = u8(0);
-    	this.syscode     = u16(0);
-    	this.ticks       = u16(0);
-    	this.wait        = u16(0);
-    	this.sentHalt    = false;
-    	this.sentSyscall = false;
-    	this.sentPlay    = false;
+    this.counter     = u16(0);
+		this.section     = u16(0);
+    this.register    = u8(0);
+    this.accumulator = false;
+    this.instrument  = u8(0);
+    this.note        = u8(0);
+    this.syscode     = u16(0);
+    this.ticks       = u16(0);
+    this.wait        = u16(0);
+    this.sentHalt    = false;
+    this.sentSyscall = false;
+    this.sentPlay    = false;
 	}
   
 	/**
@@ -536,6 +598,43 @@ class Track {
 		  this.cursor += 2;
 		  break;
 		}
+
+    // Salva um offset para saltar depois.
+		if(opcode === Opcode.SECTION) {
+		  this.section = len();
+      this.cursor += 1;
+		  continue;
+		}
+
+    // Salta para o offset salvo.
+		if(opcode === Opcode.REPEAT) {
+		  this.cursor = this.section;
+		  continue;
+		}
+
+    // Salta para o offset salvo, quando o valor do acumulador
+    // é igual a `true`.
+		if(opcode === Opcode.IFREPEAT) {
+		  if(this.accumulator === true) {
+			this.cursor = this.section;
+			continue;
+		  }
+				  
+		  this.cursor += 1;
+		  break;
+		}
+
+    // Salta para o offset salvo, quando o valor do acumulador
+    // é igual a `false`.
+		if(opcode === Opcode.IFNOTREPEAT) {
+		  if(this.accumulator === false) {
+			this.cursor = this.section;
+			continue;
+		  }
+				  
+		  this.cursor += 1;
+		  break;
+		}
   
 		// Solicita a execução de uma syscall.
 		if(opcode === Opcode.SYSCALL) {
@@ -638,10 +737,18 @@ class Track {
 		  break;
 		}
 		
-		  // Define um índice de instrumento para uso.
+		// Define um índice de instrumento para uso.
 		if(opcode === Opcode.INSTRUMENT) {
 		  this.instrument = loadu8(offset + 1);
 		  this.cursor += 2;
+		  continue;
+		}
+
+    // Define um índice de instrumento para uso.
+    // Utiliza o valor salvo no registrador.
+		if(opcode === Opcode.INSTRUMENTSET) {
+		  this.instrument = this.register;
+		  this.cursor += 1;
 		  continue;
 		}
   
@@ -650,6 +757,17 @@ class Track {
 		  this.note = loadu8(offset + 1);
 		  this.sentPlay = true;
 		  this.cursor += 2;
+  
+		  this.play(this.note);
+		  break;
+		}
+
+    // Solicita o toque de uma nota do instrumento.
+    // Utiliza o valor salvo no registrador.
+		if(opcode === Opcode.PLAYSET) {
+		  this.note = this.register;
+		  this.sentPlay = true;
+		  this.cursor += 1;
   
 		  this.play(this.note);
 		  break;
@@ -681,6 +799,10 @@ if(globalThis.hasOwnProperty("module")) {
 		jump, 
 		ifjump, 
 		ifnotjump, 
+    section,
+    repeat,
+    ifrepeat,
+    ifnotrepeat,
 		syscall, 
 		reset, 
 		set, 
@@ -696,7 +818,9 @@ if(globalThis.hasOwnProperty("module")) {
 		wait, 
 		wait16, 
 		instrument, 
+    instrumentset,
 		play,
+    playset,
     Track
 	};
 }
