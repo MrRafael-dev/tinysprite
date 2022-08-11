@@ -3,7 +3,7 @@
  * @name TinySprite Utils for WASM-4
  * @author Mr.Rafael
  * @license MIT
- * @version 1.4.1
+ * @version 1.4.2
  *
  * @description
  * Funções utilitárias da TinySprite (apenas gráficos e controles).
@@ -630,7 +630,6 @@ export class Track {
       // Define uma taxa de ticks de execução.
       if(opcode === TRACK_OPCODE_TICKS) {
         this.ticks = (load<u8>(offset + 1) as u16);
-        this.counter = this.ticks;
         this.cursor += 2;
         break;
       }
@@ -638,7 +637,6 @@ export class Track {
       // Define uma taxa de ticks de execução. (16-bits).
       if(opcode === TRACK_OPCODE_TICKS16) {
         this.ticks = load<u16>(offset + 1);
-        this.counter = this.ticks;
         this.cursor += 3;
         break;
       }
