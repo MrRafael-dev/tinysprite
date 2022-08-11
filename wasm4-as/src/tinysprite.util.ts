@@ -3,7 +3,7 @@
  * @name TinySprite Utils for WASM-4
  * @author Mr.Rafael
  * @license MIT
- * @version 1.4.0
+ * @version 1.4.1
  *
  * @description
  * Funções utilitárias da TinySprite (apenas gráficos e controles).
@@ -116,10 +116,10 @@ const TRACK_OPCODE_WAIT: u8 = 0xEB;
 /** Opcode: `wait16(u16/little-endian)` */
 const TRACK_OPCODE_WAIT16: u8 = 0xEA;
 
-/** Opcode: `instrument(u8)` */
+/** Opcode: `instrument(u8) => sentInstrument` */
 const TRACK_OPCODE_INSTRUMENT: u8 = 0xE9;
 
-/** Opcode: `instrumentset()` */
+/** Opcode: `instrumentset() => sentInstrument` */
 const TRACK_OPCODE_INSTRUMENTSET: u8 = 0xE8;
 
 /** Opcode: `play(u8) => sentPlay` */
@@ -341,6 +341,9 @@ export class Track {
   /** Indica se foi solicitada uma *syscall*. */
   sentSyscall: boolean;
 
+  /** Indica se foi solicitado a troca de instrumento. */
+  sentInstrument: boolean;
+
   /** Indica se foi solicitado o toque da nota. */
   sentPlay: boolean;
 
@@ -363,9 +366,10 @@ export class Track {
     this.ticks       = 0;
     this.wait        = 0;
 
-    this.sentHalt    = false;
-    this.sentSyscall = false;
-    this.sentPlay    = false;
+    this.sentHalt       = false;
+    this.sentSyscall    = false;
+    this.sentInstrument = false;
+    this.sentPlay       = false;
   }
 
   /**
@@ -384,34 +388,44 @@ export class Track {
     this.ticks       = 0;
     this.wait        = 0;
 
-    this.sentHalt    = false;
-    this.sentSyscall = false;
-    this.sentPlay    = false;
+    this.sentHalt       = false;
+    this.sentSyscall    = false;
+    this.sentInstrument = false;
+    this.sentPlay       = false;
   }
 
   /**
-   * @event halt
+   * @event onHalt
    * Evento acionado ao encerrar a execução.
    */
-  halt(): void {
+  onHalt(): void {
   }
 
   /**
-   * @event syscall
+   * @event onSyscall
    * Evento acionado ao receber um código de *syscall*.
    * 
    * @param {u16} syscode Código de *syscall*.
    */
-  syscall(syscode: u16): void {
+  onSyscall(syscode: u16): void {
   }
 
   /**
-   * @event play
+   * @event onInstrument
+   * Evento acionado ao receber um instrumento para trocar.
+   * 
+   * @param {u8} instrumento Instrumento a ser trocado.
+   */
+  onInstrument(instrument: u8): void {
+  }
+
+  /**
+   * @event onPlay
    * Evento acionado ao receber uma nota para tocar.
    * 
    * @param {u8} note Nota a ser tocada.
    */
-  play(note: u8): void {
+  onPlay(note: u8): void {
   }
 
   /**
@@ -423,24 +437,13 @@ export class Track {
   update(): void {
     // Não executar quando o encerramento tiver sido solicitado...
     if(this.sentHalt) {
-      this.halt();
+      this.onHalt();
       return;
     }
 
     // Não executar até sincronizar com a taxa de ticks por ciclo...
     if(this.counter > 0) {
       this.counter -= 1;
-
-      // Escutar syscall...
-      if(this.sentSyscall) {
-        this.syscall(this.syscode);
-      }
-
-      // Escutar notas...
-      if(this.sentPlay) {
-        this.play(this.note);
-      }
-
       return;
     }
 
@@ -449,8 +452,9 @@ export class Track {
 
     // Este valor poderão ser alterados novamente
     // até o encerramento da função...
-    this.sentSyscall = false;
-    this.sentPlay    = false;
+    this.sentSyscall    = false;
+    this.sentInstrument = false;
+    this.sentPlay       = false;
 
     // Não executar enquanto estiver em um período de espera...
     if(this.wait > 0) {
@@ -475,7 +479,7 @@ export class Track {
         this.sentHalt = true;
         this.cursor += 1;
 
-        this.halt();
+        this.onHalt();
         break;
       }
 
@@ -552,7 +556,7 @@ export class Track {
         this.sentSyscall = true;
         this.cursor += 3;
 
-        this.syscall(this.syscode);
+        this.onSyscall(this.syscode);
         break;
       }
 
@@ -656,7 +660,10 @@ export class Track {
       // Define um índice de instrumento para uso.
       if(opcode === TRACK_OPCODE_INSTRUMENT) {
         this.instrument = load<u8>(offset + 1);
+        this.sentInstrument = true;
         this.cursor += 2;
+
+        this.onInstrument(this.instrument);
         continue;
       }
 
@@ -664,7 +671,10 @@ export class Track {
       // Utiliza o valor salvo no registrador.
       if(opcode === TRACK_OPCODE_INSTRUMENTSET) {
         this.instrument = this.register;
+        this.sentInstrument = true;
         this.cursor += 1;
+
+        this.onInstrument(this.instrument);
         continue;
       }
       
@@ -674,7 +684,7 @@ export class Track {
         this.sentPlay = true;
         this.cursor += 2;
 
-        this.play(this.note);
+        this.onPlay(this.note);
         break;
       }
 
@@ -685,7 +695,7 @@ export class Track {
         this.sentPlay = true;
         this.cursor += 1;
 
-        this.play(this.note);
+        this.onPlay(this.note);
         break;
       }
 
@@ -695,7 +705,7 @@ export class Track {
       this.sentPlay = true;
       this.cursor += 1;
       
-      this.play(this.note);
+      this.onPlay(this.note);
       break;
     }
   }
