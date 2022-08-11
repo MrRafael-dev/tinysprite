@@ -511,7 +511,7 @@ export class Track {
 
       // Salva um offset para saltar depois.
       if(opcode === TRACK_OPCODE_SECTION) {
-        this.section = load<u16>(offset + 1);
+        this.section = this.cursor;
         this.cursor += 1;
         continue;
       }
