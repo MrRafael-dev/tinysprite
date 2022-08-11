@@ -3,7 +3,7 @@
  * @name TinySprite Utils for WASM-4
  * @author Mr.Rafael
  * @license MIT
- * @version 1.3.9
+ * @version 1.4.0
  *
  * @description
  * Funções utilitárias da TinySprite (apenas gráficos e controles).
@@ -62,53 +62,71 @@ const TRACK_OPCODE_IFJUMP: u8 = 0xFD;
 /** Opcode: `ifnotjump(u16/little-endian)` */
 const TRACK_OPCODE_IFNOTJUMP: u8 = 0xFC;
 
+/** Opcode: `section()` */
+const TRACK_OPCODE_SECTION: u8 = 0xFB;
+
+/** Opcode: `repeat()` */
+const TRACK_OPCODE_REPEAT: u8 = 0xFA;
+
+/** Opcode: `ifrepeat()` */
+const TRACK_OPCODE_IFREPEAT: u8 = 0xF9;
+
+/** Opcode: `ifnotrepeat()` */
+const TRACK_OPCODE_IFNOTREPEAT: u8 = 0xF8;
+
 /** Opcode: `syscall(u16/little-endian) => sentSyscall` */
-const TRACK_OPCODE_SYSCALL: u8 = 0xFB;
+const TRACK_OPCODE_SYSCALL: u8 = 0xF7;
 
 /** Opcode: `reset()` */
-const TRACK_OPCODE_RESET: u8 = 0xFA;
+const TRACK_OPCODE_RESET: u8 = 0xF6;
 
 /** Opcode: `set(u8)` */
-const TRACK_OPCODE_SET: u8 = 0xF9;
+const TRACK_OPCODE_SET: u8 = 0xF5;
 
 /** Opcode: `add(u8)` */
-const TRACK_OPCODE_ADD: u8 = 0xF8;
+const TRACK_OPCODE_ADD: u8 = 0xF4;
 
 /** Opcode: `sub(u8)` */
-const TRACK_OPCODE_SUB: u8 = 0xF7;
+const TRACK_OPCODE_SUB: u8 = 0xF3;
 
 /** Opcode: `equal(u8)` */
-const TRACK_OPCODE_EQUAL: u8 = 0xF6;
+const TRACK_OPCODE_EQUAL: u8 = 0xF2;
 
 /** Opcode: `lt(u8)` */
-const TRACK_OPCODE_LT: u8 = 0xF5;
+const TRACK_OPCODE_LT: u8 = 0xF1;
 
 /** Opcode: `gt(u8)` */
-const TRACK_OPCODE_GT: u8 = 0xF4;
+const TRACK_OPCODE_GT: u8 = 0xF0;
 
 /** Opcode: `ltequal(u8)` */
-const TRACK_OPCODE_LTEQUAL: u8 = 0xF3;
+const TRACK_OPCODE_LTEQUAL: u8 = 0xEF;
 
 /** Opcode: `gtequal(u8)` */
-const TRACK_OPCODE_GTEQUAL: u8 = 0xF2;
+const TRACK_OPCODE_GTEQUAL: u8 = 0xEE;
 
 /** Opcode: `ticks(u8)` */
-const TRACK_OPCODE_TICKS: u8 = 0xF1;
+const TRACK_OPCODE_TICKS: u8 = 0xED;
 
 /** Opcode: `ticks(u16/little-endian)` */
-const TRACK_OPCODE_TICKS16: u8 = 0xF0;
+const TRACK_OPCODE_TICKS16: u8 = 0xEC;
 
 /** Opcode: `wait(u8)` */
-const TRACK_OPCODE_WAIT: u8 = 0xEF;
+const TRACK_OPCODE_WAIT: u8 = 0xEB;
 
 /** Opcode: `wait16(u16/little-endian)` */
-const TRACK_OPCODE_WAIT16: u8 = 0xEE;
+const TRACK_OPCODE_WAIT16: u8 = 0xEA;
 
 /** Opcode: `instrument(u8)` */
-const TRACK_OPCODE_INSTRUMENT: u8 = 0xED;
+const TRACK_OPCODE_INSTRUMENT: u8 = 0xE9;
+
+/** Opcode: `instrumentset()` */
+const TRACK_OPCODE_INSTRUMENTSET: u8 = 0xE8;
 
 /** Opcode: `play(u8) => sentPlay` */
-const TRACK_OPCODE_PLAY: u8 = 0xEC;
+const TRACK_OPCODE_PLAY: u8 = 0xE7;
+
+/** Opcode: `playset() => sentPlay` */
+const TRACK_OPCODE_PLAYSET: u8 = 0xE6;
 
 /**
  * Sorteia um número aleatório entre dois valores.
@@ -293,6 +311,9 @@ export class Track {
   /** Contador interno de ticks. Pode ser controlado com `wait`. */
   counter: u16;
 
+  /** Seção temporária da trilha. Pode ser saltada diretamente. */
+  section: u16;
+
   /** Registrador único. Usado para operações simples. */
   register: u8;
 
@@ -333,6 +354,7 @@ export class Track {
     this.cursor  = 0;
     this.counter = 0;
 
+    this.section     = 0;
     this.register    = 0;
     this.accumulator = false;
     this.instrument  = 0;
@@ -353,6 +375,7 @@ export class Track {
     this.cursor  = 0;
     this.counter = 0;
 
+    this.section     = 0;
     this.register    = 0;
     this.accumulator = false;
     this.instrument  = 0;
@@ -486,6 +509,43 @@ export class Track {
         break;
       }
 
+      // Salva um offset para saltar depois.
+      if(opcode === TRACK_OPCODE_SECTION) {
+        this.section = load<u16>(offset + 1);
+        this.cursor += 1;
+        continue;
+      }
+
+      // Salta para o offset salvo.
+      if(opcode === TRACK_OPCODE_REPEAT) {
+        this.cursor = this.section;
+        continue;
+      }
+
+      // Salta para o offset salvo, quando o valor do acumulador
+      // é igual a `true`.
+      if(opcode === TRACK_OPCODE_IFREPEAT) {
+        if(this.accumulator === true) {
+          this.cursor = this.section;
+          continue;
+        }
+                
+        this.cursor += 1;
+        break;
+      }
+
+      // Salta para o offset salvo, quando o valor do acumulador
+      // é igual a `false`.
+      if(opcode === TRACK_OPCODE_IFNOTREPEAT) {
+        if(this.accumulator === false) {
+          this.cursor = this.section;
+          continue;
+        }
+                
+        this.cursor += 1;
+        break;
+      }
+
       // Solicita a execução de uma syscall.
       if(opcode === TRACK_OPCODE_SYSCALL) {
         this.syscode = load<u16>(offset + 1);
@@ -593,10 +653,18 @@ export class Track {
         break;
       }
       
-        // Define um índice de instrumento para uso.
+      // Define um índice de instrumento para uso.
       if(opcode === TRACK_OPCODE_INSTRUMENT) {
         this.instrument = load<u8>(offset + 1);
         this.cursor += 2;
+        continue;
+      }
+
+      // Define um índice de instrumento para uso.
+      // Utiliza o valor salvo no registrador.
+      if(opcode === TRACK_OPCODE_INSTRUMENTSET) {
+        this.instrument = this.register;
+        this.cursor += 1;
         continue;
       }
       
@@ -605,6 +673,17 @@ export class Track {
         this.note = load<u8>(offset + 1);
         this.sentPlay = true;
         this.cursor += 2;
+
+        this.play(this.note);
+        break;
+      }
+
+      // Solicita o toque de uma nota do instrumento.
+      // Utiliza o valor salvo no registrador.
+      if(opcode === TRACK_OPCODE_PLAYSET) {
+        this.note = this.register;
+        this.sentPlay = true;
+        this.cursor += 1;
 
         this.play(this.note);
         break;
