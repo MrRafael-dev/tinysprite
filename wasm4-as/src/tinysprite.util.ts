@@ -3,7 +3,7 @@
  * @name TinySprite Utils for WASM-4
  * @author Mr.Rafael
  * @license MIT
- * @version 1.4.2
+ * @version 1.4.3
  *
  * @description
  * Funções utilitárias da TinySprite (apenas gráficos e controles).
@@ -486,7 +486,7 @@ export class Track {
       // Salta para um outro offset.
       if(opcode === TRACK_OPCODE_JUMP) {
         this.cursor = load<u16>(offset + 1);
-        continue;
+        break;
       }
 
       // Salta para um outro offset, quando o valor do acumulador
@@ -494,7 +494,7 @@ export class Track {
       if(opcode === TRACK_OPCODE_IFJUMP) {
         if(this.accumulator === true) {
           this.cursor = load<u16>(offset + 1);
-          continue;
+          break;
         }
                 
         this.cursor += 2;
@@ -506,7 +506,7 @@ export class Track {
       if(opcode === TRACK_OPCODE_IFNOTJUMP) {
         if(this.accumulator === false) {
           this.cursor = load<u16>(offset + 1);
-          continue;
+          break;
         }
                 
         this.cursor += 2;
@@ -517,13 +517,13 @@ export class Track {
       if(opcode === TRACK_OPCODE_SECTION) {
         this.section = this.cursor;
         this.cursor += 1;
-        continue;
+        break;
       }
 
       // Salta para o offset salvo.
       if(opcode === TRACK_OPCODE_REPEAT) {
         this.cursor = this.section;
-        continue;
+        break;
       }
 
       // Salta para o offset salvo, quando o valor do acumulador
@@ -531,7 +531,7 @@ export class Track {
       if(opcode === TRACK_OPCODE_IFREPEAT) {
         if(this.accumulator === true) {
           this.cursor = this.section;
-          continue;
+          break;
         }
                 
         this.cursor += 1;
@@ -543,7 +543,7 @@ export class Track {
       if(opcode === TRACK_OPCODE_IFNOTREPEAT) {
         if(this.accumulator === false) {
           this.cursor = this.section;
-          continue;
+          break;
         }
                 
         this.cursor += 1;
@@ -570,21 +570,21 @@ export class Track {
       if(opcode === TRACK_OPCODE_SET) {
         this.register = load<u8>(offset + 1);
         this.cursor += 2;
-        continue;
+        break;
       }
 
       // Adiciona um valor para o registrador.
       if(opcode === TRACK_OPCODE_ADD) {
         this.register += load<u8>(offset + 1);
         this.cursor += 2;
-        continue;
+        break;
       }
 
       // Subtrai um valor do registrador.
       if(opcode === TRACK_OPCODE_SUB) {
         this.register -= load<u8>(offset + 1);
         this.cursor += 2;
-        continue;
+        break;
       }
 
       // Compara se o registrador é igual ao valor.
@@ -592,7 +592,7 @@ export class Track {
         const value: u8 = load<u8>(offset + 1);
         this.accumulator = this.register === value;
         this.cursor += 2;
-        continue;
+        break;
       }
 
       // Compara se o registrador é menor que o valor.
@@ -600,7 +600,7 @@ export class Track {
         const value: u8 = load<u8>(offset + 1);
         this.accumulator = this.register < value;
         this.cursor += 2;
-        continue;
+        break;
       }
 
       // Compara se o registrador é maior que o valor.
@@ -608,7 +608,7 @@ export class Track {
         const value: u8 = load<u8>(offset + 1);
         this.accumulator = this.register > value;
         this.cursor += 2;
-        continue;
+        break;
       }
 
       // Compara se o registrador é menor ou igual que o valor.
@@ -616,7 +616,7 @@ export class Track {
         const value: u8 = load<u8>(offset + 1);
         this.accumulator = this.register <= value;
         this.cursor += 2;
-        continue;
+        break;
       }
 
       // Compara se o registrador é maior ou igual que o valor.
@@ -624,7 +624,7 @@ export class Track {
         const value: u8 = load<u8>(offset + 1);
         this.accumulator = this.register >= value;
         this.cursor += 2;
-        continue;
+        break;
       }
 
       // Define uma taxa de ticks de execução.
@@ -662,7 +662,7 @@ export class Track {
         this.cursor += 2;
 
         this.onInstrument(this.instrument);
-        continue;
+        break;
       }
 
       // Define um índice de instrumento para uso.
@@ -673,7 +673,7 @@ export class Track {
         this.cursor += 1;
 
         this.onInstrument(this.instrument);
-        continue;
+        break;
       }
       
       // Solicita o toque de uma nota do instrumento.
