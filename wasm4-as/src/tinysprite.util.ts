@@ -3,7 +3,7 @@
  * @name TinySprite Utils for WASM-4
  * @author Mr.Rafael
  * @license MIT
- * @version 1.4.3
+ * @version 1.4.4
  *
  * @description
  * Funções utilitárias da TinySprite (apenas gráficos e controles).
@@ -1149,10 +1149,10 @@ export class Rect {
    */
   within(x: i32, y: i32): boolean {
     return (
-      this.x               <= x + 1 &&
-      this.x + this.width  >= x     &&
-      this.y               <= y + 1 &&
-      this.height + this.y >= y
+      this.x               < x + 1 &&
+      this.x + this.width  > x     &&
+      this.y               < y + 1 &&
+      this.height + this.y > y
     );
   }
 
@@ -1168,10 +1168,10 @@ export class Rect {
       rect != this
       && this.collisionsEnabled
       && rect.collisionsEnabled
-      && this.x               <= rect.x + rect.width
-      && this.x + this.width  >= rect.x
-      && this.y               <= rect.y + rect.height
-      && this.height + this.y >= rect.y
+      && this.x               < rect.x + rect.width
+      && this.x + this.width  > rect.x
+      && this.y               < rect.y + rect.height
+      && this.height + this.y > rect.y
     );
   }
 
