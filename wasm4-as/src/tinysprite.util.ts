@@ -3,7 +3,7 @@
  * @name TinySprite Utils for WASM-4
  * @author Mr.Rafael
  * @license MIT
- * @version 1.4.4
+ * @version 1.4.5
  *
  * @description
  * Funções utilitárias da TinySprite (apenas gráficos e controles).
@@ -1738,8 +1738,8 @@ export class Canvas {
       // Desenhar caractere...
       this.blitSub(
         image,
-        this.viewX(x) + (column * (frame.width  + paddingX)),
-        this.viewY(y) + (line   * (frame.height + paddingY)),
+        x + (column * (frame.width  + paddingX)),
+        y + (line   * (frame.height + paddingY)),
         charWidth,
         charHeight,
         frame.x,
