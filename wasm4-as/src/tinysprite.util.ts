@@ -3,7 +3,7 @@
  * @name TinySprite Utils for WASM-4
  * @author Mr.Rafael
  * @license MIT
- * @version 1.4.6
+ * @version 1.4.7
  *
  * @description
  * Funções utilitárias da TinySprite (apenas gráficos e controles).
@@ -570,21 +570,21 @@ export class Track {
       if(opcode === TRACK_OPCODE_SET) {
         this.register = load<u8>(offset + 1);
         this.cursor += 2;
-        break;
+        continue;
       }
 
       // Adiciona um valor para o registrador.
       if(opcode === TRACK_OPCODE_ADD) {
         this.register += load<u8>(offset + 1);
         this.cursor += 2;
-        break;
+        continue;
       }
 
       // Subtrai um valor do registrador.
       if(opcode === TRACK_OPCODE_SUB) {
         this.register -= load<u8>(offset + 1);
         this.cursor += 2;
-        break;
+        continue;
       }
 
       // Compara se o registrador é igual ao valor.
@@ -592,7 +592,7 @@ export class Track {
         const value: u8 = load<u8>(offset + 1);
         this.accumulator = this.register === value;
         this.cursor += 2;
-        break;
+        continue;
       }
 
       // Compara se o registrador é menor que o valor.
@@ -600,7 +600,7 @@ export class Track {
         const value: u8 = load<u8>(offset + 1);
         this.accumulator = this.register < value;
         this.cursor += 2;
-        break;
+        continue;
       }
 
       // Compara se o registrador é maior que o valor.
@@ -608,7 +608,7 @@ export class Track {
         const value: u8 = load<u8>(offset + 1);
         this.accumulator = this.register > value;
         this.cursor += 2;
-        break;
+        continue;
       }
 
       // Compara se o registrador é menor ou igual que o valor.
@@ -616,7 +616,7 @@ export class Track {
         const value: u8 = load<u8>(offset + 1);
         this.accumulator = this.register <= value;
         this.cursor += 2;
-        break;
+        continue;
       }
 
       // Compara se o registrador é maior ou igual que o valor.
@@ -624,7 +624,7 @@ export class Track {
         const value: u8 = load<u8>(offset + 1);
         this.accumulator = this.register >= value;
         this.cursor += 2;
-        break;
+        continue;
       }
 
       // Define uma taxa de ticks de execução.
