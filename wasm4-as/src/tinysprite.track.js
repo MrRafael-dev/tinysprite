@@ -2,10 +2,10 @@
  * @name TinySprite Track Script for WASM-4
  * @author Mr.Rafael
  * @license MIT
- * @version 1.0.7
+ * @version 1.0.8
  *
  * @description
- * Função que ajudam a entender e criar trilhas sonoras para a classe `Track`.
+ * Funções que ajudam a entender e criar trilhas sonoras para a classe `Track`.
  */
 
 /** Opcodes usados pelas trilhas. */
@@ -547,8 +547,8 @@ class Track {
   
 	  // Não executar enquanto estiver em um período de espera...
 	  if(this.wait > 0) {
-      this.wait -= 1;
-  		return;
+			this.wait -= 1;
+			return;
 	  }
   
 	  // Executar código (com recursão de até 255 loops)...
@@ -569,74 +569,74 @@ class Track {
 		  this.cursor += 1;
   
 		  this.onHalt();
-		  break;
+		  continue;
 		}
   
 		// Salta para um outro offset.
 		if(opcode === Opcode.JUMP) {
 		  this.cursor = loadu16(offset + 1);
-		  break;
+		  continue;
 		}
   
 		// Salta para um outro offset, quando o valor do acumulador
 		// é igual a `true`.
 		if(opcode === Opcode.IFJUMP) {
 		  if(this.accumulator === true) {
-			this.cursor = loadu16(offset + 1);
-			break;
+				this.cursor = loadu16(offset + 1);
+				continue;
 		  }
 				  
 		  this.cursor += 2;
-		  break;
+		  continue;
 		}
 
 		// Salta para um outro offset, quando o valor do acumulador
 		// é igual a `false`.
 		if(opcode === Opcode.IFNOTJUMP) {
 		  if(this.accumulator === false) {
-			this.cursor = loadu16(offset + 1);
-			break;
+				this.cursor = loadu16(offset + 1);
+				continue;
 		  }
 				  
 		  this.cursor += 2;
-		  break;
+		  continue;
 		}
 
     // Salva um offset para saltar depois.
 		if(opcode === Opcode.SECTION) {
 		  this.section = this.cursor;
       this.cursor += 1;
-		  break;
+		  continue;
 		}
 
     // Salta para o offset salvo.
 		if(opcode === Opcode.REPEAT) {
 		  this.cursor = this.section;
-		  break;
+		  continue;
 		}
 
     // Salta para o offset salvo, quando o valor do acumulador
     // é igual a `true`.
 		if(opcode === Opcode.IFREPEAT) {
 		  if(this.accumulator === true) {
-			this.cursor = this.section;
-			break;
+				this.cursor = this.section;
+				continue;
 		  }
 				  
 		  this.cursor += 1;
-		  break;
+		  continue;
 		}
 
     // Salta para o offset salvo, quando o valor do acumulador
     // é igual a `false`.
 		if(opcode === Opcode.IFNOTREPEAT) {
 		  if(this.accumulator === false) {
-			this.cursor = this.section;
-			break;
+				this.cursor = this.section;
+				continue;
 		  }
 				  
 		  this.cursor += 1;
-		  break;
+		  continue;
 		}
   
 		// Solicita a execução de uma syscall.
