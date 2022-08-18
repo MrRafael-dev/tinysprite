@@ -3,7 +3,7 @@
  * @name TinySprite Utils for WASM-4
  * @author Mr.Rafael
  * @license MIT
- * @version 1.4.5
+ * @version 1.4.6
  *
  * @description
  * Funções utilitárias da TinySprite (apenas gráficos e controles).
@@ -486,7 +486,7 @@ export class Track {
       // Salta para um outro offset.
       if(opcode === TRACK_OPCODE_JUMP) {
         this.cursor = load<u16>(offset + 1);
-        break;
+        continue;
       }
 
       // Salta para um outro offset, quando o valor do acumulador
@@ -494,11 +494,11 @@ export class Track {
       if(opcode === TRACK_OPCODE_IFJUMP) {
         if(this.accumulator === true) {
           this.cursor = load<u16>(offset + 1);
-          break;
+          continue;
         }
                 
         this.cursor += 2;
-        break;
+        continue;
       }
       
       // Salta para um outro offset, quando o valor do acumulador
@@ -506,24 +506,24 @@ export class Track {
       if(opcode === TRACK_OPCODE_IFNOTJUMP) {
         if(this.accumulator === false) {
           this.cursor = load<u16>(offset + 1);
-          break;
+          continue;
         }
                 
         this.cursor += 2;
-        break;
+        continue;
       }
 
       // Salva um offset para saltar depois.
       if(opcode === TRACK_OPCODE_SECTION) {
         this.section = this.cursor;
         this.cursor += 1;
-        break;
+        continue;
       }
 
       // Salta para o offset salvo.
       if(opcode === TRACK_OPCODE_REPEAT) {
         this.cursor = this.section;
-        break;
+        continue;
       }
 
       // Salta para o offset salvo, quando o valor do acumulador
@@ -531,11 +531,11 @@ export class Track {
       if(opcode === TRACK_OPCODE_IFREPEAT) {
         if(this.accumulator === true) {
           this.cursor = this.section;
-          break;
+          continue;
         }
                 
         this.cursor += 1;
-        break;
+        continue;
       }
 
       // Salta para o offset salvo, quando o valor do acumulador
@@ -543,11 +543,11 @@ export class Track {
       if(opcode === TRACK_OPCODE_IFNOTREPEAT) {
         if(this.accumulator === false) {
           this.cursor = this.section;
-          break;
+          continue;
         }
                 
         this.cursor += 1;
-        break;
+        continue;
       }
 
       // Solicita a execução de uma syscall.
