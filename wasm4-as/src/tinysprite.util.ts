@@ -3,14 +3,14 @@
  * @name TinySprite Utils for WASM-4
  * @author Mr.Rafael
  * @license MIT
- * @version 1.4.7
+ * @version 1.4.8
  *
  * @description
  * Funções utilitárias da TinySprite (apenas gráficos e controles).
  * Você pode importá-la utilizando uma das duas linhas abaixo:
  *
  * ```
- * import {Track, Velocity, Vec2, Rect, Spritesheet, Animation, Font, Tilemap, canvas, p1, p2, p3, p4, mouse, range, prand, cflags, tfreq, tdur, tvol, tflags, poll} from "./tinysprite";
+ * import {Track, Velocity, Vec2, Rect, Spritesheet, Animation, Font, Tilemap, canvas, Eventable, p1, p2, p3, p4, mouse, range, prand, cflags, tfreq, tdur, tvol, tflags, poll} from "./tinysprite";
  * import * as ts from "./tinysprite";
  * ```
  */
@@ -2455,6 +2455,96 @@ export class Mouse {
   }
 }
 //#endregion </mouse.ts>
+//#region <eventable.ts>
+/**
+ * @class Eventable
+ * 
+ * @description
+ * Representa um objeto comum de jogo.
+ * Contém uma caixa de colisão básica e eventos simples.
+ */
+export abstract class Eventable extends Rect {
+  /** Indica se a instância foi criada. */
+  isCreated: boolean = false;
+
+  /** Indica se a instância foi destruída. */
+  isDestroyed: boolean = false;
+
+  /**
+   * @constructor
+   *
+   * @param {i32} x Posição X.
+   * @param {i32} y Posição Y.
+   * @param {i32} width Largura.
+   * @param {i32} height Altura.
+   */
+  constructor(x: i32 = 0, y: i32 = 0, width: i32 = 1, height: i32 = 1) {
+    super(x, y, width, height);
+  }
+
+  /**
+   * Aciona o evento de criação.
+   * 
+   * @returns {boolean}
+   */
+  create(): boolean {
+    if (this.isCreated === false) {
+      this.isCreated = true;
+      this.created();
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * Aciona o evento de destruição.
+   * 
+   * @returns {boolean}
+   */
+  destroy(): boolean {
+    if (this.isDestroyed === false) {
+      this.isDestroyed = true;
+      this.destroyed();
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * @event created
+   * 
+   * Evento de criação.
+   * Acionado apenas uma vez, ao utilizar o evento `create()`.
+   */
+  created(): void { }
+
+  /**
+   * @event update
+   * 
+   * Evento de update.
+   * Deve ser acionado constantemente, utilizando ele memso.
+   */
+  update(): void { }
+
+  /**
+   * @event draw
+   * 
+   * Evento de desenho.
+   * Deve ser acionado constantemente, utilizando ele memso.
+   */
+  draw(): void { }
+
+  /**
+   * @event created
+   * 
+   * Evento de destruição.
+   * Acionado apenas uma vez, ao utilizar o evento `destroy()`.
+   */
+  destroyed(): void { }
+}
+//#endregion </eventable.ts>
 //#region <variables.ts>
 /** Canvas principal. */
 export const canvas: Canvas = new Canvas();
