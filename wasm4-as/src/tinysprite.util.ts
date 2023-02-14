@@ -2490,7 +2490,7 @@ export abstract class Eventable extends Rect {
   create(): boolean {
     if (this.isCreated === false) {
       this.isCreated = true;
-      this.created();
+      this.onCreate();
       return true;
     }
 
@@ -2505,7 +2505,7 @@ export abstract class Eventable extends Rect {
   destroy(): boolean {
     if (this.isDestroyed === false) {
       this.isDestroyed = true;
-      this.destroyed();
+      this.onDestroy();
       return true;
     }
 
@@ -2513,18 +2513,18 @@ export abstract class Eventable extends Rect {
   }
 
   /**
-   * @event created
+   * @event onCreate
    * 
    * Evento de criação.
    * Acionado apenas uma vez, ao utilizar o evento `create()`.
    */
-  created(): void { }
+  onCreate(): void { }
 
   /**
    * @event update
    * 
    * Evento de update.
-   * Deve ser acionado constantemente, utilizando ele memso.
+   * Deve ser acionado constantemente, utilizando ele mesmo.
    */
   update(): void { }
 
@@ -2532,18 +2532,19 @@ export abstract class Eventable extends Rect {
    * @event draw
    * 
    * Evento de desenho.
-   * Deve ser acionado constantemente, utilizando ele memso.
+   * Deve ser acionado constantemente, utilizando ele mesmo.
    */
   draw(): void { }
 
   /**
-   * @event created
+   * @event onDestroy
    * 
    * Evento de destruição.
    * Acionado apenas uma vez, ao utilizar o evento `destroy()`.
    */
-  destroyed(): void { }
+  onDestroy(): void { }
 }
+
 //#endregion </eventable.ts>
 //#region <variables.ts>
 /** Canvas principal. */
