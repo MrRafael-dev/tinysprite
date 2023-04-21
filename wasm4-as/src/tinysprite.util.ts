@@ -3,7 +3,7 @@
  * @name TinySprite Utils for WASM-4
  * @author Mr.Rafael
  * @license MIT
- * @version 1.4.9
+ * @version 1.5.0
  *
  * @description
  * Funções utilitárias da TinySprite (apenas gráficos e controles).
@@ -1448,6 +1448,44 @@ export class Canvas {
     // Alterar framebuffer...
     store<u8>(w4.FRAMEBUFFER + offset, pixelData);
     return true;
+  }
+
+  /**
+   * Obtém um pixel de uma imagem 1bpp.
+   *
+   * @param {usize} image Imagem de referência.
+   * @param {i32} width Largura.
+   * @param {i32} height Altura.
+   * @param {i32} x Posição X.
+   * @param {i32} y Posição Y.
+   *
+   * @returns {u8} Índice de cor deste pixel (de 0x00 a 0x01).
+   */
+  getPixelFrom1bppImage(image: usize, width: i32, height: i32, x: i32, y: i32): u8 {
+    // Ignorar pixels fora da área da imagem...
+    if((x < 0 || x >= width) || (y < 0 || y >= height)) {
+      return 0;
+    }
+
+    // Calcular offset e índice do pixel na imagem.
+    const offset: i32 = ((y * (height / 8)) + (x / 8));
+    const index: i32 = Math.abs(x % 8) as i32;
+
+    // Obter byte com os pixels da imagem.
+    const pixelData: u8 = load<u8>(image + offset);
+
+    // Separar byte em bits 1bpp.
+    const pixels: Uint8Array = new Uint8Array(8);
+          pixels[0] = (pixelData >> 7) & 1;
+          pixels[1] = (pixelData >> 6) & 1;
+          pixels[2] = (pixelData >> 5) & 1;
+          pixels[3] = (pixelData >> 4) & 1;
+          pixels[4] = (pixelData >> 3) & 1;
+          pixels[5] = (pixelData >> 2) & 1;
+          pixels[6] = (pixelData >> 1) & 1;
+          pixels[7] = (pixelData >> 0) & 1;
+
+    return pixels[index];
   }
 
   /**
