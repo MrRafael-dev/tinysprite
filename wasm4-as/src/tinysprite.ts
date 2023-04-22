@@ -3,18 +3,13 @@
  * @name tinysprite
  * @author MrRafael-dev
  * @license MIT
- * @version 1.0.1
+ * @version 1.0.0.2
  *
  * @description
  * Biblioteca de jogos para o WASM-4.
  * 
  * Esta é uma versão mais simplificada das originais e com algumas
  * funcionalidades removidas para minimizar o tamanho da biblioteca.
- *
- * ```
- * import {Vec2, Rect, canvas, p1, p2, p3, p4, mouse, range, prand, cflags, tfreq, tdur, tvol, tflags, poll} from "./tinysprite";
- * import * as ts from "./tinysprite";
- * ```
  */
 import * as w4 from "./wasm4";
 
@@ -212,6 +207,59 @@ export function poll(): void {
 
   // Aleatorizar seed...
   Math.random();
+}
+
+/**
+ * Divide um byte em 8 bits individuais.
+ * 
+ * @param {u8} value Valor.
+ * 
+ * @returns {Uint8Array}
+ */
+export function splitByteIntoBits(value: u8): Uint8Array {
+  const result: Uint8Array = new Uint8Array(8);
+        result[0] = (value >> 7) & 1;
+        result[1] = (value >> 6) & 1;
+        result[2] = (value >> 5) & 1;
+        result[3] = (value >> 4) & 1;
+        result[4] = (value >> 3) & 1;
+        result[5] = (value >> 2) & 1;
+        result[6] = (value >> 1) & 1;
+        result[7] = (value >> 0) & 1;
+  
+  return result;
+}
+
+/**
+ * Divide um byte em 4 half-nibbles individuais.
+ * 
+ * @param {u8} value Valor.
+ * 
+ * @returns {Uint8Array}
+ */
+export function splitByteIntoHalfNibbles(value: u8): Uint8Array {
+  const result: Uint8Array = new Uint8Array(4);
+        result[0] = (value & 0b00000011);
+        result[1] = (value & 0b00001100) >> 2;
+        result[2] = (value & 0b00110000) >> 4;
+        result[3] = (value & 0b11000000) >> 6;
+
+  return result;
+}
+
+/**
+ * Divide um byte em 2 nibbles individuais.
+ * 
+ * @param {u8} value Valor.
+ * 
+ * @returns {Uint8Array}
+ */
+export function splitByteInfoNibbles(value: u8): Uint8Array {
+  const result: Uint8Array = new Uint8Array(2);
+        result[1] = (value >> 4);
+        result[0] = (value & 0xF);
+
+  return result;
 }
 
 //#endregion </misc.ts>
@@ -808,13 +856,8 @@ export class Canvas {
     // Obter byte com os pixels da tela.
     const pixelData: u8 = load<u8>(w4.FRAMEBUFFER + offset);
 
-    // Separar byte em bits 2bpp.
-    const pixels: Uint8Array = new Uint8Array(4);
-          pixels[0] = (pixelData & 0b00000011);
-          pixels[1] = (pixelData & 0b00001100) >> 2;
-          pixels[2] = (pixelData & 0b00110000) >> 4;
-          pixels[3] = (pixelData & 0b11000000) >> 6;
-
+    // Separar bytes e retornar o valor do pixel especificado...
+    const pixels: Uint8Array = splitByteIntoHalfNibbles(pixelData);
     return pixels[index];
   }
 
@@ -840,15 +883,9 @@ export class Canvas {
     // Obter byte com os pixels da tela.
     let pixelData: u8 = load<u8>(w4.FRAMEBUFFER + offset);
 
-    // Separar byte em bits 2bpp.
-    let pixels: Uint8Array = new Uint8Array(4);
-        pixels[0] = (pixelData & 0b00000011);
-        pixels[1] = (pixelData & 0b00001100) >> 2;
-        pixels[2] = (pixelData & 0b00110000) >> 4;
-        pixels[3] = (pixelData & 0b11000000) >> 6;
-
-    // Alterar índice do pixel especificado...
-    pixels[index] = color % 4;
+    // Separar bytes e alterar índice do pixel especificado...
+    let pixels: Uint8Array = splitByteIntoHalfNibbles(pixelData);
+        pixels[index] = color % 4;
 
     // Remontar byte...
     pixelData = (
@@ -887,17 +924,8 @@ export class Canvas {
     // Obter byte com os pixels da imagem.
     const pixelData: u8 = load<u8>(image + offset);
 
-    // Separar byte em bits 1bpp.
-    const pixels: Uint8Array = new Uint8Array(8);
-          pixels[0] = (pixelData >> 7) & 1;
-          pixels[1] = (pixelData >> 6) & 1;
-          pixels[2] = (pixelData >> 5) & 1;
-          pixels[3] = (pixelData >> 4) & 1;
-          pixels[4] = (pixelData >> 3) & 1;
-          pixels[5] = (pixelData >> 2) & 1;
-          pixels[6] = (pixelData >> 1) & 1;
-          pixels[7] = (pixelData >> 0) & 1;
-
+    // Separar bytes e retornar o valor do pixel especificado...
+    const pixels: Uint8Array = splitByteIntoBits(pixelData);
     return pixels[index];
   }
 
@@ -925,13 +953,8 @@ export class Canvas {
     // Obter byte com os pixels da imagem.
     const pixelData: u8 = load<u8>(image + offset);
 
-    // Separar byte em bits 2bpp.
-    const pixels: Uint8Array = new Uint8Array(4);
-          pixels[0] = (pixelData & 0b00000011);
-          pixels[1] = (pixelData & 0b00001100) >> 2;
-          pixels[2] = (pixelData & 0b00110000) >> 4;
-          pixels[3] = (pixelData & 0b11000000) >> 6;
-
+    // Separar bytes e retornar o valor do pixel especificado...
+    const pixels: Uint8Array = splitByteIntoHalfNibbles(pixelData);
     return pixels[index];
   }
 
