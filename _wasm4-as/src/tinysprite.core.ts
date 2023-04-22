@@ -1,5 +1,5 @@
 /**
- * @name TinySprite for WASM-4
+ * @name TinySprite core for WASM-4
  * @author Mr.Rafael
  * @license MIT
  * @version 0.0.7
