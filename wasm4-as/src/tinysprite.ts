@@ -624,7 +624,7 @@ export class Rect {
  * @description
  * Abstração de funções de desenho do WASM-4.
  */
-@final @unmanaged
+@final
 export class Canvas {
   /** Área de desenho. */
   view: Rect;
@@ -1251,7 +1251,7 @@ export class Canvas {
  * Representa um dos botões de controle. Útil para obter eventos rápidos, como
  * checar se foi pressionado ou não.
  */
-@final @unmanaged
+@final
 export class GamepadButton {
   /** Estado de botão. */
   state: u8;
@@ -1340,7 +1340,7 @@ export class GamepadButton {
  * @description
  * Representa um controle de jogador.
  */
-@final @unmanaged
+@final
 export class Gamepad {
   /** Número do jogador. */
   player: u8;
@@ -1429,7 +1429,7 @@ export class Gamepad {
  * @description
  * Representa um cursor de mouse/touchscreen.
  */
-@final @unmanaged
+@final
 export class Mouse {
   /** Posição do mouse. */
   position: Vec2;
