@@ -256,8 +256,8 @@ export function splitByteIntoHalfNibbles(value: u8): Uint8Array {
  */
 export function splitByteInfoNibbles(value: u8): Uint8Array {
   const result: Uint8Array = new Uint8Array(2);
-        result[1] = (value >> 4);
-        result[0] = (value & 0xF);
+        result[0] = (value >> 4);
+        result[1] = (value & 0xF);
 
   return result;
 }
