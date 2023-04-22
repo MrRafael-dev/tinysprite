@@ -3,7 +3,7 @@
  * @name tinysprite
  * @author MrRafael-dev
  * @license MIT
- * @version 1.0.0
+ * @version 1.0.1
  *
  * @description
  * Biblioteca de jogos para o WASM-4.
@@ -624,6 +624,7 @@ export class Rect {
  * @description
  * Abstração de funções de desenho do WASM-4.
  */
+@final @unmanaged
 export class Canvas {
   /** Área de desenho. */
   view: Rect;
@@ -1250,6 +1251,7 @@ export class Canvas {
  * Representa um dos botões de controle. Útil para obter eventos rápidos, como
  * checar se foi pressionado ou não.
  */
+@final @unmanaged
 export class GamepadButton {
   /** Estado de botão. */
   state: u8;
@@ -1338,6 +1340,7 @@ export class GamepadButton {
  * @description
  * Representa um controle de jogador.
  */
+@final @unmanaged
 export class Gamepad {
   /** Número do jogador. */
   player: u8;
@@ -1426,6 +1429,7 @@ export class Gamepad {
  * @description
  * Representa um cursor de mouse/touchscreen.
  */
+@final @unmanaged
 export class Mouse {
   /** Posição do mouse. */
   position: Vec2;
