@@ -826,7 +826,7 @@ export class Canvas {
   /**
    * Calcula uma posição Y relativa à área de desenho.
    *
-   * @param {i32} x Posição X.
+   * @param {i32} y Posição Y.
    *
    * @returns {i32}
    */
