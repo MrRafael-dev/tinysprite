@@ -836,6 +836,64 @@ export class Canvas {
   }
 
   /**
+   * Obtém um pixel de uma imagem 1bpp.
+   *
+   * @param {usize} image Imagem de referência.
+   * @param {i32} width Largura.
+   * @param {i32} height Altura.
+   * @param {i32} x Posição X.
+   * @param {i32} y Posição Y.
+   *
+   * @returns {u8} Índice de cor deste pixel (de 0x00 a 0x01).
+   */
+  get1bppPixelFrom(image: usize, width: i32, height: i32, x: i32, y: i32): u8 {
+    // Ignorar pixels fora da área da imagem...
+    if((x < 0 || x >= width) || (y < 0 || y >= height)) {
+      return 0;
+    }
+
+    // Calcular offset e índice do pixel na imagem.
+    const offset: i32 = ((y * (height / 8)) + (x / 8));
+    const index: i32 = Math.abs(x % 8) as i32;
+
+    // Obter byte com os pixels da imagem.
+    const pixelData: u8 = load<u8>(image + offset);
+
+    // Separar bytes e retornar o valor do pixel especificado...
+    const pixels: Uint8Array = splitByteIntoBits(pixelData);
+    return pixels[index];
+  }
+
+  /**
+   * Obtém um pixel de uma imagem 2bpp.
+   *
+   * @param {usize} image Imagem de referência.
+   * @param {i32} width Largura.
+   * @param {i32} height Altura.
+   * @param {i32} x Posição X.
+   * @param {i32} y Posição Y.
+   *
+   * @returns {u8} Índice de cor deste pixel (de 0x00 a 0x03).
+   */
+  get2bppPixelFrom(image: usize, width: i32, height: i32, x: i32, y: i32): u8 {
+    // Ignorar pixels fora da área da imagem...
+    if((x < 0 || x >= width) || (y < 0 || y >= height)) {
+      return 0;
+    }
+
+    // Calcular offset e índice do pixel na imagem.
+    const offset: i32 = ((y * (height / 4)) + (x / 4));
+    const index: i32 = Math.abs(x % 4) as i32;
+
+    // Obter byte com os pixels da imagem.
+    const pixelData: u8 = load<u8>(image + offset);
+
+    // Separar bytes e retornar o valor do pixel especificado...
+    const pixels: Uint8Array = splitByteIntoHalfNibbles(pixelData);
+    return pixels[index];
+  }
+
+  /**
    * Obtém um pixel da tela.
    *
    * @param {i32} x Posição X.
@@ -898,64 +956,6 @@ export class Canvas {
     // Alterar framebuffer...
     store<u8>(w4.FRAMEBUFFER + offset, pixelData);
     return true;
-  }
-
-  /**
-   * Obtém um pixel de uma imagem 1bpp.
-   *
-   * @param {usize} image Imagem de referência.
-   * @param {i32} width Largura.
-   * @param {i32} height Altura.
-   * @param {i32} x Posição X.
-   * @param {i32} y Posição Y.
-   *
-   * @returns {u8} Índice de cor deste pixel (de 0x00 a 0x01).
-   */
-  getPixelFrom1bppImage(image: usize, width: i32, height: i32, x: i32, y: i32): u8 {
-    // Ignorar pixels fora da área da imagem...
-    if((x < 0 || x >= width) || (y < 0 || y >= height)) {
-      return 0;
-    }
-
-    // Calcular offset e índice do pixel na imagem.
-    const offset: i32 = ((y * (height / 8)) + (x / 8));
-    const index: i32 = Math.abs(x % 8) as i32;
-
-    // Obter byte com os pixels da imagem.
-    const pixelData: u8 = load<u8>(image + offset);
-
-    // Separar bytes e retornar o valor do pixel especificado...
-    const pixels: Uint8Array = splitByteIntoBits(pixelData);
-    return pixels[index];
-  }
-
-  /**
-   * Obtém um pixel de uma imagem 2bpp.
-   *
-   * @param {usize} image Imagem de referência.
-   * @param {i32} width Largura.
-   * @param {i32} height Altura.
-   * @param {i32} x Posição X.
-   * @param {i32} y Posição Y.
-   *
-   * @returns {u8} Índice de cor deste pixel (de 0x00 a 0x03).
-   */
-  getPixelFrom2bppImage(image: usize, width: i32, height: i32, x: i32, y: i32): u8 {
-    // Ignorar pixels fora da área da imagem...
-    if((x < 0 || x >= width) || (y < 0 || y >= height)) {
-      return 0;
-    }
-
-    // Calcular offset e índice do pixel na imagem.
-    const offset: i32 = ((y * (height / 4)) + (x / 4));
-    const index: i32 = Math.abs(x % 4) as i32;
-
-    // Obter byte com os pixels da imagem.
-    const pixelData: u8 = load<u8>(image + offset);
-
-    // Separar bytes e retornar o valor do pixel especificado...
-    const pixels: Uint8Array = splitByteIntoHalfNibbles(pixelData);
-    return pixels[index];
   }
 
   /**
