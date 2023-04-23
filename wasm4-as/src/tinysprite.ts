@@ -3,7 +3,7 @@
  * @name tinysprite
  * @author MrRafael-dev
  * @license MIT
- * @version 1.0.0.2
+ * @version 1.0.0.3
  *
  * @description
  * Biblioteca de jogos para o WASM-4.
@@ -239,10 +239,10 @@ export function splitByteIntoBits(value: u8): Uint8Array {
  */
 export function splitByteIntoHalfNibbles(value: u8): Uint8Array {
   const result: Uint8Array = new Uint8Array(4);
-        result[0] = (value & 0b00000011);
-        result[1] = (value & 0b00001100) >> 2;
-        result[2] = (value & 0b00110000) >> 4;
-        result[3] = (value & 0b11000000) >> 6;
+        result[0] = (value & 0b11000000) >> 6;
+        result[1] = (value & 0b00110000) >> 4;
+        result[2] = (value & 0b00001100) >> 2;
+        result[3] = (value & 0b00000011);
 
   return result;
 }
