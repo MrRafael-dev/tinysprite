@@ -3,7 +3,7 @@
  * @name tinysprite
  * @author MrRafael-dev
  * @license MIT
- * @version 1.0.0.3
+ * @version 1.0.0.4
  *
  * @description
  * Biblioteca de jogos para o WASM-4.
@@ -1318,39 +1318,27 @@ export class GamepadButton {
     return this.state;
   }
 
-  /**
-   * Indica se este botão está inerte.
-   *
-   * @returns {boolean}
-   */
-  idle(): boolean {
+  /** Indica se este botão está inerte. */
+  @inline
+  get idle(): boolean {
     return this.state === GAMEPAD_STATE_IDLE;
   }
 
-  /**
-   * Indica se este botão está recém-pressionado.
-   *
-   * @returns {boolean}
-   */
-  pressed(): boolean {
+  /** Indica se este botão está recém-pressionado. */
+  @inline
+  get pressed(): boolean {
     return this.state === GAMEPAD_STATE_PRESSED;
   }
 
-  /**
-   * Indica se este botão está mantido.
-   *
-   * @returns {boolean}
-   */
-  held(): boolean {
+  /** Indica se este botão está mantido. */
+  @inline
+  get held(): boolean {
     return this.state === GAMEPAD_STATE_HELD;
   }
 
-  /**
-   * Indica se este botão está solto.
-   *
-   * @returns {boolean}
-   */
-  released(): boolean {
+  /** Indica se este botão está solto. */
+  @inline
+  get released(): boolean {
     return this.state === GAMEPAD_STATE_RELEASED;
   }
 }
