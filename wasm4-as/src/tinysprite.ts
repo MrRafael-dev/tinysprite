@@ -4,6 +4,7 @@
  * @author MrRafael-dev
  * @license MIT
  * @version 1.0.0.5
+ * @see {@link https://github.com/MrRafael-dev/tinysprite Github}
  *
  * @description
  * Biblioteca de jogos para o WASM-4.
