@@ -3,7 +3,7 @@
  * @name tinysprite
  * @author MrRafael-dev
  * @license MIT
- * @version 1.0.0.4
+ * @version 1.0.0.5
  *
  * @description
  * Biblioteca de jogos para o WASM-4.
@@ -1178,12 +1178,13 @@ export class Canvas {
 
   /**
    * Escreve um texto na tela, assumindo que todos os caracteres estejam
-   * organizados em apenas uma linha.
+   * organizados em apenas uma linha/coluna.
    *
    * @param {usize} image Imagem de referência.
-   * @param {i32} imageWidth Largura da imagem.
-   * @param {i32} imageHeight Altura da imagem.
+   * @param {boolean} isHorizontal Modo de organização (horizontal/vertical).
+   * @param {i32} imageSize Tamanho (horizontal/vertical) da imagem.
    * @param {i32} charWidth Largura dos caracteres.
+   * @param {i32} charHeight Altura dos caracteres.
    * @param {i32} x Posição X.
    * @param {i32} y Posição Y.
    * @param {string} text Texto a ser escrito.
@@ -1194,7 +1195,7 @@ export class Canvas {
    * @param {u16} colors Ordem de cores da paleta.
    * @param {u32} flags Flags de desenho da imagem de referência.
    */
-   write(image: usize, imageWidth: i32, charWidth: i32, charHeight: i32, x: i32, y: i32, text: string, charset: string, start: i32, paddingX: i32, paddingY: i32, colors: u16, flags: u32): boolean {
+  write(image: usize, isHorizontal: boolean, imageSize: i32, charWidth: i32, charHeight: i32, x: i32, y: i32, text: string, charset: string, start: i32, paddingX: i32, paddingY: i32, colors: u16, flags: u32): boolean {
     // Contadores de linhas e colunas.
     let line  : i32 = 0;
     let column: i32 = 0;
@@ -1214,8 +1215,18 @@ export class Canvas {
         column = 0;
         continue;
       }
-      // Avançar para a próxima coluna ao encontrar um " " (space)...
+
+      // Avançar para a próxima coluna ao encontrar um " " (space),
+      // depois de desenhar um retângulo que simboliza o espaço...
       else if(charCode === space) {
+        this.rect(
+          x + (column * (charWidth  + paddingX)),
+          y + (line   * (charHeight + paddingY)),
+          charWidth,
+          charHeight, 
+          (colors >> 4)
+        );
+
         column += 1;
         continue;
       }
@@ -1237,8 +1248,8 @@ export class Canvas {
 
       // Quadro de animação equivalente ao do caractere.
       const frame: Rect = new Rect(
-        index * charWidth,
-        0,
+        isHorizontal ===  true? index * charWidth : 0,
+        isHorizontal === false? index * charHeight: 0,
         charWidth,
         charHeight
       );
@@ -1252,7 +1263,7 @@ export class Canvas {
         charHeight,
         frame.x,
         frame.y,
-        imageWidth,
+        imageSize,
         colors,
         flags
       );
