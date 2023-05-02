@@ -3,7 +3,7 @@
  * @name tinysprite
  * @author MrRafael-dev
  * @license MIT
- * @version 1.0.0.5
+ * @version 1.0.0.6
  * @see {@link https://github.com/MrRafael-dev/tinysprite Github}
  *
  * @description
@@ -264,6 +264,50 @@ export function splitByteInfoNibbles(value: u8): Uint8Array {
 }
 
 //#endregion </misc.ts>
+//#region <bit_array.ts>
+/**
+ * @class BitArray
+ * 
+ * @description
+ * Representa uma `Array` de *bits* que representam um *byte*.
+ */
+export class BitArray extends Uint8Array {
+  /**
+   * @constructor
+   * 
+   * @param {u8} value Valor.
+   */
+  constructor(value: u8) {
+    super(8);
+    this.value = value;
+  }
+
+  /** Valor. */
+  get value(): u8 {
+    return (this[0] * 0b10000000)
+         + (this[1] * 0b1000000 )
+         + (this[2] * 0b100000  )
+         + (this[3] * 0b10000   )
+         + (this[4] * 0b1000    )
+         + (this[5] * 0b100     )
+         + (this[6] * 0b10      )
+         + (this[7]             );
+  }
+
+  /** Valor. */
+  set value(value: u8) {
+    this[0] = (value >> 7) & 1;
+    this[1] = (value >> 6) & 1;
+    this[2] = (value >> 5) & 1;
+    this[3] = (value >> 4) & 1;
+    this[4] = (value >> 3) & 1;
+    this[5] = (value >> 2) & 1;
+    this[6] = (value >> 1) & 1;
+    this[7] = (value >> 0) & 1;
+  }
+}
+
+//#endregion </bit_array.ts>
 //#region <vec2.ts>
 /**
  * @class Vec2
