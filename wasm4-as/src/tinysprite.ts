@@ -3,7 +3,7 @@
  * @name tinysprite
  * @author MrRafael-dev
  * @license MIT
- * @version 1.0.0.6
+ * @version 1.0.0.7
  * @see {@link https://github.com/MrRafael-dev/tinysprite Github}
  *
  * @description
@@ -308,6 +308,41 @@ export class BitArray extends Uint8Array {
 }
 
 //#endregion </bit_array.ts>
+//#region <half_nibble_array.ts>
+/**
+ * @class HalfNibbleArray
+ * 
+ * @description
+ * Representa uma `Array` de *half-nibbles*, que representam 2 *bits*.
+ */
+export class HalfNibbleArray extends Uint8Array {
+  /**
+   * @constructor
+   * 
+   * @param {u8} Valor.
+   */
+  constructor(value: u8) {
+    super(4);
+  }
+
+  /** Valor. */
+  get value(): u8 {
+    return (this[3] << 6)
+         + (this[2] << 4)
+         + (this[1] << 2)
+         + (this[0]     );
+  }
+
+  /** Valor. */
+  set value(value: u8) {
+    this[0] = (value & 0b11000000) >> 6;
+    this[1] = (value & 0b00110000) >> 4;
+    this[2] = (value & 0b00001100) >> 2;
+    this[3] = (value & 0b00000011);
+  }
+}
+
+//#endregion </half_nibble_array.ts>
 //#region <vec2.ts>
 /**
  * @class Vec2
