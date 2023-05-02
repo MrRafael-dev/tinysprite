@@ -3,7 +3,7 @@
  * @name tinysprite
  * @author MrRafael-dev
  * @license MIT
- * @version 1.0.0.8
+ * @version 1.0.0.9
  * @see {@link https://github.com/MrRafael-dev/tinysprite Github}
  *
  * @description
@@ -210,21 +210,6 @@ export function poll(): void {
   Math.random();
 }
 
-/**
- * Divide um byte em 2 nibbles individuais.
- * 
- * @param {u8} value Valor.
- * 
- * @returns {Uint8Array}
- */
-export function splitByteInfoNibbles(value: u8): Uint8Array {
-  const result: Uint8Array = new Uint8Array(2);
-        result[0] = (value >> 4);
-        result[1] = (value & 0xF);
-
-  return result;
-}
-
 //#endregion </misc.ts>
 //#region <bit_array.ts>
 /**
@@ -306,6 +291,37 @@ export class HalfNibbleArray extends Uint8Array {
 }
 
 //#endregion </half_nibble_array.ts>
+//#region <nibble_array.ts>
+/**
+ * @class NibbleArray @extends Uint8Array
+ * 
+ * @description
+ * Representa uma `Array` de *nibbles*, que representam 4 *bits*.
+ */
+export class NibbleArray extends Uint8Array {
+  /**
+   * @constructor
+   * 
+   * @param {u8} value Valor.
+   */
+  constructor(value: u8) {
+    super(2);
+    this.value = value;
+  }
+
+  /** Valor. */
+  get value(): u8 {
+    return (this[0] * 0xF0) + this[1];
+  }
+
+  /** Valor. */
+  set value(value: u8) {
+    this[0] = (value >> 4);
+    this[1] = (value & 0xF);
+  }
+}
+
+//#endregion </nibble_array.ts>
 //#region <vec2.ts>
 /**
  * @class Vec2
