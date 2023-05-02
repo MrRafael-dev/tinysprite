@@ -3,7 +3,7 @@
  * @name tinysprite
  * @author MrRafael-dev
  * @license MIT
- * @version 1.0.0.9
+ * @version 1.0.0.10
  * @see {@link https://github.com/MrRafael-dev/tinysprite Github}
  *
  * @description
@@ -275,10 +275,10 @@ export class HalfNibbleArray extends Uint8Array {
 
   /** Valor. */
   get value(): u8 {
-    return (this[3] << 6)
-         + (this[2] << 4)
-         + (this[1] << 2)
-         + (this[0]     );
+    const hi: u8  = (this[0] * 0b100) + (this[1]);
+    const lo: u8  = (this[2] * 0b100) + (this[3]);
+
+    return (hi * 0x10) + lo;
   }
 
   /** Valor. */
@@ -311,7 +311,7 @@ export class NibbleArray extends Uint8Array {
 
   /** Valor. */
   get value(): u8 {
-    return (this[0] * 0xF0) + this[1];
+    return (this[0] * 0x10) + this[1];
   }
 
   /** Valor. */
