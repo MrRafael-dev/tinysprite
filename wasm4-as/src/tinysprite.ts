@@ -989,12 +989,7 @@ export class Canvas {
         pixels[index] = color % 4;
 
     // Remontar byte...
-    pixelData = (
-      (pixels[3] << 6) +
-      (pixels[2] << 4) +
-      (pixels[1] << 2) +
-      (pixels[0])
-    );
+    pixelData = pixels.value;
 
     // Alterar framebuffer...
     store<u8>(w4.FRAMEBUFFER + offset, pixelData);
