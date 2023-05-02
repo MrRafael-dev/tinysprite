@@ -3,7 +3,7 @@
  * @name tinysprite
  * @author MrRafael-dev
  * @license MIT
- * @version 1.0.0.7
+ * @version 1.0.0.8
  * @see {@link https://github.com/MrRafael-dev/tinysprite Github}
  *
  * @description
@@ -211,44 +211,6 @@ export function poll(): void {
 }
 
 /**
- * Divide um byte em 8 bits individuais.
- * 
- * @param {u8} value Valor.
- * 
- * @returns {Uint8Array}
- */
-export function splitByteIntoBits(value: u8): Uint8Array {
-  const result: Uint8Array = new Uint8Array(8);
-        result[0] = (value >> 7) & 1;
-        result[1] = (value >> 6) & 1;
-        result[2] = (value >> 5) & 1;
-        result[3] = (value >> 4) & 1;
-        result[4] = (value >> 3) & 1;
-        result[5] = (value >> 2) & 1;
-        result[6] = (value >> 1) & 1;
-        result[7] = (value >> 0) & 1;
-  
-  return result;
-}
-
-/**
- * Divide um byte em 4 half-nibbles individuais.
- * 
- * @param {u8} value Valor.
- * 
- * @returns {Uint8Array}
- */
-export function splitByteIntoHalfNibbles(value: u8): Uint8Array {
-  const result: Uint8Array = new Uint8Array(4);
-        result[0] = (value & 0b11000000) >> 6;
-        result[1] = (value & 0b00110000) >> 4;
-        result[2] = (value & 0b00001100) >> 2;
-        result[3] = (value & 0b00000011);
-
-  return result;
-}
-
-/**
  * Divide um byte em 2 nibbles individuais.
  * 
  * @param {u8} value Valor.
@@ -323,6 +285,7 @@ export class HalfNibbleArray extends Uint8Array {
    */
   constructor(value: u8) {
     super(4);
+    this.value = value;
   }
 
   /** Valor. */
@@ -940,7 +903,7 @@ export class Canvas {
     const pixelData: u8 = load<u8>(image + offset);
 
     // Separar bytes e retornar o valor do pixel especificado...
-    const pixels: Uint8Array = splitByteIntoBits(pixelData);
+    const pixels: BitArray = new BitArray(pixelData);
     return pixels[index];
   }
 
@@ -969,7 +932,7 @@ export class Canvas {
     const pixelData: u8 = load<u8>(image + offset);
 
     // Separar bytes e retornar o valor do pixel especificado...
-    const pixels: Uint8Array = splitByteIntoHalfNibbles(pixelData);
+    const pixels: HalfNibbleArray = new HalfNibbleArray(pixelData);
     return pixels[index];
   }
 
@@ -995,7 +958,7 @@ export class Canvas {
     const pixelData: u8 = load<u8>(w4.FRAMEBUFFER + offset);
 
     // Separar bytes e retornar o valor do pixel especificado...
-    const pixels: Uint8Array = splitByteIntoHalfNibbles(pixelData);
+    const pixels: HalfNibbleArray = new HalfNibbleArray(pixelData);
     return pixels[index];
   }
 
@@ -1022,7 +985,7 @@ export class Canvas {
     let pixelData: u8 = load<u8>(w4.FRAMEBUFFER + offset);
 
     // Separar bytes e alterar índice do pixel especificado...
-    let pixels: Uint8Array = splitByteIntoHalfNibbles(pixelData);
+    let pixels: HalfNibbleArray = new HalfNibbleArray(pixelData);
         pixels[index] = color % 4;
 
     // Remontar byte...
