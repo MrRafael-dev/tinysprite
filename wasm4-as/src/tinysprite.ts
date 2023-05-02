@@ -284,9 +284,9 @@ export class HalfNibbleArray extends Uint8Array {
   /** Valor. */
   set value(value: u8) {
     this[0] = (value & 0b11000000) >> 6;
-    this[1] = (value & 0b00110000) >> 4;
-    this[2] = (value & 0b00001100) >> 2;
-    this[3] = (value & 0b00000011);
+    this[1] = (value & 0b110000  ) >> 4;
+    this[2] = (value & 0b1100    ) >> 2;
+    this[3] = (value & 0b11      );
   }
 }
 
