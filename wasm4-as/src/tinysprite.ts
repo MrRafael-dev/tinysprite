@@ -266,7 +266,7 @@ export function splitByteInfoNibbles(value: u8): Uint8Array {
 //#endregion </misc.ts>
 //#region <bit_array.ts>
 /**
- * @class BitArray
+ * @class BitArray @extends Uint8Array
  * 
  * @description
  * Representa uma `Array` de *bits* que representam um *byte*.
@@ -310,7 +310,7 @@ export class BitArray extends Uint8Array {
 //#endregion </bit_array.ts>
 //#region <half_nibble_array.ts>
 /**
- * @class HalfNibbleArray
+ * @class HalfNibbleArray @extends Uint8Array
  * 
  * @description
  * Representa uma `Array` de *half-nibbles*, que representam 2 *bits*.
