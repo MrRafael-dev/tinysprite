@@ -3,7 +3,7 @@
  * @name tinysprite
  * @author MrRafael-dev
  * @license MIT
- * @version 1.0.0.10
+ * @version 1.0.0.11
  * @see {@link https://github.com/MrRafael-dev/tinysprite Github}
  *
  * @description
@@ -1002,7 +1002,7 @@ export class Canvas {
 
     // Separar bytes e alterar índice do pixel especificado...
     let pixels: HalfNibbleArray = new HalfNibbleArray(pixelData);
-        pixels[index] = color % 4;
+        pixels[3 - index] = color % 4;
 
     // Remontar byte...
     pixelData = pixels.value;
