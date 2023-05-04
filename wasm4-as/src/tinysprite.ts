@@ -372,6 +372,13 @@ export class BitSurface implements Surface {
   width: i32;
   height: i32;
 
+  /**
+   * @constructor
+   * 
+   * @param {usize} offset Referência de imagem.
+   * @param {i32} width Altura.
+   * @param {i32} height Largura.
+   */
   constructor(offset: usize, width: i32, height: i32) {
     this.offset = offset;
     this.width = width;
@@ -433,6 +440,13 @@ export class HalfNibbleSurface implements Surface {
   width: i32;
   height: i32;
 
+  /**
+   * @constructor
+   * 
+   * @param {usize} offset Referência de imagem.
+   * @param {i32} width Altura.
+   * @param {i32} height Largura.
+   */
   constructor(offset: usize, width: i32, height: i32) {
     this.offset = offset;
     this.width = width;
