@@ -3,7 +3,7 @@
  * @name tinysprite
  * @author MrRafael-dev
  * @license MIT
- * @version 1.0.0.11
+ * @version 1.0.0.12
  * @see {@link https://github.com/MrRafael-dev/tinysprite Github}
  *
  * @description
@@ -322,6 +322,168 @@ export class NibbleArray extends Uint8Array {
 }
 
 //#endregion </nibble_array.ts>
+//#region <surface.ts>
+/**
+ * @interface Surface
+ * 
+ * @description
+ * Permite manipular pixels de uma imagem, permitindo editá-la dinamicamente.
+ */
+export interface Surface {
+  /** Referência de imagem. */
+  offset: usize;
+
+  /** Largura. */
+  width: i32;
+
+  /** Altura. */
+  height: i32;
+
+  /**
+   * Obtém um pixel.
+   *
+   * @param {i32} x Posição X.
+   * @param {i32} y Posição Y.
+   *
+   * @returns {u8} Índice de cor deste pixel.
+   */
+  getPixel(x: i32, y: i32): u8;
+
+  /**
+   * Insere um pixel.
+   *
+   * @param {i32} x Posição X.
+   * @param {i32} y Posição Y.
+   * @param {u8} color Índice de cor deste pixel.
+   *
+   * @returns {boolean}
+   */
+  setPixel(x: i32, y: i32, color: u8): boolean;
+}
+
+/**
+ * @class BitSurface @implements Surface
+ * 
+ * @description
+ * *Surface* para imagens de formato *1BPP* (*1 bit per pixel*; 2 cores).
+ */
+export class BitSurface implements Surface {
+  offset: usize;
+  width: i32;
+  height: i32;
+
+  constructor(offset: usize, width: i32, height: i32) {
+    this.offset = offset;
+    this.width = width;
+    this.height = height;
+  }
+
+  getPixel(x: i32, y: i32): u8 {
+    // Ignorar pixels fora da área da imagem...
+    if((x < 0 || x >= this.width) || (y < 0 || y >= this.height)) {
+      return 0;
+    }
+
+    // Calcular offset e índice do pixel na imagem.
+    const offset: i32 = ((y * (this.height / 8)) + (x / 8));
+    const index: i32 = Math.abs(x % 8) as i32;
+
+    // Obter byte com os pixels da imagem.
+    const pixelData: u8 = load<u8>(this.offset + offset);
+
+    // Separar bytes e retornar o valor do pixel especificado...
+    const pixels: BitArray = new BitArray(pixelData);
+    return pixels[index];
+  }
+
+  setPixel(x: i32, y: i32, color: u8): boolean {
+    // Ignorar pixels fora da área da tela...
+    if((x < 0 || x >= this.width) || (y < 0 || y >= this.height)) {
+      return false;
+    }
+
+    // Calcular offset e índice do pixel no framebuffer.
+    const pixelOffset: i32 = ((y * (this.height / 8)) + (x / 8));
+    const index: i32 = Math.abs(x % 8) as i32;
+
+    // Obter byte com os pixels da tela.
+    let pixelData: u8 = load<u8>(this.offset + pixelOffset);
+
+    // Separar bytes e alterar índice do pixel especificado...
+    let pixels: BitArray = new BitArray(pixelData);
+        pixels[index] = color % 2;
+
+    // Remontar byte...
+    pixelData = pixels.value;
+
+    // Alterar framebuffer...
+    store<u8>(this.offset + pixelOffset, pixelData);
+    return true;
+  }
+}
+
+/**
+ * @class HalfNibbleSurface @implements Surface
+ * 
+ * @description
+ * *Surface* para imagens de formato *2BPP* (*2 bits per pixel*; 4 cores).
+ */
+export class HalfNibbleSurface implements Surface {
+  offset: usize;
+  width: i32;
+  height: i32;
+
+  constructor(offset: usize, width: i32, height: i32) {
+    this.offset = offset;
+    this.width = width;
+    this.height = height;
+  }
+  
+  getPixel(x: i32, y: i32): u8 {
+    // Ignorar pixels fora da área da tela...
+    if((x < 0 || x >= this.width) || (y < 0 || y >= this.height)) {
+      return 0;
+    }
+
+    // Calcular offset e índice do pixel no framebuffer.
+    const pixelOffset: i32 = ((y * (this.height / 4)) + (x / 4));
+    const index: i32 = Math.abs(x % 4) as i32;
+
+    // Obter byte com os pixels da tela.
+    const pixelData: u8 = load<u8>(this.offset + pixelOffset);
+
+    // Separar bytes e retornar o valor do pixel especificado...
+    const pixels: HalfNibbleArray = new HalfNibbleArray(pixelData);
+    return pixels[index];
+  }
+
+  setPixel(x: i32, y: i32, color: u8): boolean {
+    // Ignorar pixels fora da área da tela...
+    if((x < 0 || x >= this.width) || (y < 0 || y >= this.height)) {
+      return false;
+    }
+
+    // Calcular offset e índice do pixel no framebuffer.
+    const pixelOffset: i32 = ((y * (this.height / 4)) + (x / 4));
+    const index: i32 = Math.abs(x % 4) as i32;
+
+    // Obter byte com os pixels da tela.
+    let pixelData: u8 = load<u8>(this.offset + pixelOffset);
+
+    // Separar bytes e alterar índice do pixel especificado...
+    let pixels: HalfNibbleArray = new HalfNibbleArray(pixelData);
+        pixels[3 - index] = color % 4;
+
+    // Remontar byte...
+    pixelData = pixels.value;
+
+    // Alterar framebuffer...
+    store<u8>(this.offset + pixelOffset, pixelData);
+    return true;
+  }
+}
+
+//#endregion </surface.ts>
 //#region <vec2.ts>
 /**
  * @class Vec2
@@ -892,64 +1054,6 @@ export class Canvas {
   @inline
   viewY(y: i32): i32 {
     return y - this.view.y;
-  }
-
-  /**
-   * Obtém um pixel de uma imagem 1bpp.
-   *
-   * @param {usize} image Imagem de referência.
-   * @param {i32} width Largura.
-   * @param {i32} height Altura.
-   * @param {i32} x Posição X.
-   * @param {i32} y Posição Y.
-   *
-   * @returns {u8} Índice de cor deste pixel (de 0x00 a 0x01).
-   */
-  get1bppPixelFrom(image: usize, width: i32, height: i32, x: i32, y: i32): u8 {
-    // Ignorar pixels fora da área da imagem...
-    if((x < 0 || x >= width) || (y < 0 || y >= height)) {
-      return 0;
-    }
-
-    // Calcular offset e índice do pixel na imagem.
-    const offset: i32 = ((y * (height / 8)) + (x / 8));
-    const index: i32 = Math.abs(x % 8) as i32;
-
-    // Obter byte com os pixels da imagem.
-    const pixelData: u8 = load<u8>(image + offset);
-
-    // Separar bytes e retornar o valor do pixel especificado...
-    const pixels: BitArray = new BitArray(pixelData);
-    return pixels[index];
-  }
-
-  /**
-   * Obtém um pixel de uma imagem 2bpp.
-   *
-   * @param {usize} image Imagem de referência.
-   * @param {i32} width Largura.
-   * @param {i32} height Altura.
-   * @param {i32} x Posição X.
-   * @param {i32} y Posição Y.
-   *
-   * @returns {u8} Índice de cor deste pixel (de 0x00 a 0x03).
-   */
-  get2bppPixelFrom(image: usize, width: i32, height: i32, x: i32, y: i32): u8 {
-    // Ignorar pixels fora da área da imagem...
-    if((x < 0 || x >= width) || (y < 0 || y >= height)) {
-      return 0;
-    }
-
-    // Calcular offset e índice do pixel na imagem.
-    const offset: i32 = ((y * (height / 4)) + (x / 4));
-    const index: i32 = Math.abs(x % 4) as i32;
-
-    // Obter byte com os pixels da imagem.
-    const pixelData: u8 = load<u8>(image + offset);
-
-    // Separar bytes e retornar o valor do pixel especificado...
-    const pixels: HalfNibbleArray = new HalfNibbleArray(pixelData);
-    return pixels[index];
   }
 
   /**
