@@ -3,7 +3,7 @@
  * @name tinysprite
  * @author MrRafael-dev
  * @license MIT
- * @version 1.0.0.13
+ * @version 1.0.0.14
  * @see {@link https://github.com/MrRafael-dev/tinysprite Github}
  *
  * @description
@@ -213,156 +213,111 @@ export function poll(): void {
 //#endregion </misc.ts>
 //#region <bit_array.ts>
 /**
- * @namespace BitArray
+ * @class BitArray @extends Uint8Array
  * 
  * @description
- * Funções utilitárias para conversão de *bytes* em *Arrays* de *bits*.
- * 
- * Uma *Array* de *bits* é representada por uma `Uint8Array` com 8 valores.
- * Cada valor representa 1 *bit*.
+ * Representa uma `Array` de *bits* que representam um *byte*.
  */
-export namespace BitArray {
+export class BitArray extends Uint8Array {
   /**
-   * Separa um *byte* em uma *Array* de *bits*.
+   * @constructor
    * 
    * @param {u8} value Valor.
-   * 
-   * @returns {Uint8Array}
    */
-  export function from(value: u8): Uint8Array {
-    const bytes: Uint8Array = new Uint8Array(8);
-          bytes[0] = (value >> 7) & 1;
-          bytes[1] = (value >> 6) & 1;
-          bytes[2] = (value >> 5) & 1;
-          bytes[3] = (value >> 4) & 1;
-          bytes[4] = (value >> 3) & 1;
-          bytes[5] = (value >> 2) & 1;
-          bytes[6] = (value >> 1) & 1;
-          bytes[7] = (value >> 0) & 1;
-    
-    return bytes;
+  constructor(value: u8) {
+    super(8);
+    this.value = value;
   }
 
-  /**
-   * Concatena uma *Array* de *bits* de volta para um *byte*.
-   * 
-   * Uma *Array* de *bits* deve possuir, no mínimo, 8 *bytes*.
-   * Caso não possua, o valor padrão retornado é `0`.
-   * 
-   * @param {Uint8Array} bytes *Array* de *bits*.
-   * 
-   * @returns {u8}
-   */
-   export function to(bytes: Uint8Array): u8 {
-    if(bytes.length < 8) {
-      return 0;
-    }
+  /** Valor. */
+  get value(): u8 {
+    return (this[0] * 0b10000000)
+         + (this[1] * 0b1000000 )
+         + (this[2] * 0b100000  )
+         + (this[3] * 0b10000   )
+         + (this[4] * 0b1000    )
+         + (this[5] * 0b100     )
+         + (this[6] * 0b10      )
+         + (this[7]             );
+  }
 
-    return ((bytes[0] % 2) * 0b10000000)
-         + ((bytes[1] % 2) * 0b1000000 )
-         + ((bytes[2] % 2) * 0b100000  )
-         + ((bytes[3] % 2) * 0b10000   )
-         + ((bytes[4] % 2) * 0b1000    )
-         + ((bytes[5] % 2) * 0b100     )
-         + ((bytes[6] % 2) * 0b10      )
-         + ((bytes[7] % 2)             );
+  /** Valor. */
+  set value(value: u8) {
+    this[0] = (value >> 7) & 1;
+    this[1] = (value >> 6) & 1;
+    this[2] = (value >> 5) & 1;
+    this[3] = (value >> 4) & 1;
+    this[4] = (value >> 3) & 1;
+    this[5] = (value >> 2) & 1;
+    this[6] = (value >> 1) & 1;
+    this[7] = (value >> 0) & 1;
   }
 }
 
 //#endregion </bit_array.ts>
 //#region <half_nibble_array.ts>
 /**
- * @namespace HalfNibbleArray
+ * @class HalfNibbleArray @extends Uint8Array
  * 
  * @description
- * Funções utilitárias para conversão de *bytes* em *Arrays* de *half-nibbles*.
- * 
- * Uma *Array* de *half-nibbles* é representada por uma `Uint8Array` com 4 valores.
- * Cada valor representa 2 *bits*.
+ * Representa uma `Array` de *half-nibbles*, que representam 2 *bits*.
  */
-export namespace HalfNibbleArray {
+export class HalfNibbleArray extends Uint8Array {
   /**
-   * Separa um *byte* em uma *Array* de *half-nibbles*.
+   * @constructor
    * 
-   * @param {u8} value Valor.
-   * 
-   * @returns {Uint8Array}
+   * @param {u8} Valor.
    */
-  export function from(value: u8): Uint8Array {
-    const bytes: Uint8Array = new Uint8Array(4);
-          bytes[0] = (value & 0b11000000) >> 6;
-          bytes[1] = (value & 0b110000  ) >> 4;
-          bytes[2] = (value & 0b1100    ) >> 2;
-          bytes[3] = (value & 0b11      );
-    
-    return bytes;
+  constructor(value: u8) {
+    super(4);
+    this.value = value;
   }
 
-  /**
-   * Concatena uma *Array* de *half-nibbles* de volta para um *byte*.
-   * 
-   * Uma *Array* de *half-nibbles* deve possuir, no mínimo, 4 *bytes*.
-   * Caso não possua, o valor padrão retornado é `0`.
-   * 
-   * @param {Uint8Array} bytes *Array* de *half-nibbles*.
-   * 
-   * @returns {u8}
-   */
-  export function to(bytes: Uint8Array): u8 {
-    if(bytes.length < 4) {
-      return 0;
-    }
-
-    const hi: u8  = ((bytes[0] % 4) * 0b100) + (bytes[1] % 4);
-    const lo: u8  = ((bytes[2] % 4) * 0b100) + (bytes[3] % 4);
+  /** Valor. */
+  get value(): u8 {
+    const hi: u8  = (this[0] * 0b100) + (this[1]);
+    const lo: u8  = (this[2] * 0b100) + (this[3]);
 
     return (hi * 0x10) + lo;
+  }
+
+  /** Valor. */
+  set value(value: u8) {
+    this[0] = (value & 0b11000000) >> 6;
+    this[1] = (value & 0b110000  ) >> 4;
+    this[2] = (value & 0b1100    ) >> 2;
+    this[3] = (value & 0b11      );
   }
 }
 
 //#endregion </half_nibble_array.ts>
 //#region <nibble_array.ts>
 /**
- * @namespace NibbleArray
+ * @class NibbleArray @extends Uint8Array
  * 
  * @description
- * Funções utilitárias para conversão de *bytes* em *Arrays* de *nibbles*.
- * 
- * Uma *Array* de *nibbles* é representada por uma `Uint8Array` com 2 valores.
- * Cada valor representa 4 *bits*.
+ * Representa uma `Array` de *nibbles*, que representam 4 *bits*.
  */
-export namespace NibbleArray {
+export class NibbleArray extends Uint8Array {
   /**
-   * Separa um *byte* em uma *Array* de *nibbles*.
+   * @constructor
    * 
    * @param {u8} value Valor.
-   * 
-   * @returns {Uint8Array}
    */
-  export function from(value: u8): Uint8Array {
-    const bytes: Uint8Array = new Uint8Array(2);
-          bytes[0] = (value >> 4);
-          bytes[1] = (value & 0xF);
-    
-    return bytes;
+  constructor(value: u8) {
+    super(2);
+    this.value = value;
   }
 
-  /**
-   * Concatena uma *Array* de *nibbles* de volta para um *byte*.
-   * 
-   * Uma *Array* de *nibbles* deve possuir, no mínimo, 2 *bytes*.
-   * Caso não possua, o valor padrão retornado é `0`.
-   * 
-   * @param {Uint8Array} bytes *Array* de *nibbles*.
-   * 
-   * @returns {u8}
-   */
-  export function to(bytes: Uint8Array): u8 {
-    if(bytes.length < 2) {
-      return 0;
-    }
+  /** Valor. */
+  get value(): u8 {
+    return (this[0] * 0x10) + this[1];
+  }
 
-    return ((bytes[0] % 16) * 0x10) + (bytes[1] % 16);
+  /** Valor. */
+  set value(value: u8) {
+    this[0] = (value >> 4);
+    this[1] = (value & 0xF);
   }
 }
 
@@ -444,7 +399,7 @@ export class BitSurface implements Surface {
     const pixelData: u8 = load<u8>(this.offset + offset);
 
     // Separar bytes e retornar o valor do pixel especificado...
-    const pixels: Uint8Array = BitArray.from(pixelData);
+    const pixels: BitArray = new BitArray(pixelData);
     return pixels[index];
   }
 
@@ -462,11 +417,11 @@ export class BitSurface implements Surface {
     let pixelData: u8 = load<u8>(this.offset + pixelOffset);
 
     // Separar bytes e alterar índice do pixel especificado...
-    let pixels: Uint8Array = BitArray.from(pixelData);
+    let pixels: BitArray = new BitArray(pixelData);
         pixels[index] = color % 2;
 
     // Remontar byte...
-    pixelData = BitArray.to(pixels);
+    pixelData = pixels.value;
 
     // Alterar framebuffer...
     store<u8>(this.offset + pixelOffset, pixelData);
@@ -512,7 +467,7 @@ export class HalfNibbleSurface implements Surface {
     const pixelData: u8 = load<u8>(this.offset + pixelOffset);
 
     // Separar bytes e retornar o valor do pixel especificado...
-    const pixels: Uint8Array = HalfNibbleArray.from(pixelData);
+    const pixels: HalfNibbleArray = new HalfNibbleArray(pixelData);
     return pixels[index];
   }
 
@@ -530,11 +485,11 @@ export class HalfNibbleSurface implements Surface {
     let pixelData: u8 = load<u8>(this.offset + pixelOffset);
 
     // Separar bytes e alterar índice do pixel especificado...
-    let pixels: Uint8Array = HalfNibbleArray.from(pixelData);
+    let pixels: HalfNibbleArray = new HalfNibbleArray(pixelData);
         pixels[3 - index] = color % 4;
 
     // Remontar byte...
-    pixelData = HalfNibbleArray.to(pixels);
+    pixelData = pixels.value;
 
     // Alterar framebuffer...
     store<u8>(this.offset + pixelOffset, pixelData);
@@ -1137,7 +1092,7 @@ export class Canvas {
     const pixelData: u8 = load<u8>(w4.FRAMEBUFFER + offset);
 
     // Separar bytes e retornar o valor do pixel especificado...
-    const pixels: Uint8Array = HalfNibbleArray.from(pixelData);
+    const pixels: HalfNibbleArray = new HalfNibbleArray(pixelData);
     return pixels[index];
   }
 
@@ -1164,11 +1119,11 @@ export class Canvas {
     let pixelData: u8 = load<u8>(w4.FRAMEBUFFER + offset);
 
     // Separar bytes e alterar índice do pixel especificado...
-    let pixels: Uint8Array = HalfNibbleArray.from(pixelData);
+    let pixels: HalfNibbleArray = new HalfNibbleArray(pixelData);
         pixels[3 - index] = color % 4;
 
     // Remontar byte...
-    pixelData = HalfNibbleArray.to(pixels);
+    pixelData = pixels.value;
 
     // Alterar framebuffer...
     store<u8>(w4.FRAMEBUFFER + offset, pixelData);
