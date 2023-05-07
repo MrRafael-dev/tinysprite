@@ -3,7 +3,7 @@
  * @name tinysprite
  * @author MrRafael-dev
  * @license MIT
- * @version 1.0.0.14
+ * @version 1.0.0.15
  * @see {@link https://github.com/MrRafael-dev/tinysprite Github}
  *
  * @description
@@ -327,10 +327,14 @@ export class NibbleArray extends Uint8Array {
  * @interface Surface
  * 
  * @description
- * Permite manipular pixels de uma imagem, permitindo editá-la dinamicamente.
+ * Representa uma *Array* 2D que pode ser manipulada diretamente através de uma
+ * referência de memória.
+ * 
+ * Seu uso primário envolve manipulação direta de *pixels* em imagens, mas
+ * também podem ser utilizada para outros fins (ex: *TileMaps*).
  */
 export interface Surface {
-  /** Referência de imagem. */
+  /** Referência de memória. */
   offset: usize;
 
   /** Largura. */
@@ -375,7 +379,7 @@ export class BitSurface implements Surface {
   /**
    * @constructor
    * 
-   * @param {usize} offset Referência de imagem.
+   * @param {usize} offset Referência de memória.
    * @param {i32} width Altura.
    * @param {i32} height Largura.
    */
@@ -409,7 +413,7 @@ export class BitSurface implements Surface {
       return false;
     }
 
-    // Calcular offset e índice do pixel no framebuffer.
+    // Calcular offset e índice do pixel na área da imagem.
     const pixelOffset: i32 = ((y * (this.height / 8)) + (x / 8));
     const index: i32 = Math.abs(x % 8) as i32;
 
@@ -423,7 +427,7 @@ export class BitSurface implements Surface {
     // Remontar byte...
     pixelData = pixels.value;
 
-    // Alterar framebuffer...
+    // Alterar área da imagem...
     store<u8>(this.offset + pixelOffset, pixelData);
     return true;
   }
@@ -443,7 +447,7 @@ export class HalfNibbleSurface implements Surface {
   /**
    * @constructor
    * 
-   * @param {usize} offset Referência de imagem.
+   * @param {usize} offset Referência de memória.
    * @param {i32} width Altura.
    * @param {i32} height Largura.
    */
@@ -459,7 +463,7 @@ export class HalfNibbleSurface implements Surface {
       return 0;
     }
 
-    // Calcular offset e índice do pixel no framebuffer.
+    // Calcular offset e índice do pixel na área da imagem.
     const pixelOffset: i32 = ((y * (this.height / 4)) + (x / 4));
     const index: i32 = Math.abs(x % 4) as i32;
 
@@ -477,7 +481,7 @@ export class HalfNibbleSurface implements Surface {
       return false;
     }
 
-    // Calcular offset e índice do pixel no framebuffer.
+    // Calcular offset e índice do pixel na área da imagem.
     const pixelOffset: i32 = ((y * (this.height / 4)) + (x / 4));
     const index: i32 = Math.abs(x % 4) as i32;
 
@@ -491,7 +495,7 @@ export class HalfNibbleSurface implements Surface {
     // Remontar byte...
     pixelData = pixels.value;
 
-    // Alterar framebuffer...
+    // Alterar área da imagem...
     store<u8>(this.offset + pixelOffset, pixelData);
     return true;
   }
