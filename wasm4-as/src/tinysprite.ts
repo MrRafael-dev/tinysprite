@@ -1564,7 +1564,7 @@ export class Gamepad {
   /**
    * @constructor
    *
-   * @param input Porta de referência.
+   * @param player Número do jogador.
    */
   constructor(player: u8) {
     this.player = player;
