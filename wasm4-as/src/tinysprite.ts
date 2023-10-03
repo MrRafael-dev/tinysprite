@@ -3,7 +3,7 @@
  * @name tinysprite
  * @author MrRafael-dev
  * @license MIT
- * @version 1.0.0.16
+ * @version 1.0.0.17
  * @see {@link https://github.com/MrRafael-dev/tinysprite Github}
  *
  * @description
@@ -48,10 +48,10 @@ const GAMEPAD_STATE_RELEASED: u8 = 3;
 /**
  * Sorteia um número aleatório entre dois valores.
  *
- * @param {i32} min Valor mínimo.
- * @param {i32} max Valor máximo.
+ * @param min Valor mínimo.
+ * @param max Valor máximo.
  *
- * @returns {i32}
+ * @returns
  */
 export function range(min: i32 = 0, max: i32 = 0): i32 {
   const cmin: f64 = Math.ceil(min);
@@ -63,9 +63,9 @@ export function range(min: i32 = 0, max: i32 = 0): i32 {
 /**
  * Gerador de números pseudo-aleatórios: Xorshift.
  *
- * @param {u64} seed Seed para o gerador.
+ * @param seed Seed para o gerador.
  *
- * @returns {u64}
+ * @returns
  */
 export function prand(seed: u64): u64 {
   let next: u64 = seed as u64;
@@ -79,12 +79,12 @@ export function prand(seed: u64): u64 {
 /**
  * Calcula e retorna flags de desenho.
  *
- * @param {u32} flags Flags de desenho.
- * @param {boolean} flipX Inverte este quadro horizontalmente.
- * @param {boolean} flipY Inverte este quadro verticalmente.
- * @param {i32} rotation Ângulo de rotação (de 0º a 360º).
+ * @param flags Flags de desenho.
+ * @param flipX Inverte este quadro horizontalmente.
+ * @param flipY Inverte este quadro verticalmente.
+ * @param rotation Ângulo de rotação (de 0º a 360º).
  *
- * @returns {u16}
+ * @returns
  */
 export function cflags(flags: u32 = 0, flipX: boolean = false, flipY: boolean = false, rotation: i32 = 0): u32 {
   // Índice de rotação, alinhado em 90º.
@@ -142,10 +142,10 @@ export function cflags(flags: u32 = 0, flipX: boolean = false, flipY: boolean = 
 /**
  * Calcula e retorna flags de frequência de áudio.
  * 
- * @param {i32} freq1 Frequência (1/2). De `0x0000` a `0xFFFF`.
- * @param {i32} freq2 Frequência (2/2). De `0x0000` a `0xFFFF`.
+ * @param freq1 Frequência (1/2). De `0x0000` a `0xFFFF`.
+ * @param freq2 Frequência (2/2). De `0x0000` a `0xFFFF`.
  * 
- * @returns {u32}
+ * @returns
  */
 export function tfreq(freq1: i32 = 0, freq2: i32 = 0): u32 {
 	return freq1 | (freq2 << 16);
@@ -154,12 +154,12 @@ export function tfreq(freq1: i32 = 0, freq2: i32 = 0): u32 {
 /**
  * Calcula e retorna flags de duração de áudio.
  * 
- * @param {i32} attack Ataque sonoro. De `0x00` a `0xFF`.
- * @param {i32} decay Esmaecimento sonoro. De `0x00` a `0xFF`.
- * @param {i32} sustain Sustentação da nota. De `0x00` a `0xFF`.
- * @param {i32} release Soltura da nota. De `0x00` a `0xFF`.
+ * @param attack Ataque sonoro. De `0x00` a `0xFF`.
+ * @param decay Esmaecimento sonoro. De `0x00` a `0xFF`.
+ * @param sustain Sustentação da nota. De `0x00` a `0xFF`.
+ * @param release Soltura da nota. De `0x00` a `0xFF`.
  * 
- * @returns {u32}
+ * @returns
  */
 export function tdur(attack: i32 = 0, decay: i32 = 0, sustain: i32 = 0, release: i32 = 0): u32 {
 	return (attack << 24) | (decay << 16) | sustain | (release << 8);
@@ -168,10 +168,10 @@ export function tdur(attack: i32 = 0, decay: i32 = 0, sustain: i32 = 0, release:
 /**
  * Calcula e retorna flags de volume de áudio.
  * 
- * @param {i32} peak Pico da nota. De `0` a `100`.
- * @param {i32} volume Volume da nota. De `0` a `100`.
+ * @param peak Pico da nota. De `0` a `100`.
+ * @param volume Volume da nota. De `0` a `100`.
  * 
- * @returns {u32}
+ * @returns
  */
 export function tvol(peak: i32 = 0, volume: i32 = 0): u32 {
 	return (peak << 8) | volume;
@@ -180,11 +180,11 @@ export function tvol(peak: i32 = 0, volume: i32 = 0): u32 {
 /**
  * Calcula e retorna flags de áudio.
  * 
- * @param {i32} channel Canal de áudio. De `0` a `3`.
- * @param {i32} mode Modo de áudio. De `0` a `3`.
- * @param {i32} pan Direção dos auto-falantes (esquerda/direita).
+ * @param channel Canal de áudio. De `0` a `3`.
+ * @param mode Modo de áudio. De `0` a `3`.
+ * @param pan Direção dos auto-falantes (esquerda/direita).
  * 
- * @returns {i32}
+ * @returns
  */
 export function tflags(channel: i32 = 0, mode: i32 = 0, pan: i32 = 0): u32 {
 	return channel | (mode << 2) | (pan << 4);
@@ -222,7 +222,7 @@ export class BitArray extends Uint8Array {
   /**
    * @constructor
    * 
-   * @param {u8} value Valor.
+   * @param value Valor.
    */
   constructor(value: u8) {
     super(8);
@@ -266,7 +266,7 @@ export class HalfNibbleArray extends Uint8Array {
   /**
    * @constructor
    * 
-   * @param {u8} Valor.
+   * @param Valor.
    */
   constructor(value: u8) {
     super(4);
@@ -302,7 +302,7 @@ export class NibbleArray extends Uint8Array {
   /**
    * @constructor
    * 
-   * @param {u8} value Valor.
+   * @param value Valor.
    */
   constructor(value: u8) {
     super(2);
@@ -346,21 +346,21 @@ export interface Surface {
   /**
    * Obtém um pixel.
    *
-   * @param {i32} x Posição X.
-   * @param {i32} y Posição Y.
+   * @param x Posição X.
+   * @param y Posição Y.
    *
-   * @returns {u8} Índice de cor deste pixel.
+   * @returns Índice de cor deste pixel.
    */
   getPixel(x: i32, y: i32): u8;
 
   /**
    * Insere um pixel.
    *
-   * @param {i32} x Posição X.
-   * @param {i32} y Posição Y.
-   * @param {u8} color Índice de cor deste pixel.
+   * @param x Posição X.
+   * @param y Posição Y.
+   * @param color Índice de cor deste pixel.
    *
-   * @returns {boolean}
+   * @returns
    */
   setPixel(x: i32, y: i32, color: u8): boolean;
 }
@@ -379,9 +379,9 @@ export class BitSurface implements Surface {
   /**
    * @constructor
    * 
-   * @param {usize} offset Referência de memória.
-   * @param {i32} width Altura.
-   * @param {i32} height Largura.
+   * @param offset Referência de memória.
+   * @param width Altura.
+   * @param height Largura.
    */
   constructor(offset: usize, width: i32, height: i32) {
     this.offset = offset;
@@ -447,9 +447,9 @@ export class HalfNibbleSurface implements Surface {
   /**
    * @constructor
    * 
-   * @param {usize} offset Referência de memória.
-   * @param {i32} width Altura.
-   * @param {i32} height Largura.
+   * @param offset Referência de memória.
+   * @param width Altura.
+   * @param height Largura.
    */
   constructor(offset: usize, width: i32, height: i32) {
     this.offset = offset;
@@ -519,8 +519,8 @@ export class Vec2 {
   /**
    * @constructor
    *
-   * @param {i32} x Posição X.
-   * @param {i32} y Posição Y.
+   * @param x Posição X.
+   * @param y Posição Y.
    */
   constructor(x: i32, y: i32) {
     this.x = x;
@@ -530,7 +530,7 @@ export class Vec2 {
   /**
    * Retorna uma representação deste objeto em texto.
    * 
-   * @returns {string}
+   * @returns
    */
   toString(): string {
     return `${this.x.toString()},${this.y.toString()}`;
@@ -539,10 +539,10 @@ export class Vec2 {
   /**
    * Reposiciona as coordenadas deste vetor.
    *
-   * @param {i32} x Posição X.
-   * @param {i32} y Posição Y.
+   * @param x Posição X.
+   * @param y Posição Y.
    * 
-   * @returns {Vec2} Tail call.
+   * @returns Tail call.
    */
   set(x: i32, y: i32): Vec2 {
     this.x = x;
@@ -554,10 +554,10 @@ export class Vec2 {
   /**
    * Movimenta as coordenadas deste vetor em uma posição relativa.
    * 
-   * @param {i32} x Posição X.
-   * @param {i32} y Posição Y.
+   * @param x Posição X.
+   * @param y Posição Y.
    * 
-   * @returns {Vec2} Tail call.
+   * @returns Tail call.
    */
   move(x: i32, y: i32): Vec2 {
     this.x += x;
@@ -569,10 +569,10 @@ export class Vec2 {
   /**
    * Alinha as coordenadas deste vetor para representar índices de uma grade.
    * 
-   * @param {i32} width Largura da grade.
-   * @param {i32} height Altura da grade.
+   * @param width Largura da grade.
+   * @param height Altura da grade.
    * 
-   * @returns {Vec2} Tail call.
+   * @returns Tail call.
    */
   grid(width: i32, height: i32): Vec2 {
     this.x = Math.floor(this.x / width) as i32;
@@ -584,10 +584,10 @@ export class Vec2 {
   /**
    * Converte índices de grade representadas por este vetor para coordenadas.
    * 
-   * @param {i32} width Largura da grade.
-   * @param {i32} height Altura da grade.
+   * @param width Largura da grade.
+   * @param height Altura da grade.
    * 
-   * @returns {Vec2} Tail call.
+   * @returns Tail call.
    */
   ungrid(width: i32, height: i32): Vec2 {
     this.x = this.x * width;
@@ -624,10 +624,10 @@ export class Rect {
   /**
    * @constructor
    *
-   * @param {i32} x Posição X.
-   * @param {i32} y Posição Y.
-   * @param {i32} width Largura.
-   * @param {i32} height Altura.
+   * @param x Posição X.
+   * @param y Posição Y.
+   * @param width Largura.
+   * @param height Altura.
    */
   constructor(x: i32, y: i32, width: i32, height: i32) {
     this.x = x;
@@ -640,7 +640,7 @@ export class Rect {
   /**
    * Retorna uma representação deste objeto em texto.
    * 
-   * @returns {string}
+   * @returns
    */
   toString(): string {
     return `${this.x.toString()},${this.y.toString()};${this.width.toString()},${this.height.toString()};${this.collisionsEnabled? 1: 0}`;
@@ -649,10 +649,10 @@ export class Rect {
   /**
    * Reposiciona as coordenadas desta caixa.
    *
-   * @param {i32} x Posição X.
-   * @param {i32} y Posição Y.
+   * @param x Posição X.
+   * @param y Posição Y.
    *
-   * @returns {Rect} Tail call.
+   * @returns Tail call.
    */
   set(x: i32, y: i32): Rect {
     this.x = x;
@@ -664,10 +664,10 @@ export class Rect {
   /**
    * Movimenta as coordenadas desta caixa em uma posição relativa.
    * 
-   * @param {i32} x Posição X.
-   * @param {i32} y Posição Y.
+   * @param x Posição X.
+   * @param y Posição Y.
    * 
-   * @returns {Rect} Tail call.
+   * @returns Tail call.
    */
   move(x: i32, y: i32): Rect {
     this.x += x;
@@ -679,10 +679,10 @@ export class Rect {
   /**
    * Alinha as coordenadas desta caixa para representar índices de uma grade.
    * 
-   * @param {i32} width Largura da grade.
-   * @param {i32} height Altura da grade.
+   * @param width Largura da grade.
+   * @param height Altura da grade.
    * 
-   * @returns {Rect} Tail call.
+   * @returns Tail call.
    */
   grid(width: i32, height: i32): Rect {
     this.x = Math.floor(this.x / width) as i32;
@@ -694,10 +694,10 @@ export class Rect {
   /**
    * Converte índices de grade representadas por esta caixa para coordenadas.
    * 
-   * @param {i32} width Largura da grade.
-   * @param {i32} height Altura da grade.
+   * @param width Largura da grade.
+   * @param height Altura da grade.
    * 
-   * @returns {Rect} Tail call.
+   * @returns Tail call.
    */
   ungrid(width: i32, height: i32): Rect {
     this.x = this.x * width;
@@ -709,10 +709,10 @@ export class Rect {
   /**
    * Redimensiona o tamanho desta caixa.
    *
-   * @param {i32} width Largura.
-   * @param {i32} height Altura.
+   * @param width Largura.
+   * @param height Altura.
    *
-   * @returns {Rect} Tail call.
+   * @returns Tail call.
    */
   resize(width: i32, height: i32): Rect {
     this.width  = width;
@@ -724,7 +724,7 @@ export class Rect {
   /**
    * Retorna a posição superior-esquerda desta caixa (X e Y).
    *
-   * @returns {Vec2}
+   * @returns
    */
   get topLeft(): Vec2 {
     return new Vec2(
@@ -736,7 +736,7 @@ export class Rect {
   /**
    * Retorna a posição superior-central desta caixa (X e Y).
    *
-   * @returns {Vec2}
+   * @returns
    */
   get topCenter(): Vec2 {
     return new Vec2(
@@ -748,7 +748,7 @@ export class Rect {
   /**
    * Retorna a posição superior-direita desta caixa (X e Y).
    *
-   * @returns {Vec2}
+   * @returns
    */
   get topRight(): Vec2 {
     return new Vec2(
@@ -760,7 +760,7 @@ export class Rect {
   /**
    * Retorna a posição centro-esquerda desta caixa (X e Y).
    *
-   * @returns {Vec2}
+   * @returns
    */
   get centerLeft(): Vec2 {
     return new Vec2(
@@ -772,7 +772,7 @@ export class Rect {
   /**
    * Retorna a posição central desta caixa (X e Y).
    *
-   * @returns {Vec2}
+   * @returns
    */
   get center(): Vec2 {
     return new Vec2(
@@ -784,7 +784,7 @@ export class Rect {
   /**
    * Retorna a posição centro-direita desta caixa (X e Y).
    *
-   * @returns {Vec2}
+   * @returns
    */
   get centerRight(): Vec2 {
     return new Vec2(
@@ -796,7 +796,7 @@ export class Rect {
   /**
    * Retorna a posição inferior-esquerda desta caixa (X e Y).
    *
-   * @returns {Vec2}
+   * @returns
    */
   get bottomLeft(): Vec2 {
     return new Vec2(
@@ -808,7 +808,7 @@ export class Rect {
   /**
    * Retorna a posição inferior-central desta caixa (X e Y).
    *
-   * @returns {Vec2}
+   * @returns
    */
   get bottomCenter(): Vec2 {
     return new Vec2(
@@ -820,7 +820,7 @@ export class Rect {
   /**
    * Retorna a posição inferior-direita desta caixa (X e Y).
    *
-   * @returns {Vec2}
+   * @returns
    */
   get bottomRight(): Vec2 {
     return new Vec2(
@@ -832,7 +832,7 @@ export class Rect {
   /**
    * Indica se esta caixa está em uma posição visível da tela.
    *
-   * @returns {boolean}
+   * @returns
    */
   get isOnScreen(): boolean {
     return canvas.isVisible(this.x, this.y, this.width, this.height);
@@ -841,10 +841,10 @@ export class Rect {
   /**
    * Indica se uma posição está dentro dos limites desta caixa.
    * 
-   * @param x {i32} Posição X.
-   * @param y {i32} Posição Y.
+   * @param x Posição X.
+   * @param y Posição Y.
    * 
-   * @returns {boolean}
+   * @returns
    */
   within(x: i32, y: i32): boolean {
     return (
@@ -858,9 +858,9 @@ export class Rect {
   /**
    * Detecta colisão entre esta e outra caixa.
    *
-   * @param {Rect} rect Caixa de colisão.
+   * @param rect Caixa de colisão.
    *
-   * @returns {boolean}
+   * @returns
    */
   intersect(rect: Rect): boolean {
     return (
@@ -877,11 +877,11 @@ export class Rect {
   /**
    * Detecta colisão entre esta e outra caixa, em outra posição.
    *
-   * @param {Rect} rect Caixa de colisão.
-   * @param {i32} x Posição X.
-   * @param {i32} y Posição Y.
+   * @param rect Caixa de colisão.
+   * @param x Posição X.
+   * @param y Posição Y.
    *
-   * @returns {boolean}
+   * @returns
    */
   intersectAt(rect: Rect, x: i32, y: i32): boolean {
     // Salvar posição atual temporariamente...
@@ -940,7 +940,7 @@ export class Canvas {
   /**
    * Redefine a paleta de cores de volta para a padrão.
    * 
-   * @returns {boolean}
+   * @returns
    */
   resetPalette(): boolean {
     return this.setPalette(0xE0F8CF, 0x86C06C, 0x306850, 0x071821);
@@ -949,12 +949,12 @@ export class Canvas {
   /**
    * Define uma nova paleta de cores.
    * 
-   * @param {i32} color1 Cor da paleta (1/4).
-   * @param {i32} color2 Cor da paleta (2/4).
-   * @param {i32} color3 Cor da paleta (3/4).
-   * @param {i32} color4 Cor da paleta (4/4).
+   * @param color1 Cor da paleta (1/4).
+   * @param color2 Cor da paleta (2/4).
+   * @param color3 Cor da paleta (3/4).
+   * @param color4 Cor da paleta (4/4).
    * 
-   * @returns {boolean}
+   * @returns
    */
   setPalette(color1: i32, color2: i32, color3: i32, color4: i32): boolean {
     this.palette[0] = color1;
@@ -968,7 +968,7 @@ export class Canvas {
   /**
    * Atualiza a paleta de cores.
    *
-   * @returns {boolean}
+   * @returns
    */
   updatePalette(): boolean {
     // Atualizar paleta de cores...
@@ -983,7 +983,7 @@ export class Canvas {
   /**
    * Atualiza as flags.
    *
-   * @returns {boolean}
+   * @returns
    */
   updateSystemFlags(): boolean {
     // Valores das flags.
@@ -998,12 +998,12 @@ export class Canvas {
   /**
    * Limpa a tela com uma cor específica.
    *
-   * @param {u16} colors Ordem de cores da paleta.
-   * @param {boolean} ignoreViewport Permite ignorar o posicionamento da
+   * @param colors Ordem de cores da paleta.
+   * @param ignoreViewport Permite ignorar o posicionamento da
    *        viewport, limpando a tela inteira. O valor padrão é `true`.
    *
    *
-   * @returns {boolean}
+   * @returns
    */
   clear(colors: u16, ignoreViewport: boolean = true): boolean {
     // Alterar ordem de cores da paleta:
@@ -1034,12 +1034,12 @@ export class Canvas {
   /**
    * Retorna se uma instância está visível na tela.
    *
-   * @param {i32} x Posição X.
-   * @param {i32} y Posição Y.
-   * @param {i32} width Largura.
-   * @param {i32} height Altura.
+   * @param x Posição X.
+   * @param y Posição Y.
+   * @param width Largura.
+   * @param height Altura.
    *
-   * @returns {boolean}
+   * @returns
    */
   isVisible(x: i32, y: i32, width: i32, height: i32): boolean {
     return (
@@ -1053,9 +1053,9 @@ export class Canvas {
   /**
    * Calcula uma posição X relativa à área de desenho.
    *
-   * @param {i32} x Posição X.
+   * @param x Posição X.
    *
-   * @returns {i32}
+   * @returns
    */
   @inline
   viewX(x: i32): i32 {
@@ -1065,9 +1065,9 @@ export class Canvas {
   /**
    * Calcula uma posição Y relativa à área de desenho.
    *
-   * @param {i32} y Posição Y.
+   * @param y Posição Y.
    *
-   * @returns {i32}
+   * @returns
    */
   @inline
   viewY(y: i32): i32 {
@@ -1077,10 +1077,10 @@ export class Canvas {
   /**
    * Obtém um pixel da tela.
    *
-   * @param {i32} x Posição X.
-   * @param {i32} y Posição Y.
+   * @param x Posição X.
+   * @param y Posição Y.
    *
-   * @returns {u8} Índice de cor deste pixel (de 0x00 a 0x03).
+   * @returns Índice de cor deste pixel (de 0x00 a 0x03).
    */
   getPixel(x: i32, y: i32): u8 {
     // Ignorar pixels fora da área da tela...
@@ -1103,11 +1103,11 @@ export class Canvas {
   /**
    * Insere um pixel na tela.
    *
-   * @param {i32} x Posição X.
-   * @param {i32} y Posição Y.
-   * @param {u8} color Índice de cor deste pixel (de 0x00 a 0x03).
+   * @param x Posição X.
+   * @param y Posição Y.
+   * @param color Índice de cor deste pixel (de 0x00 a 0x03).
    *
-   * @returns {boolean}
+   * @returns
    */
   setPixel(x: i32, y: i32, color: u8): boolean {
     // Ignorar pixels fora da área da tela...
@@ -1137,13 +1137,13 @@ export class Canvas {
   /**
    * Desenha uma imagem na tela.
    *
-   * @param {usize} image Imagem de referência.
-   * @param {i32} x Posição X.
-   * @param {i32} y Posição Y.
-   * @param {i32} width Largura.
-   * @param {i32} height Altura.
-   * @param {u16} colors Ordem de cores da paleta.
-   * @param {u32} flags Flags de desenho da imagem de referência.
+   * @param image Imagem de referência.
+   * @param x Posição X.
+   * @param y Posição Y.
+   * @param width Largura.
+   * @param height Altura.
+   * @param colors Ordem de cores da paleta.
+   * @param flags Flags de desenho da imagem de referência.
    */
   blit(image: usize, x: i32, y: i32, width: i32, height: i32, colors: u16, flags: u32): boolean {
     // Não desenhar fora da tela...
@@ -1170,16 +1170,16 @@ export class Canvas {
   /**
    * Desenha um fragmento de uma imagem na tela.
    *
-   * @param {usize} image Imagem de referência.
-   * @param {i32} x Posição X.
-   * @param {i32} y Posição Y.
-   * @param {i32} width Largura.
-   * @param {i32} height Altura.
-   * @param {i32} cutX Posição X de corte.
-   * @param {u16} cutY Posição Y de corte.
-   * @param {u16} stride Use a largura da imagem de referência.
-   * @param {u16} colors Ordem de cores da paleta.
-   * @param {u32} flags Flags de desenho da imagem de referência.
+   * @param image Imagem de referência.
+   * @param x Posição X.
+   * @param y Posição Y.
+   * @param width Largura.
+   * @param height Altura.
+   * @param cutX Posição X de corte.
+   * @param cutY Posição Y de corte.
+   * @param stride Use a largura da imagem de referência.
+   * @param colors Ordem de cores da paleta.
+   * @param flags Flags de desenho da imagem de referência.
    */
   blitSub(image: usize, x: i32, y: i32, width: i32, height: i32, cutX: i32, cutY: i32, stride: i32, colors: u16, flags: u32): boolean {
     // Não desenhar fora da tela...
@@ -1209,11 +1209,11 @@ export class Canvas {
   /**
    * Desenha uma linha na tela.
    *
-   * @param {i32} x1 Posição X inicial.
-   * @param {i32} y1 Posição Y inicial.
-   * @param {i32} x2 Posição X final.
-   * @param {i32} y2 Posição Y final.
-   * @param {u16} colors Ordem de cores da paleta.
+   * @param x1 Posição X inicial.
+   * @param y1 Posição Y inicial.
+   * @param x2 Posição X final.
+   * @param y2 Posição Y final.
+   * @param colors Ordem de cores da paleta.
    */
   line(x1: i32, y1: i32, x2: i32, y2: i32, colors: u16): boolean {
     // Alterar ordem de cores da paleta:
@@ -1233,10 +1233,10 @@ export class Canvas {
   /**
    * Desenha uma linha horizontal na tela.
    *
-   * @param {i32} x Posição X inicial.
-   * @param {i32} y Posição Y inicial.
-   * @param {i32} length Tamanho da linha.
-   * @param {u16} colors Ordem de cores da paleta.
+   * @param x Posição X inicial.
+   * @param y Posição Y inicial.
+   * @param length Tamanho da linha.
+   * @param colors Ordem de cores da paleta.
    */
   hline(x: i32, y: i32, length: i32, colors: u16): boolean {
     // Alterar ordem de cores da paleta:
@@ -1255,10 +1255,10 @@ export class Canvas {
   /**
    * Desenha uma linha vertical na tela.
    *
-   * @param {i32} x Posição X inicial.
-   * @param {i32} y Posição Y inicial.
-   * @param {i32} length Tamanho da linha.
-   * @param {u16} colors Ordem de cores da paleta.
+   * @param x Posição X inicial.
+   * @param y Posição Y inicial.
+   * @param length Tamanho da linha.
+   * @param colors Ordem de cores da paleta.
    */
   vline(x: i32, y: i32, length: i32, colors: u16): boolean {
     // Alterar ordem de cores da paleta:
@@ -1277,11 +1277,11 @@ export class Canvas {
   /**
    * Desenha um círculo na tela.
    *
-   * @param {i32} x Posição X.
-   * @param {i32} y Posição Y.
-   * @param {i32} width Largura.
-   * @param {i32} height Altura.
-   * @param {u16} colors Ordem de cores da paleta.
+   * @param x Posição X.
+   * @param y Posição Y.
+   * @param width Largura.
+   * @param height Altura.
+   * @param colors Ordem de cores da paleta.
    */
   oval(x: i32, y: i32, width: i32, height: i32, colors: u16): boolean {
     // Não desenhar fora da tela...
@@ -1306,11 +1306,11 @@ export class Canvas {
   /**
    * Desenha um retângulo na tela.
    *
-   * @param {i32} x Posição X.
-   * @param {i32} y Posição Y.
-   * @param {i32} width Largura.
-   * @param {i32} height Altura.
-   * @param {u16} colors Ordem de cores da paleta.
+   * @param x Posição X.
+   * @param y Posição Y.
+   * @param width Largura.
+   * @param height Altura.
+   * @param colors Ordem de cores da paleta.
    */
   rect(x: i32, y: i32, width: i32, height: i32, colors: u16): boolean {
     // Não desenhar fora da tela...
@@ -1335,12 +1335,12 @@ export class Canvas {
   /**
    * Escreve um texto na tela usando a fonte padrão.
    *
-   * @param {string} text Texto a ser escrito.
-   * @param {i32} x Posição X.
-   * @param {i32} y Posição Y.
-   * @param {u16} colors Ordem de cores da paleta.
+   * @param text Texto a ser escrito.
+   * @param x Posição X.
+   * @param y Posição Y.
+   * @param colors Ordem de cores da paleta.
    *
-   * @returns {boolean}
+   * @returns
    */
   text(text: string, x: i32, y: i32, colors: u16): boolean {
     // Alterar ordem de cores da paleta:
@@ -1356,20 +1356,20 @@ export class Canvas {
    * Escreve um texto na tela, assumindo que todos os caracteres estejam
    * organizados em apenas uma linha/coluna.
    *
-   * @param {usize} image Imagem de referência.
-   * @param {boolean} isHorizontal Modo de organização (horizontal/vertical).
-   * @param {i32} imageSize Tamanho (horizontal/vertical) da imagem.
-   * @param {i32} charWidth Largura dos caracteres.
-   * @param {i32} charHeight Altura dos caracteres.
-   * @param {i32} x Posição X.
-   * @param {i32} y Posição Y.
-   * @param {string} text Texto a ser escrito.
-   * @param {string} charset Charset com todos os caracteres a serem usados.
-   * @param {i32} paddingX Espaçamento horizontal entre cada caractere.
-   * @param {i32} paddingY Espaçamento vertical entre cada caractere.
-   * @param {i32} start Índice do quadro de animação do primeiro caractere.
-   * @param {u16} colors Ordem de cores da paleta.
-   * @param {u32} flags Flags de desenho da imagem de referência.
+   * @param image Imagem de referência.
+   * @param isHorizontal Modo de organização (horizontal/vertical).
+   * @param imageSize Tamanho (horizontal/vertical) da imagem.
+   * @param charWidth Largura dos caracteres.
+   * @param charHeight Altura dos caracteres.
+   * @param x Posição X.
+   * @param y Posição Y.
+   * @param text Texto a ser escrito.
+   * @param charset Charset com todos os caracteres a serem usados.
+   * @param paddingX Espaçamento horizontal entre cada caractere.
+   * @param paddingY Espaçamento vertical entre cada caractere.
+   * @param start Índice do quadro de animação do primeiro caractere.
+   * @param colors Ordem de cores da paleta.
+   * @param flags Flags de desenho da imagem de referência.
    */
   write(image: usize, isHorizontal: boolean, imageSize: i32, charWidth: i32, charHeight: i32, x: i32, y: i32, text: string, charset: string, start: i32, paddingX: i32, paddingY: i32, colors: u16, flags: u32): boolean {
     // Contadores de linhas e colunas.
@@ -1476,9 +1476,9 @@ export class GamepadButton {
   /**
    * Avança para o próximo estado de botão, a partir de uma situação atual.
    *
-   * @param {boolean} pressed Indica se o botão de entrada está pressionado.
+   * @param pressed Indica se o botão de entrada está pressionado.
    *
-   * @returns {u8}
+   * @returns
    */
   nextState(pressed: boolean): u8 {
     // Ciclo de estados quando o botão estiver pressionado.
@@ -1564,7 +1564,7 @@ export class Gamepad {
   /**
    * @constructor
    *
-   * @param {usize} input Porta de referência.
+   * @param input Porta de referência.
    */
   constructor(player: u8) {
     this.player = player;
@@ -1579,7 +1579,7 @@ export class Gamepad {
   /**
    * Retorna a entrada de referência do jogador deste controle.
    *
-   * @returns {usize}
+   * @returns
    */
   gamepad(): usize {
     // Porta do jogador 1...
