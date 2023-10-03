@@ -3,7 +3,7 @@
  * @name tinysprite
  * @author MrRafael-dev
  * @license MIT
- * @version 1.0.0.15
+ * @version 1.0.0.16
  * @see {@link https://github.com/MrRafael-dev/tinysprite Github}
  *
  * @description
@@ -396,7 +396,7 @@ export class BitSurface implements Surface {
     }
 
     // Calcular offset e índice do pixel na imagem.
-    const offset: i32 = ((y * (this.height / 8)) + (x / 8));
+    const offset: i32 = ((y * (this.width / 8)) + (x / 8));
     const index: i32 = Math.abs(x % 8) as i32;
 
     // Obter byte com os pixels da imagem.
@@ -414,7 +414,7 @@ export class BitSurface implements Surface {
     }
 
     // Calcular offset e índice do pixel na área da imagem.
-    const pixelOffset: i32 = ((y * (this.height / 8)) + (x / 8));
+    const pixelOffset: i32 = ((y * (this.width / 8)) + (x / 8));
     const index: i32 = Math.abs(x % 8) as i32;
 
     // Obter byte com os pixels da tela.
@@ -464,7 +464,7 @@ export class HalfNibbleSurface implements Surface {
     }
 
     // Calcular offset e índice do pixel na área da imagem.
-    const pixelOffset: i32 = ((y * (this.height / 4)) + (x / 4));
+    const pixelOffset: i32 = ((y * (this.width / 4)) + (x / 4));
     const index: i32 = Math.abs(x % 4) as i32;
 
     // Obter byte com os pixels da tela.
@@ -482,7 +482,7 @@ export class HalfNibbleSurface implements Surface {
     }
 
     // Calcular offset e índice do pixel na área da imagem.
-    const pixelOffset: i32 = ((y * (this.height / 4)) + (x / 4));
+    const pixelOffset: i32 = ((y * (this.width / 4)) + (x / 4));
     const index: i32 = Math.abs(x % 4) as i32;
 
     // Obter byte com os pixels da tela.
@@ -726,7 +726,7 @@ export class Rect {
    *
    * @returns {Vec2}
    */
-  topLeft(): Vec2 {
+  get topLeft(): Vec2 {
     return new Vec2(
       this.x,
       this.y
@@ -738,7 +738,7 @@ export class Rect {
    *
    * @returns {Vec2}
    */
-  topCenter(): Vec2 {
+  get topCenter(): Vec2 {
     return new Vec2(
       this.x + (Math.floor(this.width / 2) as i32) - 1,
       this.y
@@ -750,7 +750,7 @@ export class Rect {
    *
    * @returns {Vec2}
    */
-  topRight(): Vec2 {
+  get topRight(): Vec2 {
     return new Vec2(
       this.x + (this.width - 1),
       this.y
@@ -762,7 +762,7 @@ export class Rect {
    *
    * @returns {Vec2}
    */
-  centerLeft(): Vec2 {
+  get centerLeft(): Vec2 {
     return new Vec2(
       this.x,
       this.y + (Math.floor(this.height / 2) as i32) - 1
@@ -774,7 +774,7 @@ export class Rect {
    *
    * @returns {Vec2}
    */
-  center(): Vec2 {
+  get center(): Vec2 {
     return new Vec2(
       this.x + (Math.floor(this.width  / 2) as i32) - 1,
       this.y + (Math.floor(this.height / 2) as i32) - 1
@@ -786,7 +786,7 @@ export class Rect {
    *
    * @returns {Vec2}
    */
-  centerRight(): Vec2 {
+  get centerRight(): Vec2 {
     return new Vec2(
       this.x + (this.width - 1),
       this.y + (Math.floor(this.height / 2) as i32) - 1
@@ -798,7 +798,7 @@ export class Rect {
    *
    * @returns {Vec2}
    */
-  bottomLeft(): Vec2 {
+  get bottomLeft(): Vec2 {
     return new Vec2(
       this.x,
       this.y + (this.height - 1)
@@ -810,7 +810,7 @@ export class Rect {
    *
    * @returns {Vec2}
    */
-  bottomCenter(): Vec2 {
+  get bottomCenter(): Vec2 {
     return new Vec2(
       this.x + (Math.floor(this.width  / 2) as i32) - 1,
       this.y + (this.height - 1)
@@ -822,7 +822,7 @@ export class Rect {
    *
    * @returns {Vec2}
    */
-  bottomRight(): Vec2 {
+  get bottomRight(): Vec2 {
     return new Vec2(
       this.x + (this.width  - 1),
       this.y + (this.height - 1)
@@ -834,7 +834,7 @@ export class Rect {
    *
    * @returns {boolean}
    */
-  isOnScreen(): boolean {
+  get isOnScreen(): boolean {
     return canvas.isVisible(this.x, this.y, this.width, this.height);
   }
 
