@@ -3,7 +3,7 @@
  * @name tinysprite
  * @author MrRafael-dev
  * @license MIT
- * @version 1.0.0.17
+ * @version 1.0.0.18
  * @see {@link https://github.com/MrRafael-dev/tinysprite Github}
  *
  * @description
@@ -491,6 +491,74 @@ export class HalfNibbleSurface implements Surface {
     // Separar bytes e alterar índice do pixel especificado...
     let pixels: HalfNibbleArray = new HalfNibbleArray(pixelData);
         pixels[3 - index] = color % 4;
+
+    // Remontar byte...
+    pixelData = pixels.value;
+
+    // Alterar área da imagem...
+    store<u8>(this.offset + pixelOffset, pixelData);
+    return true;
+  }
+}
+
+/**
+ * @class NibbleSurface @implements Surface
+ * 
+ * @description
+ * *Surface* para imagens de formato *4BPP* (*4 bits per pixel*; 8 cores).
+ */
+export class NibbleSurface implements Surface {
+  offset: usize;
+  width: i32;
+  height: i32;
+
+  /**
+   * @constructor
+   * 
+   * @param offset Referência de memória.
+   * @param width Altura.
+   * @param height Largura.
+   */
+  constructor(offset: usize, width: i32, height: i32) {
+    this.offset = offset;
+    this.width = width;
+    this.height = height;
+  }
+  
+  getPixel(x: i32, y: i32): u8 {
+    // Ignorar pixels fora da área da tela...
+    if((x < 0 || x >= this.width) || (y < 0 || y >= this.height)) {
+      return 0;
+    }
+
+    // Calcular offset e índice do pixel na área da imagem.
+    const pixelOffset: i32 = ((y * (this.width / 2)) + (x / 2));
+    const index: i32 = Math.abs(x % 2) as i32;
+
+    // Obter byte com os pixels da tela.
+    const pixelData: u8 = load<u8>(this.offset + pixelOffset);
+
+    // Separar bytes e retornar o valor do pixel especificado...
+    const pixels: NibbleArray = new NibbleArray(pixelData);
+    return pixels[index];
+  }
+
+  setPixel(x: i32, y: i32, color: u8): boolean {
+    // Ignorar pixels fora da área da tela...
+    if((x < 0 || x >= this.width) || (y < 0 || y >= this.height)) {
+      return false;
+    }
+
+    // Calcular offset e índice do pixel na área da imagem.
+    const pixelOffset: i32 = ((y * (this.width / 2)) + (x / 2));
+    const index: i32 = Math.abs(x % 2) as i32;
+
+    // Obter byte com os pixels da tela.
+    let pixelData: u8 = load<u8>(this.offset + pixelOffset);
+
+    // Separar bytes e alterar índice do pixel especificado...
+    let pixels: HalfNibbleArray = new HalfNibbleArray(pixelData);
+        pixels[3 - index] = color % 8;
 
     // Remontar byte...
     pixelData = pixels.value;
