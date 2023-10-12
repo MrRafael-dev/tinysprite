@@ -3,7 +3,7 @@
  * @name tinysprite
  * @author MrRafael-dev
  * @license MIT
- * @version 1.0.0.19
+ * @version 1.0.0.20
  * @see {@link https://github.com/MrRafael-dev/tinysprite Github}
  *
  * @description
@@ -558,7 +558,7 @@ export class NibbleSurface implements Surface {
 
     // Separar bytes e alterar índice do pixel especificado...
     let pixels: NibbleArray = new NibbleArray(pixelData);
-        pixels[3 - index] = color % 2;
+        pixels[1 - index] = color % 2;
 
     // Remontar byte...
     pixelData = pixels.value;
