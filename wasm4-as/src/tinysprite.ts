@@ -211,7 +211,7 @@ export function poll(): void {
 }
 
 //#endregion </misc.ts>
-//#region <bit_array.ts>
+//#region <byte_array.ts>
 /**
  * @class BitArray @extends Uint8Array
  * 
@@ -254,8 +254,6 @@ export class BitArray extends Uint8Array {
   }
 }
 
-//#endregion </bit_array.ts>
-//#region <half_nibble_array.ts>
 /**
  * @class HalfNibbleArray @extends Uint8Array
  * 
@@ -290,8 +288,6 @@ export class HalfNibbleArray extends Uint8Array {
   }
 }
 
-//#endregion </half_nibble_array.ts>
-//#region <nibble_array.ts>
 /**
  * @class NibbleArray @extends Uint8Array
  * 
@@ -321,7 +317,7 @@ export class NibbleArray extends Uint8Array {
   }
 }
 
-//#endregion </nibble_array.ts>
+//#endregion </byte_array.ts>
 //#region <surface.ts>
 /**
  * @interface Surface
