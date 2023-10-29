@@ -3,7 +3,7 @@
  * @name tinysprite
  * @author MrRafael-dev
  * @license MIT
- * @version 1.0.0.20
+ * @version 1.0.0.21
  * @see {@link https://github.com/MrRafael-dev/tinysprite Github}
  *
  * @description
@@ -1673,10 +1673,10 @@ export class Gamepad {
   /** Botáo para direita. */
   right: GamepadButton;
 
-  /** Botáo 1 (tecla Z). */
+  /** Botáo 1 (tecla X). */
   b1: GamepadButton;
 
-  /** Botáo 2 (tecla X). */
+  /** Botáo 2 (tecla Z). */
   b2: GamepadButton;
 
   /**
