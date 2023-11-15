@@ -2,7 +2,7 @@
  * @name tinysprite
  * @author MrRafael-dev
  * @license MIT
- * @version 2.0.0-rc.0
+ * @version 2.0.0-rc.1
  * @see {@link https://github.com/MrRafael-dev/tinysprite Github}
  *
  * @description
@@ -543,7 +543,7 @@ export interface Grid {
 export enum GridFormat {
 	Bits = 8,
 	HalfNibbles = 4,
-	Nibbles = 2
+	Nibbles = 2,
 }
 
 /**
@@ -652,7 +652,12 @@ export namespace canvas {
 	export const view: Rect = new Rect(0, 0, w4.SCREEN_SIZE, w4.SCREEN_SIZE);
 
 	/** Paleta de cores. É uma *array* com exatamente 4 valores.  */
-	export const pal: StaticArray<i32> = [0xE0F8CF, 0x86C06C, 0x306850, 0x071821];
+	export const pal: StaticArray<i32> = [
+		0xE0F8CF, 
+		0x86C06C, 
+		0x306850, 
+		0x071821,
+	];
 
 	/** Quando `true`, mantém a tela "suja". */
   export let preserveFrameBuffer: bool = false;
@@ -715,9 +720,9 @@ export namespace canvas {
    */
   export function onScreen(x: i32, y: i32, w: i32, h: i32): bool {
     return (
-      	 viewX(x) < framebuffer.w
+      	 viewX(x) < w4.SCREEN_SIZE
       && viewX(x + w) > 0
-      && viewY(y) < framebuffer.h
+      && viewY(y) < w4.SCREEN_SIZE
       && viewY(y + h) > 0
     );
   }
@@ -738,8 +743,8 @@ export namespace canvas {
 			w4.rect(
 				0,
 				0,
-				framebuffer.w,
-				framebuffer.h
+				w4.SCREEN_SIZE,
+				w4.SCREEN_SIZE
 			);
 		}
 		// Desenhar retângulo (dentro da viewport)...
@@ -1082,19 +1087,21 @@ export namespace canvas {
 
 //#endregion </canvas.ts>
 //#region <gamepad.ts>
+/** Ciclos de estados de botão. */
+enum GamepadState {
+	Idle = 0,
+	Pressed = 1,
+	Held = 2,
+	Released = 3,
+}
+
 /**
  * Representa um dos botões de controle. Útil para obter eventos rápidos, 
  * como checar se foi pressionado ou não.
  */
 @final @unmanaged class GamepadButton {
-	/** Ciclos de estados de entrada usados pelo método {@link next}. */
-	public static cycle: usize = memory.data<u8>([
-		1, 2, 2, 1, // Quando recém-pressionado.
-		0, 3, 3, 0, // Quando recém-solto.
-	]);
-
   /** Estado de entrada. */
-  public state: u8 = 0;
+  public state: GamepadState = GamepadState.Idle;
 
   /**
    * Avança para o próximo estado de botão, a partir de uma situação atual.
@@ -1102,41 +1109,52 @@ export namespace canvas {
    * @param isPressed Indica se o botão de entrada está pressionado.
    */
   public next(isPressed: bool): void {
-		let offset: usize = GamepadButton.cycle + usize(this.state);
-
+		// Ciclos para quando o botão é pressionado...
 		if(isPressed) {
-			offset += 4;
+			if(this.state === GamepadState.Idle) {
+				this.state = GamepadState.Pressed;
+			}
+			else if(this.state === GamepadState.Pressed || this.state === GamepadState.Released) {
+				this.state = GamepadState.Held;
+			}
 		}
-
-		this.state = load<u8>(offset);
+		// Ciclos para quando o botão é solto...
+		else {
+			if(this.state === GamepadState.Pressed || this.state === GamepadState.Held) {
+				this.state = GamepadState.Released;
+			}
+			else if(this.state === GamepadState.Released) {
+				this.state = GamepadState.Idle;
+			}
+		}
   }
 
   /**
 	 * Retorna se este botão está inerte.
 	 */
   public get isIdle(): bool {
-    return this.state === 0;
+    return this.state === GamepadState.Idle;
   }
 
   /**
 	 * Retorna se este botão está recém-pressionado.
 	 */
   public get isPressed(): bool {
-    return this.state === 1;
+    return this.state === GamepadState.Pressed;
   }
 
   /**
 	 * Retorna se este botão está mantido.
 	 */
   public get isHeld(): bool {
-    return this.state === 2;
+    return this.state === GamepadState.Held;
   }
 
   /**
 	 * Retorna se este botão está solto.
 	 */
   public get isReleased(): bool {
-    return this.state === 3;
+    return this.state === GamepadState.Released;
   }
 }
 
@@ -1159,11 +1177,11 @@ export namespace canvas {
   /** Botáo para direita. */
   public right: GamepadButton;
 
+	/** Botáo 2 (tecla Z). */
+  public z: GamepadButton;
+
   /** Botáo 1 (tecla X). */
   public x: GamepadButton;
-
-  /** Botáo 2 (tecla Z). */
-  public z: GamepadButton;
 
   /**
    * @param offset Endereço de memória do estado do controle.
@@ -1174,30 +1192,32 @@ export namespace canvas {
     this.down = new GamepadButton();
     this.left = new GamepadButton();
     this.right = new GamepadButton();
-    this.x = new GamepadButton();
     this.z = new GamepadButton();
+		this.x = new GamepadButton();
   }
 
   /**
    * Atualiza todos os estados de tecla.
    */
   public update(): void {
-		/** Estado do controle. */
-    const state: u8 = load<u8>(this._offset);
+		/** Estado do controle (dados brutos). */
+    const rawState: u8 = load<u8>(this._offset);
+		/** Estados do controle. */
+		const state: StaticArray<u8> = util.splitBits(rawState);
 
 		// Aproveitar a entrada do controle para 
 		// embaralhar os números aleatórios...
-		for(let i: u8 = 0; i < state; i += 1) {
+		for(let i: u8 = 0; i < rawState; i += 1) {
       Math.random();
     }
 
 		// Atualizar estados dos botões:
-    this.up.next(bool(state & w4.BUTTON_UP));
-    this.down.next(bool(state & w4.BUTTON_DOWN));
-    this.left.next(bool(state & w4.BUTTON_LEFT));
-    this.right.next(bool(state & w4.BUTTON_RIGHT));
-    this.x.next(bool(state & w4.BUTTON_1));
-    this.z.next(bool(state & w4.BUTTON_2));
+    this.up.next(bool(unchecked(state[1])));
+    this.down.next(bool(unchecked(state[0])));
+    this.left.next(bool(unchecked(state[3])));
+    this.right.next(bool(unchecked(state[2])));
+    this.z.next(bool(unchecked(state[6])));
+		this.x.next(bool(unchecked(state[7])));
   }
 }
 
@@ -1221,17 +1241,19 @@ export namespace mouse {
    * Atualiza todos os estados de tecla.
    */
   export function update(): void {
-		/** Estado do controle. */
-    const state: u8 = load<u8>(w4.MOUSE_BUTTONS);
+		/** Estado do controle (dados brutos). */
+    const rawState: u8 = load<u8>(w4.MOUSE_BUTTONS);
+		/** Estados do controle. */
+		const state: StaticArray<u8> = util.splitBits(rawState);
 		/** Posição X atual do *mouse*. */
 		const x: i32 = i32(load<i16>(w4.MOUSE_X));
 		/** Posição Y atual do *mouse*. */
 		const y: i32 = i32(load<i16>(w4.MOUSE_Y));
 
 		// Atualizar estados dos botões:
-    left.next(bool(state & w4.MOUSE_LEFT));
-    right.next(bool(state & w4.MOUSE_RIGHT));
-    middle.next(bool(state & w4.MOUSE_MIDDLE));
+    left.next(bool(unchecked(state[7])));
+    right.next(bool(unchecked(state[6])));
+    middle.next(bool(unchecked(state[5])));
     
 		// Atualizar posição do mouse:
 		pos.to(x, y);
