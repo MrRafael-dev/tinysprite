@@ -720,9 +720,9 @@ export namespace canvas {
    */
   export function onScreen(x: i32, y: i32, w: i32, h: i32): bool {
     return (
-      	 viewX(x) < w4.SCREEN_SIZE
+      	 viewX(x) < framebuffer.w
       && viewX(x + w) > 0
-      && viewY(y) < w4.SCREEN_SIZE
+      && viewY(y) < framebuffer.h
       && viewY(y + h) > 0
     );
   }
@@ -743,8 +743,8 @@ export namespace canvas {
 			w4.rect(
 				0,
 				0,
-				w4.SCREEN_SIZE,
-				w4.SCREEN_SIZE
+				framebuffer.w,
+				framebuffer.h
 			);
 		}
 		// Desenhar retângulo (dentro da viewport)...
