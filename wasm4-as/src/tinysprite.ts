@@ -1137,7 +1137,7 @@ enum GamepadState {
   }
 
   /**
-	 * Retorna se este botão está recém-pressionado.
+	 * Retorna se este botão está pressionado.
 	 */
   public get isPressed(): bool {
     return this.state === GamepadState.Pressed;
@@ -1156,6 +1156,34 @@ enum GamepadState {
   public get isReleased(): bool {
     return this.state === GamepadState.Released;
   }
+
+	/**
+	 * Retorna se este botão está pressionado *ou* mantido.
+	 */
+	public get isOn(): bool {
+		return this.state === GamepadState.Pressed || this.state === GamepadState.Held;
+	}
+
+	/**
+	 * Retorna se este botão está inerte *ou* solto.
+	 */
+	public get isOff(): bool {
+		return this.state === GamepadState.Idle || this.state === GamepadState.Released;
+	}
+
+	/**
+	 * Retorna se este botão está inerte *ou* mantido.
+	 */
+	public get isAny(): bool {
+		return this.state === GamepadState.Idle || this.state === GamepadState.Held;
+	}
+
+	/**
+	 * Retorna se este botão está pressionado *ou* solto.
+	 */
+	public get isNeither(): bool {
+		return this.state === GamepadState.Pressed || this.state === GamepadState.Released;
+	}
 }
 
 /**
