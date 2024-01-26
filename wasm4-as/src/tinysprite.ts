@@ -162,7 +162,7 @@ export namespace util {
 		/** Potência. */
 		let pow: u8 = 128;
 
-		for(let i: i32 = 6; i > 0; i -= 1) {
+		for(let i: i32 = 0; i < 7; i += 1) {
 			unchecked(result += array[i] * pow);
 			pow /= 2;
 		}
