@@ -2,7 +2,7 @@
  * @name tinysprite
  * @author MrRafael-dev
  * @license MIT
- * @version 2.0.0-rc.1
+ * @version 2.0.1-rc.1
  * @see {@link https://github.com/MrRafael-dev/tinysprite Github}
  *
  * @description
@@ -162,7 +162,7 @@ export namespace util {
 		/** Potência. */
 		let pow: u8 = 128;
 
-		for(let i: i32 = 7; i > 0; i -= 1) {
+		for(let i: i32 = 6; i > 0; i -= 1) {
 			unchecked(result += array[i] * pow);
 			pow /= 2;
 		}
