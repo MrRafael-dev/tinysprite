@@ -2,7 +2,7 @@
  * @name tinysprite
  * @author MrRafael-dev
  * @license MIT
- * @version 2.0.1-rc.1
+ * @version 2.0.1-rc.2
  * @see {@link https://github.com/MrRafael-dev/tinysprite Github}
  *
  * @description
@@ -19,6 +19,34 @@ import * as w4 from "./wasm4";
  * Funções utilitárias.
  */
 export namespace util {
+	/**
+	 * Look-Up Table* de frequências de áudio. Possui 108 valores.
+	 * As notas podem ser obtidas usando o método {@link noteAt}.
+	 */
+	export const noteTable: usize = memory.data<u16>([
+  	  16,   17,   18,   19,   20,
+  	  21,   23,   24,   25,   27,
+  	  29,   30,   32,   34,   36,
+  	  38,   41,   43,   46,   49,
+  	  51,   55,   58,   61,   65,
+  	  69,   73,   77,   82,   87,
+  	  92,   98,  103,  110,  116,
+  	 123,  130,  138,  146,  155,
+  	 164,  174,  185,  196,  207,
+  	 220,  233,  246,  261,  277,
+  	 293,  311,  329,  349,  369,
+  	 392,  415,  440,  466,  493,
+  	 523,  554,  587,  622,  659,
+  	 698,  739,  783,  830,  880,
+  	 932,  987, 1046, 1108, 1174,
+  	1244, 1318, 1396, 1479, 1567,
+  	1661, 1760, 1864, 1975, 2093,
+  	2217, 2349, 2489, 2637, 2793,
+  	2959, 3135, 3322, 3520, 3729,
+  	3951, 4186, 4434, 4698, 4978,
+  	5274, 5587, 5919, 6271, 6644,
+	]);
+
 	/** *Look-Up Table* de rotações usadas pelo método {@link flip}. */
 	export const rotTable: usize = memory.data<u8>([
 		2, 10, 4, 12, // Rotação com X invertido.
@@ -52,6 +80,20 @@ export namespace util {
 		next ^= next << 17;
 
 		return next;
+	}
+
+	/**
+	 * Retorna uma frequência de áudio equivalente a uma nota musical.
+	 * 
+	 * @param index Índice da nota (de `0` a `107`).
+	 * @returns 
+	 */
+	export function noteAt(index: i32): u32 {
+		if(index < 0 || index >= 108) {
+			return 0;
+		}
+
+		return load<u16>(noteTable + (index * 2));
 	}
 
 	/**
